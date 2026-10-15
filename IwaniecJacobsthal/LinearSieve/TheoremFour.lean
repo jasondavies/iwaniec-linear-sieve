@@ -149,7 +149,7 @@ theorem cor1_part : ∃ C, 0 ≤ C ∧ ∀ (lower : Bool) (y s : ℝ), 1 < y →
         _ = 432 * C * s ^ 2 * errMaj true s * pntE (y ^ (1 / xi y)) := by ring
 
 /-- The source term in the form needed for the induction. -/
-theorem src_le' {cR CR : ℝ} (hR : ∀ z ≥ 2, |R z * log z - cR| ≤ CR * pntE z) {lower : Bool}
+theorem src_le_of_le_xi {cR CR : ℝ} (hR : ∀ z ≥ 2, |R z * log z - cR| ≤ CR * pntE z) {lower : Bool}
     {y s : ℝ} (hy : 1 < y) (hs : sMin lower ≤ s) (hsξ : s ≤ xi y) (hξ3 : 3 ≤ xi y)
     (hw2 : 2 ≤ y ^ (1 / xi y)) :
     src lower y (y ^ (1 / s)) ≤ (if lower then 0 else cR * max (3 - s) 0 / log y) +
@@ -551,7 +551,7 @@ theorem theorem4 {cR CR : ℝ} (hcR : 0 < cR) (hR : ∀ z ≥ 2, |R z * log z - 
       have hξ3 : 3 ≤ xi y := by linarith [add_one_le_exp (32 : ℝ)]
       obtain ⟨⟨hΛ, hδ⟩, hK⟩ := hye y hye'
       exact main_step IH hcR hc₇ hCR hC₁0 hC₃0 hy hs hsξ (hC₁ lower y s hy hs hsξ hξ3 hw2)
-        (src_le' hR hy hs hsξ hξ3 hw2) (hC₃ lower y s hy₃ hs) (hyc y hyc' lower (r + 1) s hs hsξ)
+        (src_le_of_le_xi hR hy hs hsξ hξ3 hw2) (hC₃ lower y s hy₃ hs) (hyc y hyc' lower (r + 1) s hs hsξ)
         hΛ hδ hK hdeep
 
 end IwaniecJacobsthal

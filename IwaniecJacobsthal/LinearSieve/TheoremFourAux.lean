@@ -58,11 +58,9 @@ theorem not_cube_lt_iff {y x : ℝ} (hy : 0 ≤ y) (hx : 0 ≤ x) :
   rw [not_lt, one_div, rpow_inv_le_iff_of_pos hy hx (by norm_num)]
   norm_cast
 
-theorem log_rpow_inv_three {y : ℝ} (hy : 0 < y) (s : ℝ) : log (y ^ (1 / s)) = log y / s :=
-  log_rpow_one_div hy s
-
-/-- The source term for `z = y^{1/s}`: `R(y^{1/3}) - R(y^{1/s}) ≤ cR (3 - s)⁺ / L + 6 C_R pntE(w) / L`
-for any `2 ≤ w ≤ y^{1/s}` (and `0` for the lower sieve). -/
+/-- The source term for `z = y^{1/s}`:
+`R(y^{1/3}) - R(y^{1/s}) ≤ cR (3 - s)⁺ / L + 6 C_R pntE(w) / L` for any `w ≥ 2` below `y^{1/s}`
+and `y^{1/3}` (and `0` for the lower sieve). -/
 theorem src_le {cR CR : ℝ} (hR : ∀ z ≥ 2, |R z * log z - cR| ≤ CR * pntE z) {lower : Bool}
     {y s w : ℝ} (hy : 1 < y) (hs : 1 ≤ s) (hw : 2 ≤ w) (hwz : w ≤ y ^ (1 / s))
     (hw3 : w ≤ y ^ (1 / 3 : ℝ)) :

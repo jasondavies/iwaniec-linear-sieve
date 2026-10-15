@@ -365,16 +365,39 @@ Items 1–4 are done, in `LinearSieve/Calculus.lean`, `LemmaSeven.lean`, `LemmaE
    Q_{m+1} = Q_{m-1}`, with `r = m - 1`) and `exists_card_filter_rosserSet_add_eq` (same, for
    `#{d ∈ D | ω(d) ≤ r - 1 + j} = #{d ∈ D | ω(d) ≤ r - 1}`, which gives [I71]'s
    `A_{m+1} = A_{m-1}`).
-7. **Theorem 4** (main terms): for all `r`, `lower`, `y > 1`, `s` in the domain with `s ≤ ξ(y)`,
+7. **Theorem 4** (main terms; done, `LinearSieve/TheoremFour.lean`, helpers in
+   `TheoremFourAux.lean`, `TheoremFourAsymp.lean`, namespace `IwaniecJacobsthal.TheoremFour`).
 
-       fail lower r y (y^{1/s}) ≤ cR · (M lower s / L + c₇ · r/(r+1) · δ(s,y) · G lower s / L²).
+       theorem theorem4 {cR CR : ℝ} (hcR : 0 < cR)
+           (hR : ∀ z ≥ 2, |R z * log z - cR| ≤ CR * pntE z) :
+           ∃ c₇ : ℝ, 0 ≤ c₇ ∧ ∀ (r : ℕ) (lower : Bool) (y s : ℝ), 1 < y → sMin lower ≤ s →
+             s ≤ xi y → fail lower r y (y ^ (1 / s)) ≤
+               cR * (mainMaj lower s / log y +
+                 c₇ * ((r : ℝ) / (r + 1)) * delta s y * errMaj lower s / log y ^ 2)
 
-   Proof as in [I71, pp. 23–25]: the induction on `r`; the small-`y` case (4.8); the stabilised
-   case; otherwise split the prime sum at `y^{1/(ξ-1)}`; the inner IH at `(y/p, t_p - 1)` (check
-   `t_p - 1 ≤ ξ(y/p)`); Corollary 1 for the main part (closes exactly by item 1); Corollary 3 for
-   the error part; the crude bound plus the Lemma 9 lower bound (C2) for the part with
-   `p < y^{1/(ξ-1)}`, with the comparisons (4.4), (4.5), (4.9), (4.10) (use the `δ` growth for
-   `s ≥ ξ/2`).
+   (apply it to the `cR`, `CR` obtained from `R_asymp`). Proof as in [I71, pp. 23–25], by
+   induction on `r` for both sieves at once (`TheoremFour.Bound cR c₇ r`), with
+   `y₀` (all "large `y`" facts) fixed first and then `c₇ = max (32/cR) (6 e^{SLT y₀} log² y₀ /
+   (cR 𝔐(Ξ)))`, `Ξ = log y₀ / (log log 3)^{11/5}`:
+   * `y ≤ y₀` (`small_y`, (4.8)): `fail ≤ exp (SLT y₀)` (`fail_le_exp_SLT`), `s ≤ ξ(y) ≤ Ξ`, and
+     the error term alone is large enough;
+   * `2L / log L < r + 2`: `fail (r+1) = fail r` (`exists_fail_add_eq`);
+   * otherwise (`main_step`) split at `w = y^{1/ξ}` (not `y^{1/(ξ-1)}`: then
+     `t_p - 1 ≤ ξ(y/p)` exactly, `inner_le_xi`) by `fail_succ_le_split` into
+     `fail (r+1) y w`, the large primes and the source term `src` (`= R(y^{1/3}) - R(z)`,
+     `sum_R_div_eq`, bounded by `R_asymp` in `src_le`). Large primes: IH at
+     `(y/p, t_p - 1)` (`ih_term`, `rpow_inner_eq`, `sMin_le_inner`), `cor1_part`
+     (`cor1_le` + `fSieve_eq_integral_mainMaj` / `mainMaj_false_eq_integral`, error via
+     `mainMaj_sub_one_le`), `cor3_xi`, `delta_max_le`. Small primes: `crude_le`
+     (`fail_rpow_le_tail` with `X = log log w + C`, against `majG_ge_exp` at `ξ/2` resp.
+     `δ(ξ/2, y) G(ξ)`; [I71, (4.4), (4.5), (4.9), (4.10)]). Bookkeeping `combine`, `ratio_le`:
+     `r/(r+1) ≤ (r+1)/(r+2) (1 - ε)` with `ε = (log L)²/(4L²)` from `(r+1) log L ≤ 2L`
+     ([I71, (4.6)]); the losses `δ(s₀,y)(1 + C₃ ξ² pntE w) ≤ 1 + ε/2`
+     (`eventually_delta_mul_le`), `K ξ² L³ pntE w ≤ 1` (`eventually_mul_pntE_le`) and the crude
+     part `≤ δ G / L⁴` fit into `c₇ cR (r+1)/(r+2) · ε/2 · δ G / L²` once `cR c₇ ≥ 32`.
+   The asymptotics are proved in the variable `ℓ = log log 3y` (`L = e^ℓ - log 3`,
+   `log w = ℓ^{11/5}`, `pntE w = exp(-κ ℓ^{11/10})`; `crude_alg`, `eventually_crude_hyp`).
+   Note: `(3 + (-1)^r)/2 ≤ s` in [I71] is our `sMin lower ≤ s`; no boundary adjustment was needed.
 8. **Theorem 5** (support counts): the same scheme for `#{d ∈ rosserSet lower y z | ω(d) ≤ r}`
    with Lemma 17 (`card_filter_rosserSet_succ`), giving
    `≤ c₇ · r/(r+1) · δ(s,y) · G_{r+1}(s) · y / L²` for `s ≤ ξ`.
