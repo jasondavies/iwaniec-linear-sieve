@@ -66,14 +66,6 @@ theorem primesLT_induction {P : ℝ → Prop} (h : ∀ z, (∀ p ∈ primesLT z,
     rintro z rfl
     exact h z fun p hp ↦ ih p (by simpa using lt_ceil_of_mem_primesLT hp) p (by simp)
 
-theorem R_nonneg (z : ℝ) : 0 ≤ R z :=
-  prod_nonneg fun p hp ↦ sub_nonneg.2 <| inv_le_one_of_one_le₀ <| by
-    exact_mod_cast (prime_of_mem_primesLT hp).one_lt.le
-
-theorem R_pos (z : ℝ) : 0 < R z :=
-  prod_pos fun p hp ↦ sub_pos.2 <| inv_lt_one_of_one_lt₀ <| by
-    exact_mod_cast (prime_of_mem_primesLT hp).one_lt
-
 /-- [I71, (2.11)] with `k = 1`: `R(z) = 1 - ∑_{p < z} R(p) / p`. -/
 theorem R_eq (z : ℝ) : R z = 1 - ∑ p ∈ primesLT z, R p / p := by
   rw [R, prod_one_sub_ordered]
