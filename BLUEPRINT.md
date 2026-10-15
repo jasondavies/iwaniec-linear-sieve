@@ -283,14 +283,44 @@ telescoping identity and `R_asymp`.
    the inequality `-τ' ≥ (1+x)^{5(t-1)} G_r(t-1) t/(t-1)²` (τ = δ G_{r+1}) holds as soon as
    `log t ≥ 8c₃` and `20 c₃ t² log⁴ t / L² ≤ 1/2`; the latter holds for `t ≤ ξ` once `y` is large,
    since `ξ² log⁴ ξ / L² ≤ (log log 3y)^{-0.4}`. So `s₀ = e^{8c₃}` (or larger) works.
-5. **Crude bound** ([I71] p. 24): `fail lower r y z ≤ Σ_{l > s - 2} SLT(z)^l / l!` (all failing
-   tuples of depth `l` have `z^{l+2} > y`; `e_{l+1}(1/p : p < z) = Σ_{p<z} e_l(1/p : p' < p)/p`),
-   together with `SLT(z) ≤ log log z + O(1)`.
-6. **Depth stabilisation.** For `r ≥ 3`: if `y ≤ Q_r(z)`, the least product of `r` distinct
-   primes `< z` (`+∞` if there are fewer), then `fail lower (r + j) y z = fail lower r y z`.
-   Proof by recursion with `Q_r(z) ≤ p · Q_{r-1}(p)` for `p < z`. Since `Q_r(z) ≥ r!`, the
-   depth is `≤ 2L / log log y` for large `y`, which is what [I71] uses before (4.8): the slack
-   `(r+1)/(r+2) - r/(r+1)` absorbs the `O(1/L²)` losses only for `r ≪ L / log log L`.
+5. **Crude bound** (done, `LinearSieve/Crude.lean`; [I71] pp. 24, 27). A failing tuple of depth
+   `l` has `z^{l+2} > y` and contributes `≤ 1/(p₁⋯p_l)`; the discrete integration
+   `sum_SLT_pow_div_le : ∑_{p<z} SLT(p)^n / p ≤ SLT(z)^{n+1}/(n+1)` (from the general
+   `sum_pow_sum_lt_mul_le`) replaces elementary symmetric sums. No hypotheses:
+   `fail_le_sum_SLT_pow lower r y z :
+     fail lower r y z ≤ ∑ l ∈ Icc 1 r with y < z ^ (l + 2), SLT z ^ l / l!`
+   (shifted form `fail_le_sum_ite`). Tail: `sum_pow_div_factorial_le : 0 ≤ X → 0 < u →
+   2 e X ≤ u → (∀ l ∈ s, u < l) → ∑ l ∈ s, X^l/l! ≤ 2 (e X / u)^u` (rpow), with
+   `pow_div_factorial_le_pow : X^k/k! ≤ (e X/k)^k` and
+   `exp_one_mul_div_rpow : (e X / u)^u = exp (-(u log u) + u log X + u)` (`X, u > 0`).
+   Combined: `fail_le_tail : 1 < z → 0 < u → z^(u+2) ≤ y → SLT z ≤ X → 2 e X ≤ u →
+   fail lower r y z ≤ 2 (e X / u)^u`, and `fail_rpow_le_tail` (`z = y^{1/s}`, `u = s - 2`,
+   `1 < y`, `2 < s`); this is [I71]'s `Q_{m+1,y}(ξ-1) < Σ_{k>ξ-3} (Σ 1/p)^k/k! < (5 loglog y/ξ)^ξ`.
+   `SLT_le_loglog : ∃ C, ∀ z ≥ 2, SLT z ≤ log (log z) + C`.
+   Counts ([I71] p. 27): `lt_of_mem_rosserSet` (elements with `ω(d) ≥ 2`, or `≥ 1` for the
+   upper sieve, are `< y`), `sum_inv_filter_card_primeFactors_eq_le :
+   ∑_{d ∈ D, ω(d) = l} 1/d ≤ SLT(z)^l / l!`,
+   `card_filter_le_mul_sum : 0 ≤ y → (if lower then 2 else 1) ≤ k →
+   #{d ∈ D | k ≤ ω(d)} ≤ y ∑_{l ∈ Icc k π(z)} SLT(z)^l / l!`, `card_filter_le_tail`
+   (`≤ 2 y (e X/u)^u` for `u < k`, `SLT z ≤ X`, `2 e X ≤ u`), and
+   `card_filter_eq_le_pow_div : #{d ∈ D | ω(d) = l} ≤ π(z)^l / l!`.
+6. **Depth stabilisation** (done, `LinearSieve/Depth.lean`). `LeProdPrimesLT r y z :=
+   ∀ T ⊆ primesLT z, #T = r → y ≤ ∏_{p ∈ T} p` (Iwaniec's `p₁⋯p_r ≥ y`), with
+   `LeProdPrimesLT.div` (`r+1` at `(y, z)` ⇒ `r` at `(y/p, p)`), `.succ`, `.mono`,
+   `factorial_card_add_one_le_prod` (`r` distinct integers `≥ 2` have product `≥ (r+1)!`),
+   `leProdPrimesLT_of_le_factorial : y ≤ (r+1)! → LeProdPrimesLT r y z`.
+   `fail_add_eq : 2 ≤ r → LeProdPrimesLT r y z → fail lower (r + j) y z = fail lower r y z`
+   (base case `r = 2`: the pass condition two levels up; `r = 1` is false for the lower sieve),
+   `fail_add_eq_of_le_factorial` (`y ≤ (r+1)!`);
+   `card_filter_rosserSet_add_eq : 1 ≤ r → LeProdPrimesLT (r + 1) y z →
+   #{d ∈ D | ω(d) ≤ r + j} = #{d ∈ D | ω(d) ≤ r}` (via `card_primeFactors_le_of_mem_rosserSet`).
+   Numerics: `exists_le_factorial : ∃ y₀, ∀ y ≥ y₀, ∀ r : ℕ, 2 log y / log log y < r + 2 →
+   2 ≤ r ∧ y ≤ (r+1)!` (`y₀ = exp (exp 49)`, via `n (log n - 1) ≤ log n!`), hence
+   `exists_fail_add_eq : ∃ y₀, ∀ y ≥ y₀, ∀ lower r z, 2 log y / log log y < r + 2 →
+   ∀ j, fail lower (r + j) y z = fail lower r y z` ([I71]: `m + 1 > 2 log y/loglog y ⇒
+   Q_{m+1} = Q_{m-1}`, with `r = m - 1`) and `exists_card_filter_rosserSet_add_eq` (same, for
+   `#{d ∈ D | ω(d) ≤ r - 1 + j} = #{d ∈ D | ω(d) ≤ r - 1}`, which gives [I71]'s
+   `A_{m+1} = A_{m-1}`).
 7. **Theorem 4** (main terms): for all `r`, `lower`, `y > 1`, `s` in the domain with `s ≤ ξ(y)`,
 
        fail lower r y (y^{1/s}) ≤ cR · (M lower s / L + c₇ · r/(r+1) · δ(s,y) · G lower s / L²).
