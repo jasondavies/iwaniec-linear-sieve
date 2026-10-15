@@ -6,3 +6,4 @@ import IwaniecJacobsthal.Jacobsthal
 import IwaniecJacobsthal.SieveFunctions
 import IwaniecJacobsthal.SieveMajorants
 import IwaniecJacobsthal.Main
+import IwaniecJacobsthal.LinearSieve.Defs
