@@ -203,7 +203,8 @@ theorem one_notMem_biUnion_rosserSet (lower : Bool) (y z : ℝ) :
       (rosserSet (!lower) (y / p) p).image (p * ·) := by
   simp only [mem_biUnion, mem_image, not_exists, not_and]
   intro p hp d _ h
-  exact (prime_of_mem_primesLT (rosserPrimes_subset hp)).one_lt.ne' (Nat.eq_one_of_mul_eq_one_right h)
+  exact (prime_of_mem_primesLT (rosserPrimes_subset hp)).one_lt.ne'
+    (Nat.eq_one_of_mul_eq_one_right h)
 
 /-- Sums over `rosserSet` unfold along the recursion. -/
 theorem sum_rosserSet {M : Type*} [AddCommMonoid M] (f : ℕ → M) (lower : Bool) (y z : ℝ) :
