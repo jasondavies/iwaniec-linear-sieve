@@ -270,19 +270,63 @@ Our `fail false` also contains the depth-1 term `Σ_{y^{1/3} ≤ p < z} R(p)/p =
 from (3.6) and `g 2 s = ∫_s^∞ (4 - t)⁺/(t-1) dt`. This replaces Lemmas 14 and 16 by the
 telescoping identity and `R_asymp`.
 
-1. **Calculus identities.** `fSieve s = ∫_s^∞ M false (t-1)/(t-1)`, `M false s = (3-s)⁺ +
-   ∫_{max s 3}^∞ fSieve (t-1)/(t-1)`; (3.13)/(3.14) for `G`; derivatives of `G` for
-   `t > (5 ± 1)/2`.
-2. **Lemma 7** `fr r s < M(s) ≤ 4 𝔐(s)` (`M = MSieve`), and hence `M lower (s-1) ≤ C s² G lower' (s)`
-   via Lemma 8 and Lemma 6's corollary. This is needed to compare Corollary 1's error with the
-   majorant at large `s`.
-3. **Corollaries 1 and 3 to Lemma 13** (sum over `y^{1/β} < p < y^{1/α}` against the integrals),
-   via `lemma13_mono_of_subset` / `lemma13_anti_of_subset`.
-4. **Lemmas 11, 12.** With `x(t) = t² log⁵ t / L²`, `(log δ)' ≤ 5x(3 + 5/log t)` and
-   `1 - (1+x)^{-5} ≥ 5x/(1+5x)`; with Lemma 10's corollary `G_{r+1}(t) ≤ c₃ G_r(t-1) t/((t-1)² log t)`
-   the inequality `-τ' ≥ (1+x)^{5(t-1)} G_r(t-1) t/(t-1)²` (τ = δ G_{r+1}) holds as soon as
-   `log t ≥ 8c₃` and `20 c₃ t² log⁴ t / L² ≤ 1/2`; the latter holds for `t ≤ ξ` once `y` is large,
-   since `ξ² log⁴ ξ / L² ≤ (log log 3y)^{-0.4}`. So `s₀ = e^{8c₃}` (or larger) works.
+Items 1–4 are done, in `LinearSieve/Calculus.lean`, `LemmaSeven.lean`, `LemmaEleven.lean`,
+`Corollaries.lean` (`s₀ = e^{32}`, `c₃ = 4`; all constants explicit or existential and uniform).
+
+1. **Calculus identities** (`Calculus.lean`). `mainMaj_true`/`mainMaj_false` (simp),
+   `continuous_mainMaj`, `mainMaj_nonneg`, `mainMaj_antitone`, `mainMaj_le_MSieve`;
+   `g_two_eq_integral : 2 ≤ s → IntegrableOn … ∧ g 2 s = ∫ t in Ioi s, max (3 - (t-1)) 0 / (t-1)`;
+   `fSieve_eq_integral_mainMaj : 2 ≤ s → fSieve s = ∫ t in Ioi s, mainMaj false (t-1) / (t-1)`
+   (integrability `integrableOn_mainMaj_false_shift`);
+   `mainMaj_false_eq_integral (s) : mainMaj false s = max (3-s) 0 + ∫ t in Ioi (max s 3), fSieve (t-1)/(t-1)`.
+   For `G`: `errLower lower` (`2` for `true`, `3` for `false`),
+   `errMaj_eq_integral lower : errLower lower ≤ s → IntegrableOn (fun t => errMaj (!lower) (t-1) * t/(t-1)^2) (Ioi s) ∧
+   errMaj lower s = ∫ t in Ioi s, errMaj (!lower) (t-1) * t/(t-1)^2`,
+   `integral_errMaj_shift : errLower lower ≤ s → s ≤ b → ∫ t in s..b, … = errMaj lower s - errMaj lower b`,
+   `hasDerivAt_errMaj : errLower lower < t → HasDerivAt (errMaj lower) (-(errMaj (!lower) (t-1) * t/(t-1)^2)) t`,
+   `errMaj_false_of_le_three` (`𝔉 = 1` on `s ≤ 3`), `errMaj_pos`, `errMaj_antitone`, `errMaj_mem`,
+   `errMaj_le_two`, `errMaj_eq_majG`, `majG_add_two`.
+2. **Lemma 7** (`LemmaSeven.lean`). `MSieve_lt_four_mul_bigM : 2 ≤ s → MSieve s < 4 * bigM s` and
+   `lemma7 r : 2 ≤ s → fr r s < MSieve s ∧ MSieve s ≤ 4 * bigM s` (false for `s < 2`, where
+   `M(s) = 5 + F(3) - s`). On `[2,3]`, `M = (F(3)+3)(1 - log(s-1))` and `F(3) + 3 < 4`
+   (`FSieve_three_add_lt_four`, from `fSieve_four_add`); for `s > 3` a first-crossing argument with
+   `(s-1)M(s) = ∫_{s-1}^s M` (`sub_one_mul_MSieve`) and `∫_{s-1}^s 𝔐 ≤ (s-1)²𝔐(s)/s`
+   (`integral_bigM_le`, from (3.12)). Consequences: `mainMaj_le_errMaj : 2 ≤ s →
+   mainMaj lower s ≤ 12 * errMaj lower' s`, `MSieve_sub_one_lt : 3 ≤ s → MSieve (s-1) < 16 s² 𝔐(s)`,
+   `mainMaj_sub_one_le : 1 ≤ s → mainMaj lower (s - 1) ≤ 48 * s^2 * errMaj lower' s` (any flags).
+3. **Lemmas 11, 12** (`LemmaEleven.lean`). Hypotheses `exp 32 ≤ s`, `s ≤ b`,
+   `b^2 * log b^4 ≤ log y^2 / 160` (i.e. `20 c₃ b² log⁴ b / L² ≤ 1/2`; it passes to smaller `b ≥ 1`,
+   `sq_mul_log_pow_four_le_of_le`):
+   `lemma11 r : ∫ t in s..b, (1 + t^2 * log t^5 / log y^2) ^ (5*(t-1)) * majG r (t-1) * t / (t-1)^2
+   < delta s y * majG (r+1) s`;
+   `lemma12 r : AntitoneOn (fun t => (1 + t^2 * log t^5 / L^2) ^ (5*(t-1)) * majG (r+1) t) (Icc s b)`;
+   `antitoneOn_cor3Weight r : AntitoneOn (fun t => (1 + t^2 log t^5/L^2)^(5(t-1)) * majG r (t-1) * (t^2/(t-1)^2)) (Icc s b)`
+   (the monotonicity of `b(x)` in Corollary 3, which [I71] attributes to Lemma 12; proved from the
+   Corollary to Lemma 10 at `t - 1`). Core estimates: `hasDerivAt_growth`, `rate_bound`
+   (`(log A_a)' ≤ w(15 log t + 25)` with `w = t² log⁴ t / L²`), `majG_succ_mul_log_lt`,
+   `antitoneOn_growth_mul`. Size of `ξ`: `xi_sq_mul_log_pow_four_div_le : 1 < y → 1 ≤ log log 3y →
+   1 ≤ ξ → ξ² log⁴ ξ / L² ≤ (log log 3y)^{-2/5}`, `tendsto_xi`, and
+   `exists_xi_large : ∃ y₀, ∀ y ≥ y₀, 1 < y ∧ exp 32 ≤ xi y ∧ xi y^2 * log (xi y)^4 ≤ log y^2/160 ∧ 2 ≤ y^(1/xi y)`.
+4. **Corollaries 1 and 3** (`Corollaries.lean`), `t_p = log y / log p`, `log (y/p) = log p (t_p - 1)`
+   (`log_div_prime_eq`). `lemma13_param`: Lemma 13 after the substitution `u = y^{1/t}`
+   (`integral_comp_log_div`): for `F ≥ 0` antitone on `[α, β]`, `0 < α`, `y^{1/β} ≥ 2`, and `S`
+   between the primes in `(y^{1/β}, y^{1/α})` and in `[y^{1/β}, y^{1/α}]`,
+   `|∑_{p∈S} F(t_p)/p - ∫ t in α..β, F t / t| ≤ C * F α * pntE (y^(1/β))`.
+   `cor1 : ∃ C, 0 ≤ C ∧ ∀ M y α β, 1 < y → 2 ≤ α → α ≤ β → 2 ≤ y^(1/β) → AntitoneOn M (Icc (α-1) (β-1)) →
+   (∀ t ∈ Icc (α-1) (β-1), 0 ≤ M t) → |∑ p ∈ (primesLT (y^(1/α))).filter (y^(1/β) ≤ ·),
+   M (t_p - 1) / (p * log (y/p)) - (∫ t in α..β, M (t-1)/(t-1)) / log y| ≤ C * M (α-1) * pntE (y^(1/β)) / log y`
+   (one-sided `cor1_le`).
+   `cor3 : ∃ C, 0 ≤ C ∧ ∀ lower y s b, 1 < y → sMin lower ≤ s → exp 32 ≤ b → 2 ≤ y^(1/b) →
+   b^2 * log b^4 ≤ log y^2/160 → ∑ p ∈ (rosserPrimes lower y (y^(1/s))).filter (y^(1/b) ≤ ·),
+   delta (t_p - 1) (y/p) * errMaj (!lower) (t_p - 1) / (p * log (y/p)^2) ≤
+   delta (max s (exp 32)) y * errMaj lower s / log y^2 * (1 + C * b^2 * pntE (y^(1/b)))`;
+   `cor3_xi` is the case `b = ξ(y)`, `y ≥ y₀`. The sum is over the primes of the recursion
+   (`rosserPrimes false` has `p³ < y`, so the upper-sieve case `s < 3` reduces to `s = 3`,
+   `lt_rpow_one_div_max_three`); `cor3_primesLT` is the `primesLT` form for `errLower lower ≤ s`.
+   Parts: `cor3_summand_le` (`δ(t-1, y/p) ≤ (1 + t² log⁵ t/L²)^{5(t-1)}`), `cor3_large`
+   (`e^{32} ≤ s`: Lemmas 11, 12, 13), `cor3_small` (`s ≤ a ≤ e^{32}`: `δ ≤ δ(e^{32})`, Lemma 13
+   for `G'(t-1) t²/(t-1)²` and `integral_errMaj_shift`), `errMaj_shift_sq_le : 2 ≤ s →
+   errMaj lower' (s-1) * (s^2/(s-1)^2) ≤ 32 * s^2 * errMaj lower s`, `growth_le_delta`.
 5. **Crude bound** ([I71] p. 24): `fail lower r y z ≤ Σ_{l > s - 2} SLT(z)^l / l!` (all failing
    tuples of depth `l` have `z^{l+2} > y`; `e_{l+1}(1/p : p < z) = Σ_{p<z} e_l(1/p : p' < p)/p`),
    together with `SLT(z) ≤ log log z + O(1)`.

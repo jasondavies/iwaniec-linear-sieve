@@ -192,6 +192,16 @@ theorem cor1 : ∃ C, 0 ≤ C ∧ ∀ (M : ℝ → ℝ) (y α β : ℝ), 1 < y �
         gcongr
     _ = 2 * C * M (α - 1) * pntE (y ^ (1 / β)) / log y := by ring
 
+/-- [I71, Corollary 1 to Lemma 13], one-sided form. -/
+theorem cor1_le : ∃ C, 0 ≤ C ∧ ∀ (M : ℝ → ℝ) (y α β : ℝ), 1 < y → 2 ≤ α → α ≤ β →
+    2 ≤ y ^ (1 / β) → AntitoneOn M (Icc (α - 1) (β - 1)) → (∀ t ∈ Icc (α - 1) (β - 1), 0 ≤ M t) →
+    ∑ p ∈ (primesLT (y ^ (1 / α))).filter (fun p : ℕ => y ^ (1 / β) ≤ p),
+        M (log y / log p - 1) / (p * log (y / p)) ≤
+      (∫ t in α..β, M (t - 1) / (t - 1)) / log y + C * M (α - 1) * pntE (y ^ (1 / β)) / log y := by
+  obtain ⟨C, hC0, hC⟩ := cor1
+  exact ⟨C, hC0, fun M y α β hy hα hαβ hB hM hM0 => by
+    linarith [(abs_le.1 (hC M y α β hy hα hαβ hB hM hM0)).2]⟩
+
 /-! ### Corollary 3 -/
 
 /-- `G'(s-1) s²/(s-1)² ≤ 32 s² G(s)` for `s ≥ 2` (Lemma 8 and the Corollary to Lemma 6). -/
@@ -420,5 +430,180 @@ theorem cor3_small : ∃ C, 0 ≤ C ∧ ∀ (lower : Bool) (y s a : ℝ) (S : Fi
     linarith [h13.2]
   calc _ ≤ _ := hsum
     _ ≤ _ := mul_le_mul_of_nonneg_left hmain (div_nonneg hδ0 hL2.le)
+
+theorem rpow_one_div_le_rpow_one_div {y u v : ℝ} (hy : 1 ≤ y) (hu : 0 < u) (huv : u ≤ v) :
+    y ^ (1 / v) ≤ y ^ (1 / u) :=
+  rpow_le_rpow_of_exponent_le hy (one_div_le_one_div_of_le hu huv)
+
+/-- [I71, Corollary 3 to Lemma 13] for the primes `y^{1/b} ≤ p < y^{1/s}`, `errLower lower ≤ s`
+(so `s ≥ 2`, and `s ≥ 3` for the upper sieve, where (3.13) holds). -/
+theorem cor3_primesLT : ∃ C, 0 ≤ C ∧ ∀ (lower : Bool) (y s b : ℝ), 1 < y →
+    errLower lower ≤ s → exp 32 ≤ b → 2 ≤ y ^ (1 / b) → b ^ 2 * log b ^ 4 ≤ log y ^ 2 / 160 →
+    ∑ p ∈ (primesLT (y ^ (1 / s))).filter (fun p : ℕ => y ^ (1 / b) ≤ p),
+        delta (log y / log p - 1) (y / p) * errMaj (!lower) (log y / log p - 1) /
+          (p * log (y / p) ^ 2) ≤
+      delta (max s (exp 32)) y * errMaj lower s / log y ^ 2 *
+        (1 + C * b ^ 2 * pntE (y ^ (1 / b))) := by
+  obtain ⟨C₁, hC₁, h₁⟩ := cor3_large
+  obtain ⟨C₂, hC₂, h₂⟩ := cor3_small
+  refine ⟨C₁ + C₂, by linarith, fun lower y s b hy hs hb32 hB hb => ?_⟩
+  set s₀ := exp 32 with hs₀
+  have hs2 : 2 ≤ s := (two_le_errLower lower).trans hs
+  have hs₀4 : 4 < s₀ := four_lt_of_exp_le le_rfl
+  have hL2 : 0 < log y ^ 2 := by have := log_pos hy; positivity
+  have hpE := pntE_pos (y ^ (1 / b))
+  have hGs := errMaj_pos lower s
+  set S := (primesLT (y ^ (1 / s))).filter (fun p : ℕ => y ^ (1 / b) ≤ p) with hS
+  have hRHS : 0 ≤ delta (max s s₀) y * errMaj lower s / log y ^ 2 *
+      (1 + (C₁ + C₂) * b ^ 2 * pntE (y ^ (1 / b))) := by
+    have := delta_pos (by linarith [le_max_left s s₀] : (1 : ℝ) ≤ max s s₀) y
+    have : 0 ≤ (C₁ + C₂) * b ^ 2 * pntE (y ^ (1 / b)) :=
+      mul_nonneg (mul_nonneg (by linarith) (sq_nonneg b)) hpE.le
+    positivity
+  rcases lt_or_ge b s with hbs | hsb
+  · -- no primes
+    have hempty : S = ∅ := by
+      refine Finset.eq_empty_of_forall_notMem fun p hp => ?_
+      rw [hS, mem_filter, mem_primesLT] at hp
+      have := rpow_one_div_le_rpow_one_div hy.le (by linarith) hbs.le
+      linarith [hp.1.2, hp.2]
+    rw [hempty, sum_empty]
+    exact hRHS
+  rcases le_total s₀ s with hs₀s | hss₀
+  · -- `s ≥ s₀`: Lemma 11 directly
+    rw [max_eq_left hs₀s]
+    refine (h₁ lower y s b S hy hs₀s hsb hB hb (fun p hp => ?_) fun p hp h1 h2 => ?_).trans ?_
+    · rw [hS, mem_filter, mem_primesLT] at hp; exact ⟨hp.1.1, hp.2, hp.1.2.le⟩
+    · rw [hS, mem_filter, mem_primesLT]; exact ⟨⟨hp, h2⟩, h1.le⟩
+    · have := delta_pos (by linarith : (1 : ℝ) ≤ s) y
+      gcongr
+      linarith
+  -- `s < s₀`: split at `y^{1/s₀}`
+  rw [max_eq_right hss₀]
+  have hB₀ : y ^ (1 / b) ≤ y ^ (1 / s₀) := rpow_one_div_le_rpow_one_div hy.le (by linarith) hb32
+  have hB₀s : y ^ (1 / s₀) ≤ y ^ (1 / s) := rpow_one_div_le_rpow_one_div hy.le (by linarith) hss₀
+  rw [← sum_filter_add_sum_filter_not S (fun p : ℕ => y ^ (1 / s₀) ≤ p)]
+  have e₁ := h₂ lower y s s₀ (S.filter fun p : ℕ => y ^ (1 / s₀) ≤ p) hy hs hss₀ le_rfl
+    (by linarith) (fun p hp => by
+      rw [mem_filter, hS, mem_filter, mem_primesLT] at hp
+      exact ⟨hp.1.1.1, hp.2, hp.1.1.2.le⟩)
+    (fun p hp h1 h2 => by
+      rw [mem_filter, hS, mem_filter, mem_primesLT]
+      exact ⟨⟨⟨hp, h2⟩, by linarith⟩, h1.le⟩)
+  have e₂ := h₁ lower y s₀ b (S.filter fun p : ℕ => ¬ y ^ (1 / s₀) ≤ p) hy le_rfl hb32 hB hb
+    (fun p hp => by
+      rw [mem_filter, hS, mem_filter, mem_primesLT] at hp
+      exact ⟨hp.1.1.1, hp.1.2, (not_le.1 hp.2).le⟩)
+    (fun p hp h1 h2 => by
+      rw [mem_filter, hS, mem_filter, mem_primesLT]
+      exact ⟨⟨⟨hp, by linarith⟩, h1.le⟩, not_le.2 h2⟩)
+  refine (add_le_add e₁ e₂).trans ?_
+  -- combine
+  have hδ := delta_pos (by linarith : (1 : ℝ) ≤ s₀) y
+  have hG₀ := errMaj_pos lower s₀
+  have hGG : errMaj lower s₀ ≤ errMaj lower s := errMaj_antitone lower hss₀
+  have hpE₀ : pntE (y ^ (1 / s₀)) ≤ pntE (y ^ (1 / b)) :=
+    pntE_le_pntE (by linarith) hB₀
+  have hsb2 : s ^ 2 * pntE (y ^ (1 / s₀)) ≤ b ^ 2 * pntE (y ^ (1 / b)) := by
+    have : s ^ 2 ≤ b ^ 2 := by gcongr
+    exact mul_le_mul this hpE₀ (pntE_pos _).le (sq_nonneg b)
+  have i1 : C₂ * errMaj lower s * (s ^ 2 * pntE (y ^ (1 / s₀))) ≤
+      C₂ * errMaj lower s * (b ^ 2 * pntE (y ^ (1 / b))) :=
+    mul_le_mul_of_nonneg_left hsb2 (mul_nonneg hC₂ hGs.le)
+  have i2 : C₁ * (b ^ 2 * pntE (y ^ (1 / b))) * errMaj lower s₀ ≤
+      C₁ * (b ^ 2 * pntE (y ^ (1 / b))) * errMaj lower s :=
+    mul_le_mul_of_nonneg_left hGG (mul_nonneg hC₁ (mul_nonneg (sq_nonneg b) hpE.le))
+  have hinner : errMaj lower s - errMaj lower s₀ +
+      C₂ * s ^ 2 * errMaj lower s * pntE (y ^ (1 / s₀)) +
+      errMaj lower s₀ * (1 + C₁ * b ^ 2 * pntE (y ^ (1 / b))) ≤
+      errMaj lower s * (1 + (C₁ + C₂) * b ^ 2 * pntE (y ^ (1 / b))) := by
+    nlinarith
+  have hk : 0 ≤ delta s₀ y / log y ^ 2 := div_nonneg hδ.le hL2.le
+  calc delta s₀ y / log y ^ 2 * (errMaj lower s - errMaj lower s₀ +
+        C₂ * s ^ 2 * errMaj lower s * pntE (y ^ (1 / s₀))) +
+      delta s₀ y * errMaj lower s₀ / log y ^ 2 * (1 + C₁ * b ^ 2 * pntE (y ^ (1 / b)))
+      = delta s₀ y / log y ^ 2 * (errMaj lower s - errMaj lower s₀ +
+        C₂ * s ^ 2 * errMaj lower s * pntE (y ^ (1 / s₀)) +
+        errMaj lower s₀ * (1 + C₁ * b ^ 2 * pntE (y ^ (1 / b)))) := by ring
+    _ ≤ delta s₀ y / log y ^ 2 *
+        (errMaj lower s * (1 + (C₁ + C₂) * b ^ 2 * pntE (y ^ (1 / b)))) :=
+        mul_le_mul_of_nonneg_left hinner hk
+    _ = _ := by ring
+
+/-- `p < y^{1/max s 3} ↔ p < y^{1/s} ∧ p³ < y` (for `y > 1`, `s > 0`, `p ≥ 0`). -/
+theorem lt_rpow_one_div_max_three {y s x : ℝ} (hy : 1 < y) (hs : 0 < s) (hx : 0 ≤ x) :
+    x < y ^ (1 / max s 3) ↔ x < y ^ (1 / s) ∧ x ^ 3 < y := by
+  have h3 : x < y ^ (1 / (3 : ℝ)) ↔ x ^ 3 < y := by
+    rw [one_div, lt_rpow_inv_iff_of_pos hx (by linarith) (by norm_num)]
+    norm_cast
+  rcases le_total s 3 with hs3 | hs3
+  · rw [max_eq_right hs3, h3]
+    have := rpow_one_div_le_rpow_one_div hy.le hs hs3
+    constructor
+    · intro h; exact ⟨lt_of_lt_of_le (h3.2 h) this, h⟩
+    · exact fun h => h.2
+  · rw [max_eq_left hs3]
+    have := rpow_one_div_le_rpow_one_div hy.le (by norm_num) hs3
+    exact ⟨fun h => ⟨h, h3.1 (lt_of_lt_of_le h this)⟩, fun h => h.1⟩
+
+/-- [I71, Corollary 3 to Lemma 13], for the primes of the Rosser recursion: with
+`t_p = log y / log p`, `s₀ = e^{32}`, `sMin lower ≤ s`, any `b ≥ s₀` with `y^{1/b} ≥ 2` and
+`160 b² log⁴ b ≤ log² y` (e.g. `b = ξ(y)` for large `y`, `exists_xi_large`),
+
+`∑_{p ∈ rosserPrimes lower y (y^{1/s}), p ≥ y^{1/b}} δ(t_p - 1, y/p) G(!lower)(t_p - 1) / (p log² (y/p))
+  ≤ δ(max s s₀, y) G(lower)(s) / L² · (1 + C b² pntE(y^{1/b}))`.
+
+For the upper sieve and `s < 3` the primes are those `< y^{1/3}` and `𝔉(s) = 𝔉(3) = 1`, so this
+reduces to `s = 3`. -/
+theorem cor3 : ∃ C, 0 ≤ C ∧ ∀ (lower : Bool) (y s b : ℝ), 1 < y → sMin lower ≤ s →
+    exp 32 ≤ b → 2 ≤ y ^ (1 / b) → b ^ 2 * log b ^ 4 ≤ log y ^ 2 / 160 →
+    ∑ p ∈ (rosserPrimes lower y (y ^ (1 / s))).filter (fun p : ℕ => y ^ (1 / b) ≤ p),
+        delta (log y / log p - 1) (y / p) * errMaj (!lower) (log y / log p - 1) /
+          (p * log (y / p) ^ 2) ≤
+      delta (max s (exp 32)) y * errMaj lower s / log y ^ 2 *
+        (1 + C * b ^ 2 * pntE (y ^ (1 / b))) := by
+  obtain ⟨C, hC0, hC⟩ := cor3_primesLT
+  refine ⟨C, hC0, fun lower y s b hy hs hb32 hB hb => ?_⟩
+  cases lower
+  · -- upper sieve: replace `s` by `max s 3`
+    have hs1 : (1 : ℝ) ≤ s := hs
+    have hset : (rosserPrimes false y (y ^ (1 / s))).filter (fun p : ℕ => y ^ (1 / b) ≤ p) =
+        (primesLT (y ^ (1 / max s 3))).filter (fun p : ℕ => y ^ (1 / b) ≤ p) := by
+      ext p
+      simp only [mem_filter, mem_rosserPrimes, mem_primesLT, Bool.false_eq_true, false_or]
+      rw [lt_rpow_one_div_max_three hy (by linarith) (Nat.cast_nonneg p)]
+      tauto
+    have hG : errMaj false (max s 3) = errMaj false s := by
+      rcases le_total s 3 with h | h
+      · rw [max_eq_right h, errMaj_false_of_le_three le_rfl, errMaj_false_of_le_three h]
+      · rw [max_eq_left h]
+    have hmax : max (max s 3) (exp 32) = max s (exp 32) := by
+      have : (3 : ℝ) ≤ exp 32 := by linarith [four_lt_of_exp_le (le_refl (exp 32))]
+      rw [max_assoc, max_eq_right this]
+    rw [hset, ← hG, ← hmax]
+    exact hC false y (max s 3) b hy (le_max_right _ _) hb32 hB hb
+  · rw [rosserPrimes_true]
+    exact hC true y s b hy hs hb32 hB hb
+
+/-- The hypothesis `160 b² log⁴ b ≤ L²` passes to smaller `b ≥ 1`. -/
+theorem sq_mul_log_pow_four_le_of_le {b b' X : ℝ} (hb : 1 ≤ b) (hbb' : b ≤ b')
+    (h : b' ^ 2 * log b' ^ 4 ≤ X) : b ^ 2 * log b ^ 4 ≤ X := by
+  have := log_nonneg hb
+  have : log b ≤ log b' := log_le_log (by linarith) hbb'
+  have : b ^ 2 * log b ^ 4 ≤ b' ^ 2 * log b' ^ 4 := by gcongr
+  linarith
+
+/-- Corollary 3 with `b = ξ(y)`, for `y ≥ y₀`. -/
+theorem cor3_xi : ∃ C y₀ : ℝ, 0 ≤ C ∧ ∀ (lower : Bool) (y s : ℝ), y₀ ≤ y → sMin lower ≤ s →
+    ∑ p ∈ (rosserPrimes lower y (y ^ (1 / s))).filter (fun p : ℕ => y ^ (1 / xi y) ≤ p),
+        delta (log y / log p - 1) (y / p) * errMaj (!lower) (log y / log p - 1) /
+          (p * log (y / p) ^ 2) ≤
+      delta (max s (exp 32)) y * errMaj lower s / log y ^ 2 *
+        (1 + C * xi y ^ 2 * pntE (y ^ (1 / xi y))) := by
+  obtain ⟨C, hC0, hC⟩ := cor3
+  obtain ⟨y₀, hy₀⟩ := exists_xi_large
+  refine ⟨C, y₀, hC0, fun lower y s hy hs => ?_⟩
+  obtain ⟨h1, h2, h3, h4⟩ := hy₀ y hy
+  exact hC lower y s (xi y) h1 hs h2 h4 h3
 
 end IwaniecJacobsthal

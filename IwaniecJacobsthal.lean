@@ -7,3 +7,7 @@ import IwaniecJacobsthal.SieveFunctions
 import IwaniecJacobsthal.SieveMajorants
 import IwaniecJacobsthal.Main
 import IwaniecJacobsthal.LinearSieve.Defs
+import IwaniecJacobsthal.LinearSieve.Calculus
+import IwaniecJacobsthal.LinearSieve.LemmaSeven
+import IwaniecJacobsthal.LinearSieve.LemmaEleven
+import IwaniecJacobsthal.LinearSieve.Corollaries
