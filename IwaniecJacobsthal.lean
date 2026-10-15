@@ -16,3 +16,6 @@ import IwaniecJacobsthal.LinearSieve.Corollaries
 import IwaniecJacobsthal.LinearSieve.TheoremFourAux
 import IwaniecJacobsthal.LinearSieve.TheoremFourAsymp
 import IwaniecJacobsthal.LinearSieve.TheoremFour
+import IwaniecJacobsthal.LinearSieve.TheoremFiveAux
+import IwaniecJacobsthal.LinearSieve.TheoremFiveCount
+import IwaniecJacobsthal.LinearSieve.TheoremFive
