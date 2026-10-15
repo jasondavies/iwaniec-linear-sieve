@@ -428,4 +428,101 @@ theorem lemma9Fun_le_integral {s : ℝ} (hs : 4 ≤ s) :
       ring
     _ ≤ _ := mul_le_mul_of_nonneg_left hint (div_pos hs0 hr).le
 
+/-- Comparison of `𝔐` with the subsolution `lemma9Fun`: `𝔐(s) > (𝔐(4)/2) lemma9Fun(s)` for
+`s ≥ 3`. -/
+theorem bigM_gt_lemma9Fun {s : ℝ} (hs : 3 ≤ s) : bigM 4 / 2 * lemma9Fun s < bigM s := by
+  set κ := bigM 4 / 2 with hκ
+  have hM4 := bigM_pos 4
+  have hinit : ∀ x ∈ Icc (3 : ℝ) 4, 0 < bigM x - κ * lemma9Fun x := by
+    intro x hx
+    have h1 := lemma9Fun_le_one hx.1
+    have h2 : bigM 4 ≤ bigM x := bigM_antitone hx.2
+    have h3 : κ * lemma9Fun x ≤ κ := by
+      have : 0 ≤ κ := by positivity
+      nlinarith
+    linarith
+  rcases le_total s 4 with h4 | h4
+  · exact sub_pos.1 (hinit s ⟨hs, h4⟩)
+  refine sub_pos.1 <| pos_of_first_crossing (f := fun s => bigM s - κ * lemma9Fun s) (a₀ := 3)
+    (a := 4) (continuous_bigM.continuousOn.sub (continuousOn_const.mul
+      (continuousOn_lemma9Fun.mono fun x hx => by simp only [mem_Ici] at hx ⊢; linarith)))
+    (fun x hx => (hinit x hx).le) (hinit 4 ⟨by norm_num, le_rfl⟩) ?_ s h4
+  intro t ht hall hpos
+  show 0 < bigM t - κ * lemma9Fun t
+  have hpos' : ∀ x ∈ Ioo (t - 1) t, 0 < bigM x - κ * lemma9Fun x := by
+    intro x hx
+    rcases le_total x 4 with h | h
+    · exact hinit x ⟨by linarith [hx.1], h⟩
+    · exact hpos x ⟨h, hx.2⟩
+  have ht0 : 0 < t := by linarith
+  have hr : 0 < (t - 1) ^ 2 - 1 / 2 := by nlinarith
+  have hcw : ContinuousOn (fun x => (1 - 1 / (2 * x ^ 2)) * (κ * lemma9Fun x)) (Icc (t - 1) t) := by
+    refine ContinuousOn.mul (continuousOn_const.sub (continuousOn_const.div
+      (continuousOn_const.mul (continuousOn_id.pow 2)) fun x hx => ?_))
+      (continuousOn_const.mul (continuousOn_lemma9Fun.mono fun x hx => by
+        simp only [mem_Ici]; linarith [hx.1]))
+    have : 0 < x := by linarith [hx.1]
+    positivity
+  have hlt : ∫ x in (t - 1)..t, (1 - 1 / (2 * x ^ 2)) * (κ * lemma9Fun x) <
+      ∫ x in (t - 1)..t, (1 - 1 / (2 * x ^ 2)) * bigM x := by
+    refine intervalIntegral.integral_lt_integral_of_continuousOn_of_le_of_exists_lt
+      (by linarith) hcw (continuousOn_weight_mul continuous_bigM (by linarith)) ?_ ?_
+    · intro x hx
+      have hw := (weight_mem (x := x) (by linarith [hx.1])).1
+      rcases hx.2.lt_or_eq with h | rfl
+      · exact mul_le_mul_of_nonneg_left (sub_pos.1 (hpos' x ⟨hx.1, h⟩)).le hw.le
+      · exact mul_le_mul_of_nonneg_left (sub_nonneg.1 (hall x ⟨by linarith, le_rfl⟩)) hw.le
+    · refine ⟨t - 1 / 2, ⟨by linarith, by linarith⟩, ?_⟩
+      exact mul_lt_mul_of_pos_left (sub_pos.1 (hpos' _ ⟨by linarith, by linarith⟩))
+        (weight_mem (by linarith)).1
+  rw [← bigM_integral_identity (by linarith), intervalIntegral.integral_congr
+    (g := fun x => κ * ((1 - 1 / (2 * x ^ 2)) * lemma9Fun x)) (fun x _ => by simp only; ring),
+    intervalIntegral.integral_const_mul] at hlt
+  have hsub := lemma9Fun_le_integral ht.le
+  have hκ0 : 0 < κ := by positivity
+  have h1 : κ * lemma9Fun t ≤
+      t / ((t - 1) ^ 2 - 1 / 2) * (κ * ∫ x in (t - 1)..t, (1 - 1 / (2 * x ^ 2)) * lemma9Fun x) := by
+    calc κ * lemma9Fun t ≤ κ * (t / ((t - 1) ^ 2 - 1 / 2) *
+          ∫ x in (t - 1)..t, (1 - 1 / (2 * x ^ 2)) * lemma9Fun x) :=
+          mul_le_mul_of_nonneg_left hsub hκ0.le
+      _ = _ := by ring
+  have h2 := mul_lt_mul_of_pos_left hlt (div_pos ht0 hr)
+  have e : t / ((t - 1) ^ 2 - 1 / 2) * (((t - 1) ^ 2 - 1 / 2) * bigM t / t) = bigM t := by
+    generalize (t - 1) ^ 2 - 1 / 2 = r at hr ⊢
+    field_simp
+  rw [e] at h2
+  linarith
+
+/-- [I71, Lemma 9], lower bound for `𝔐`: there is `κ > 0` with
+`𝔐(s) ≥ κ exp(-(s log s + s log log s + 2 s))` for `s ≥ 3`. -/
+theorem bigM_ge_exp : ∃ κ > 0, ∀ s ≥ 3,
+    κ * exp (-(s * log s + s * log (log s) + 2 * s)) ≤ bigM s :=
+  ⟨bigM 4 / 2, by linarith [bigM_pos 4], fun _ hs => (bigM_gt_lemma9Fun hs).le⟩
+
+/-- [I71, Lemma 9], lower bound: there is `c` with
+`G_r(s) ≥ exp(-s log s - s log log s - c s)` for all `r` and `s ≥ 3`. -/
+theorem majG_ge_exp : ∃ c : ℝ, ∀ (r : ℕ) (s : ℝ), 3 ≤ s →
+    exp (-(s * log s) - s * log (log s) - c * s) ≤ majG r s := by
+  obtain ⟨κ, hκ, hM⟩ := bigM_ge_exp
+  set K := |log (κ / 3)| / 3 with hK
+  have hK0 : 0 ≤ K := by positivity
+  refine ⟨2 + K, fun r s hs => ?_⟩
+  have hG := (majG_mem r s).1
+  have h1 := hM s hs
+  have hexp : exp (-(K * s)) ≤ κ / 3 := by
+    calc exp (-(K * s)) ≤ exp (log (κ / 3)) := by
+          rw [exp_le_exp]
+          have : -log (κ / 3) ≤ |log (κ / 3)| := neg_le_abs _
+          nlinarith
+      _ = κ / 3 := exp_log (by positivity)
+  have e : exp (-(s * log s) - s * log (log s) - (2 + K) * s) =
+      exp (-(K * s)) * exp (-(s * log s + s * log (log s) + 2 * s)) := by
+    rw [← exp_add]; ring_nf
+  rw [e]
+  calc exp (-(K * s)) * exp (-(s * log s + s * log (log s) + 2 * s))
+      ≤ κ / 3 * exp (-(s * log s + s * log (log s) + 2 * s)) :=
+        mul_le_mul_of_nonneg_right hexp (exp_pos _).le
+    _ ≤ bigM s / 3 := by linarith
+    _ ≤ majG r s := hG
+
 end IwaniecJacobsthal

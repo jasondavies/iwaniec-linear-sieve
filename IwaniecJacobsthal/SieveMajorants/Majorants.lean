@@ -68,6 +68,9 @@ theorem majG_mem (r : ℕ) (s : ℝ) : bigM s / 3 ≤ majG r s ∧ majG r s ≤ 
   · exact majf_mem s
   · exact majF_mem s
 
+theorem majG_le_two (r : ℕ) (s : ℝ) : majG r s ≤ 2 := by
+  linarith [(majG_mem r s).2, bigM_le_three s]
+
 theorem majG_pos (r : ℕ) (s : ℝ) : 0 < majG r s :=
   lt_of_lt_of_le (by linarith [bigM_pos s]) (majG_mem r s).1
 
