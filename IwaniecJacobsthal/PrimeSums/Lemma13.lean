@@ -353,4 +353,62 @@ theorem lemma13_anti : ∃ C, ∀ (b : ℝ → ℝ) (A B : ℝ), 2 ≤ B → B �
   exact ⟨C, fun b A B hB hBA hb hb0 ↦ hC b A B _ hB hBA hb hb0 (fun p hp ↦ mem_primesIcc.1 hp)
     fun p hp h1 h2 ↦ mem_primesIcc.2 ⟨hp, h1.le, h2.le⟩⟩
 
+/-! ### Lemma 14 -/
+
+theorem integral_inv_log_div_mul_log {u v : ℝ} (hu : 1 < u) (huv : u ≤ v) :
+    ∫ x in u..v, (log x)⁻¹ / (x * log x) = 1 / log u - 1 / log v := by
+  have hpos : ∀ x ∈ Set.uIcc u v, 1 < x := fun x hx ↦ by
+    rw [Set.uIcc_of_le huv] at hx; linarith [hx.1]
+  have hderiv : ∀ x ∈ Set.uIcc u v,
+      HasDerivAt (fun x ↦ -(log x)⁻¹) ((log x)⁻¹ / (x * log x)) x := fun x hx ↦ by
+    have hx := hpos x hx
+    have hl := (log_pos hx).ne'
+    convert ((hasDerivAt_log (by linarith : x ≠ 0)).inv hl).neg using 1
+    field_simp
+  have hint : IntervalIntegrable (fun x ↦ (log x)⁻¹ / (x * log x)) volume u v := by
+    have hc := continuousOn_inv_mul_log (v := v) hu
+    have hl : ContinuousOn (fun x ↦ (log x)⁻¹) (Set.Icc u v) :=
+      ContinuousOn.inv₀ (continuousOn_log.mono fun x hx ↦ by
+        simp only [Set.mem_compl_iff, Set.mem_singleton_iff]; linarith [hx.1])
+        fun x hx ↦ (log_pos (by linarith [hx.1])).ne'
+    simp_rw [div_eq_mul_inv ((log _)⁻¹)]
+    exact (hl.mul hc).intervalIntegrable_of_Icc huv
+  rw [integral_eq_sub_of_hasDerivAt hderiv hint]
+  ring
+
+/-- [I71, Lemma 14]: `∑_{B < p < A} 1/(p log p) = 1/log B - 1/log A + O(exp(-κ √(log B)))`,
+for any set of primes between those in `(B, A)` and those in `[B, A]`. -/
+theorem lemma14_of_subset : ∃ C, ∀ (A B : ℝ) (s : Finset ℕ), 2 ≤ B → B ≤ A →
+    (∀ p ∈ s, p.Prime ∧ B ≤ p ∧ (p : ℝ) ≤ A) → (∀ p : ℕ, p.Prime → B < p → (p : ℝ) < A → p ∈ s) →
+    |∑ p ∈ s, 1 / (p * log p) - (1 / log B - 1 / log A)| ≤ C * pntE B := by
+  obtain ⟨C, hC0, hC⟩ := lemma13_anti_of_subset
+  refine ⟨2 * C, fun A B s hB hBA hs1 hs2 ↦ ?_⟩
+  have hlogB : 1 / 2 ≤ log B := half_le_log hB
+  have hb : AntitoneOn (fun x ↦ (log x)⁻¹) (Set.Icc B A) := fun x hx y hy hxy ↦ by
+    have hx0 : 0 < log x := log_pos (by linarith [hx.1])
+    exact inv_anti₀ hx0 (log_le_log (by linarith [hx.1]) hxy)
+  have hb0 : ∀ x ∈ Set.Icc B A, 0 ≤ (log x)⁻¹ := fun x hx ↦
+    inv_nonneg.2 (log_nonneg (by linarith [hx.1]))
+  have h := hC _ A B s hB hBA hb hb0 hs1 hs2
+  rw [integral_inv_log_div_mul_log (by linarith) hBA] at h
+  have hsum : ∑ p ∈ s, (log (p : ℝ))⁻¹ / p = ∑ p ∈ s, 1 / (p * log p) :=
+    sum_congr rfl fun p _ ↦ by ring
+  rw [hsum] at h
+  refine h.trans ?_
+  have hinv : (log B)⁻¹ ≤ 2 := by
+    rw [inv_le_comm₀ (by linarith) (by norm_num)]; linarith
+  have := pntE_pos B
+  calc C * (log B)⁻¹ * pntE B ≤ C * 2 * pntE B := by gcongr
+    _ = 2 * C * pntE B := by ring
+
+/-- [I71, Lemma 14]: `∑_{B < p < A} 1/(p log p) = 1/log B - 1/log A + O(exp(-κ √(log B)))`. -/
+theorem lemma14 : ∃ C, ∀ A B : ℝ, 2 ≤ B → B ≤ A →
+    |∑ p ∈ primesIoo B A, 1 / (p * log p) - (1 / log B - 1 / log A)| ≤ C * pntE B := by
+  obtain ⟨C, hC⟩ := lemma14_of_subset
+  exact ⟨C, fun A B hB hBA ↦ hC A B _ hB hBA
+    (fun p hp ↦ by
+      obtain ⟨h1, h2, h3⟩ := mem_primesIoo.1 hp
+      exact ⟨h1, h2.le, h3.le⟩)
+    fun p hp h1 h2 ↦ mem_primesIoo.2 ⟨hp, h1, h2⟩⟩
+
 end IwaniecJacobsthal
