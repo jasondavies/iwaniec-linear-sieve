@@ -50,6 +50,9 @@ theorem pntE_le_pntE {x y : ℝ} (hx : 0 < x) (hxy : x ≤ y) : pntE y ≤ pntE 
 theorem pntE_antitoneOn : AntitoneOn pntE (Set.Ioi 0) :=
   fun _ hx _ _ hxy ↦ pntE_le_pntE hx hxy
 
+theorem pntE_antitoneOn_Ici_one : AntitoneOn pntE (Set.Ici 1) :=
+  pntE_antitoneOn.mono fun _ hx ↦ lt_of_lt_of_le one_pos (Set.mem_Ici.1 hx)
+
 theorem tendsto_pntE : Tendsto pntE atTop (𝓝 0) := by
   have h : Tendsto (fun x ↦ -pntκ * √(log x)) atTop atBot :=
     (tendsto_sqrt_atTop.comp tendsto_log_atTop).const_mul_atTop_of_neg (neg_lt_zero.2 pntκ_pos)
@@ -171,7 +174,8 @@ theorem theta_asymp : ∃ C : ℝ, 0 ≤ C ∧ ∀ x ≥ 2, |Chebyshev.theta x -
     have h2 := Chebyshev.psi_sub_theta_le (x := x) (by linarith)
     have h3 := Chebyshev.theta_le_psi x
     have h4 := sqrt_mul_log_le (x := x) (by linarith)
-    calc |Chebyshev.theta x - x| ≤ |Chebyshev.psi x - x| + (Chebyshev.psi x - Chebyshev.theta x) := by
+    calc |Chebyshev.theta x - x|
+        ≤ |Chebyshev.psi x - x| + (Chebyshev.psi x - Chebyshev.theta x) := by
           have h5 := le_abs_self (Chebyshev.psi x - x)
           have h6 := neg_abs_le (Chebyshev.psi x - x)
           rw [abs_le]; constructor <;> linarith

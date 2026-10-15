@@ -84,7 +84,8 @@ theorem hasDerivAt_log_log_sub_inv_log {t : ℝ} (ht : 1 < t) :
 theorem continuousOn_log_add_one_div {x y : ℝ} (hx : 1 < x) :
     ContinuousOn (fun t ↦ (log t + 1) / (t * log t) ^ 2) (Set.Icc x y) := by
   have hlog : ContinuousOn log (Set.Icc x y) :=
-    continuousOn_log.mono fun t ht ↦ by simp only [Set.mem_compl_iff, Set.mem_singleton_iff]; linarith [ht.1]
+    continuousOn_log.mono fun t ht ↦ by
+      simp only [Set.mem_compl_iff, Set.mem_singleton_iff]; linarith [ht.1]
   refine ContinuousOn.div (by fun_prop) (by fun_prop) fun t ht ↦ ?_
   have : 1 < t := by linarith [ht.1]
   have := log_pos this

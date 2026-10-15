@@ -62,15 +62,35 @@ and `R(z) = e^{-γ}/log z + O(exp(-√log z))`. The PNT gives these with `exp(-�
 fixed `κ > 0`; we use one fixed `κ` everywhere.
 
 * `pntκ : ℝ`, `pntκ_pos : 0 < pntκ`, `pntE (x : ℝ) : ℝ := exp (-pntκ * √(log x))`.
+  `pntκ = min c (1/2)` with `c` from `StrongPNT`; facts `pntE_pos`, `pntE_le_one`,
+  `pntE_le_pntE` (antitone on `x > 0`), `pntE_antitoneOn_Ici_one`, `tendsto_pntE`,
+  `inv_le_pntE : 2 ≤ x → x⁻¹ ≤ pntE x`, `one_div_mul_log_le_pntE : 1/(x log x) ≤ 2 pntE x`,
+  `sqrt_mul_log_le : 1 ≤ x → √x log x ≤ 12 x pntE x`.
+* `theta_asymp : ∃ C, 0 ≤ C ∧ ∀ x ≥ 2, |θ x - x| ≤ C * x * pntE x` (`Chebyshev.theta`).
 * `S (x : ℝ) : ℝ := ∑ p ∈ primesLT (⌊x⌋₊ + 1), (p : ℝ)⁻¹` (primes `p ≤ x`).
 * `S_asymp : ∃ c₅ C, ∀ x ≥ 2, |S x - log (log x) - c₅| ≤ C * pntE x`.
 * `R_asymp : ∃ cR > 0, ∃ C, ∀ z ≥ 2, |R z * log z - cR| ≤ C * pntE z`
-  (any constant `cR`; its value `e^{-γ}` is not needed).
-* [I71, Lemma 13] for `b ≥ 0` monotone on `[B, A]`, `2 ≤ B ≤ A`:
-  `|∑_{B ≤ p ≤ A} b p / p - ∫ x in B..A, b x / (x * log x)| ≤ C * b A * pntE B`,
-  and the antitone version with `b B` in place of `b A`.
+  (any constant `cR`; its value `e^{-γ}` is not needed);
+  `R_lower : ∃ c > 0, ∀ z ≥ 2, c / log z ≤ R z`, `R_upper : ∃ C > 0, ∀ z ≥ 2, R z ≤ C / log z`,
+  `R_pos`, `R_antitone`.
+* [I71, Lemma 13] for `b ≥ 0` monotone on `[B, A]`, `2 ≤ B ≤ A`, with
+  `primesIcc B A = {p ∈ Icc ⌈B⌉₊ ⌊A⌋₊ | p.Prime}` (`mem_primesIcc : p ∈ primesIcc B A ↔
+  p.Prime ∧ B ≤ p ∧ p ≤ A`):
+  `lemma13_mono : ∃ C, ∀ b A B, 2 ≤ B → B ≤ A → MonotoneOn b (Icc B A) → (∀ x ∈ Icc B A, 0 ≤ b x) →
+    |∑ p ∈ primesIcc B A, b p / p - ∫ x in B..A, b x / (x * log x)| ≤ C * b A * pntE B`,
+  and `lemma13_anti` (`AntitoneOn`, `b B` in place of `b A`). The variants
+  `lemma13_mono_of_subset`, `lemma13_anti_of_subset` hold for any `s : Finset ℕ` lying between
+  the primes in `(B, A)` and those in `[B, A]`, so any choice of strict/non-strict endpoints works
+  (also `primesIoc`, `primesIoo` with `mem_` lemmas).
+* [I71, Lemma 14]: `lemma14 : ∃ C, ∀ A B, 2 ≤ B → B ≤ A →
+    |∑ p ∈ primesIoo B A, 1 / (p * log p) - (1 / log B - 1 / log A)| ≤ C * pntE B`
+  (and `lemma14_of_subset`).
 * `nth_prime_le : ∃ C, ∀ r ≥ 2, (Nat.nth Nat.Prime (r - 1) : ℝ) ≤ C * r * log r`
   (the `r`-th prime is `≪ r log r`).
+
+Files: `PrimeSums/Error.lean` (`pntE`, `theta_asymp`), `Mertens.lean` (`S_asymp`, by Abel
+summation against `θ`), `Product.lean` (`R`), `SummationByParts.lean` (abstract discrete
+summation by parts), `Lemma13.lean` (Lemmas 13, 14), `NthPrime.lean`.
 
 ### B. `IwaniecJacobsthal/Rosser.lean`, `ShiftedSieve.lean`, `Jacobsthal.lean`
 

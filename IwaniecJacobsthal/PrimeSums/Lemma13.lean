@@ -189,7 +189,8 @@ theorem sum_clampPt_eq (b : ℝ → ℝ) {B A : ℝ} (hB : 0 ≤ B) (hBA : B ≤
     refine clampPt_eq (by omega) ?_
     exact (Nat.le_floor_iff (hB.trans hBA)).1 (by omega)
   rw [hS, hS, min_eq_left (by omega), min_eq_left (by omega), hc,
-    show ⌊B⌋₊ + (j + 1) = ⌊B⌋₊ + j + 1 by ring, S_succ_sub, show ⌊B⌋₊ + 1 + j = ⌊B⌋₊ + j + 1 by ring]
+    show ⌊B⌋₊ + (j + 1) = ⌊B⌋₊ + j + 1 by ring, S_succ_sub,
+    show ⌊B⌋₊ + 1 + j = ⌊B⌋₊ + j + 1 by ring]
   split_ifs <;> simp [div_eq_mul_inv]
 
 theorem S_asymp_nonneg : ∃ c₅ C : ℝ, 0 ≤ C ∧ ∀ x ≥ 2, |S x - log (log x) - c₅| ≤ C * pntE x := by

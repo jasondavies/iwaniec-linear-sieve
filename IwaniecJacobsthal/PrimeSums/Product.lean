@@ -222,7 +222,9 @@ theorem R_upper : ∃ C > 0, ∀ z ≥ 2, R z ≤ C / log z := by
   rw [le_div_iff₀ hlog]
   have h1 := hC z hz
   have h2 : C * pntE z ≤ |C| :=
-    (le_abs_self _).trans (by rw [abs_mul, abs_of_pos (pntE_pos z)]; exact mul_le_of_le_one_right (abs_nonneg _) (pntE_le_one z))
+    (le_abs_self _).trans (by
+      rw [abs_mul, abs_of_pos (pntE_pos z)]
+      exact mul_le_of_le_one_right (abs_nonneg _) (pntE_le_one z))
   rw [abs_le] at h1
   linarith
 
