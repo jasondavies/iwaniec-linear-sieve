@@ -241,6 +241,14 @@ theorem g_antitone : ∀ i, Antitone (g i)
       integral_nonneg (max_le_max huv le_rfl) fun t _ => shiftKernel_nonneg (g_nonneg (n + 2)) t
     linarith
 
+/-- Differences of `g (n + 3)` are integrals of the kernel. -/
+theorem g_add_three_sub (n : ℕ) {u v : ℝ} (hu : gLower (n + 3) ≤ u) (hv : gLower (n + 3) ≤ v) :
+    g (n + 3) u - g (n + 3) v = ∫ t in u..v, shiftKernel (g (n + 2)) t := by
+  have hk := continuous_shiftKernel (continuous_g (n + 2))
+  rw [g_add_three, g_add_three, max_eq_left hu, max_eq_left hv,
+    ← integral_add_adjacent_intervals (hk.intervalIntegrable u v) (hk.intervalIntegrable v _)]
+  ring
+
 /-! ### Improper integrals -/
 
 /-- If `h` is integrable on `(s, b]` and vanishes on `[b, ∞)`, then it is integrable on `(s, ∞)`
