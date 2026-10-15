@@ -4,4 +4,5 @@ import IwaniecJacobsthal.Rosser
 import IwaniecJacobsthal.ShiftedSieve
 import IwaniecJacobsthal.Jacobsthal
 import IwaniecJacobsthal.SieveFunctions
+import IwaniecJacobsthal.SieveMajorants
 import IwaniecJacobsthal.Main

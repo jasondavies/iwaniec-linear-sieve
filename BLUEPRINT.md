@@ -218,18 +218,41 @@ Corollary to Lemma 4), `LemmaFive.lean` (`M`, `f(2) = 2`); `SieveFunctions.lean`
   `|lemma5Q b| ≤ C b² e^{-b}` for `b ≥ 4`, so `lemma5Q_three : lemma5Q 3 = 0`;
   `integral_MSieve_two_three` evaluates `∫_2^3 M` explicitly.
 
-### C2. `IwaniecJacobsthal/SieveMajorants.lean` — [I71, §3] `𝔐`, `𝔚`, `𝔣`, `𝔉`
+### C2. `IwaniecJacobsthal/SieveMajorants.lean` — [I71, §3] `𝔐`, `𝔚`, `𝔣`, `𝔉` (done)
 
-* `𝔐`, `𝔚` (Lean names e.g. `bigM`, `bigW`) as the continuous solutions of the delay
-  equations in [I71, §3, Definition]; (3.11), (3.12); `0 < 𝔐`, `𝔐` antitone, `𝔐 = O(e^{-s})`;
-  `𝔣 = (𝔐 + 𝔚)/2`, `𝔉 = (𝔐 - 𝔚)/2`, their explicit values on `[1,3]`/`[2,3]`, (3.13),
-  (3.14); Lemma 6 and its corollary; `G r` = `𝔣` (r even) / `𝔉` (r odd); Lemma 8; Lemma 10 and
-  its corollary.
-* Lemma 9, lower bound only: `G r s ≥ exp(-s log s - s log log s - c s)` for `s ≥ 3`.
-  [I71] quotes de Bruijn-type asymptotics of the Dickman function from Hua's book; instead use
-  a comparison principle for (3.12) with an explicit subsolution
-  `h(s) = exp(-(s log s + s log log s + C s))` (convexity of the exponent gives
-  `∫_{s-1}^s h ≥ h(s-1)(1 - e^{-h'})/h'`).
+Files `IwaniecJacobsthal/SieveMajorants/{Delay,Defs,Properties,Majorants,Lemmas}.lean`.
+
+* `Delay.sol k y₀`: continuous solution of `y = y₀` on `(-∞, 3]`, `y' = k(s) y(s-1)` for `s > 3`;
+  `pos_of_first_crossing` (first-crossing principle used for all comparison arguments).
+* `bigM` (`𝔐`), `bigW` (`𝔚`): continuous on `ℝ`, constant `3`, `1` on `(-∞, 2]`;
+  `bigM_eq`, `bigW_eq` (values on `[2,3]`), `bigM_eq_integral`, `bigW_eq_integral` (`s ≥ 3`),
+  `hasDerivAt_bigM`, `hasDerivAt_bigW` (`s > 3`).
+* (3.11) `bigW_eq_neg_mul_integral : 3 ≤ s → bigW s = -s * ∫ x in (s-1)..s, bigW x / x^2`;
+  (3.12) `bigM_integral_identity : 3 ≤ s →
+  ((s-1)^2 - 1/2) * bigM s / s = ∫ x in (s-1)..s, (1 - 1/(2*x^2)) * bigM x`.
+* `bigM_pos (s) : 0 < bigM s`, `bigM_antitone`, `bigM_le_three`,
+  `bigM_le_exp (s) : bigM s ≤ 3 * exp 5 * exp (-s)`, `abs_bigW_le_exp`, `bigM_le_ratio`.
+* Lemma 6: `abs_bigW_le (s) : |bigW s| ≤ bigM s / 3` (all `s`), strict for `s ≥ 3`
+  (`abs_bigW_lt`).
+* `majf` (`𝔣`), `majF` (`𝔉`), `majG r` (`G_r`); `majF_of_le_three` (`𝔉 = 1` on `s ≤ 3`),
+  `majf_eq` (on `[2,3]`); Corollary to Lemma 6: `majf_mem`, `majF_mem`,
+  `majG_mem (r s) : bigM s / 3 ≤ majG r s ∧ majG r s ≤ 2 * bigM s / 3`; `majG_pos`,
+  `majG_le_two`, `continuous_majG`, `majG_antitone`.
+* (3.13) `majF_eq_integral : 3 ≤ s → majF s = ∫ t in Ioi s, majf (t-1) * t / (t-1)^2`;
+  (3.14) `majf_eq_integral : 2 ≤ s → majf s = ∫ t in Ioi s, majF (t-1) * t / (t-1)^2`.
+* `hasDerivAt_majG_succ (r) : (5 + (-1)^r)/2 < t →
+  HasDerivAt (majG (r+1)) (-(majG r (t-1) * t / (t-1)^2)) t` (for [I71, Lemmas 11, 12]).
+* Lemma 8: `bigM_sub_one_lt : 3 ≤ s → bigM (s-1) < 4 * s^2 * bigM s` (`bigM_sub_one_div_lt`).
+* Lemma 10: `log_mul_bigM_lt : 2 ≤ t → log t * bigM t < 2 * (t/(t-1)^2) * bigM (t-1)`,
+  `bigM_mul_log_div_lt : 3 ≤ t → bigM t * t * log t / bigM (t-1) < 9/2`; Corollary:
+  `majG_succ_mul_log_div_lt (r) : 2 ≤ t →
+  majG (r+1) t * (t-1)^2 * log t / (majG r (t-1) * t) < 4` (so `c₃ = 4`, on the larger range
+  `t ≥ 2` for every `r`). [I71]'s proof uses that `𝔐(t-1)/𝔐(t)` increases; we instead run a
+  first-crossing argument on `log t 𝔐(t) < 2t/(t-1)² 𝔐(t-1)` (cf. Opera de Cribro, Lemma 11.7).
+* Lemma 9, lower bound: `bigM_ge_exp : ∃ κ > 0, ∀ s ≥ 3,
+  κ * exp (-(s * log s + s * log (log s) + 2 * s)) ≤ bigM s` and
+  `majG_ge_exp : ∃ c, ∀ r s, 3 ≤ s → exp (-(s * log s) - s * log (log s) - c * s) ≤ majG r s`,
+  by comparison with the subsolution `lemma9Fun` of (3.12).
 * Lemma 7 (`f_r < M ≤ 4𝔐`) needs `M = f + F` from C1; state it after both are merged.
 
 ### D. [I71, §4–5]: from the sieve functions to `LinearSieveEstimate`
