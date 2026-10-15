@@ -232,7 +232,58 @@ Corollary to Lemma 4), `LemmaFive.lean` (`M`, `f(2) = 2`); `SieveFunctions.lean`
   `∫_{s-1}^s h ≥ h(s-1)(1 - e^{-h'})/h'`).
 * Lemma 7 (`f_r < M ≤ 4𝔐`) needs `M = f + F` from C1; state it after both are merged.
 
-### D. `IwaniecJacobsthal/MainTerm.lean`, `Remainder.lean`, `LinearSieve.lean` — [I71, §4–5]
+### D. [I71, §4–5]: from the sieve functions to `LinearSieveEstimate`
 
-Lemmas 11, 12, Corollaries 1–3 to Lemma 13, Lemmas 14–17, Theorems 4 and 5, and from them
-`LinearSieveEstimate`.
+Files: `IwaniecJacobsthal/LinearSieve/*.lean`. Notation: `L = log y`,
+`ξ(y) = L / (log log (3y))^{11/5}`, `δ(s, y) = (1 + s² (log s)⁵ / L²)^{5s}`, `z = y^{1/s}`,
+`t_p = L / log p` (so the inner level `(y/p, p)` has parameter `t_p - 1`). Main-term
+majorants `M true = fSieve`, `M false s = FSieve s + max (3 - s) 0` (`= MSieve s - fSieve s`);
+error majorants `G true = 𝔣`, `G false = 𝔉`; domains `s ≥ 2` (true), `s ≥ 1` (false).
+`cR` is the constant of `R_asymp`; it plays the role of Iwaniec's `e^{-γ}` and cancels in the end.
+
+Our `fail false` also contains the depth-1 term `Σ_{y^{1/3} ≤ p < z} R(p)/p = R(y^{1/3}) - R(z)`
+(Iwaniec's `Q_{odd}` starts at depth 3 and his `d_{2,y}` is handled by Lemma 16). Correspondingly
+`M false` contains `(3 - s)⁺`, and `fSieve s = ∫_s^∞ M false (t-1)/(t-1) dt` for `s ≥ 2` follows
+from (3.6) and `g 2 s = ∫_s^∞ (4 - t)⁺/(t-1) dt`. This replaces Lemmas 14 and 16 by the
+telescoping identity and `R_asymp`.
+
+1. **Calculus identities.** `fSieve s = ∫_s^∞ M false (t-1)/(t-1)`, `M false s = (3-s)⁺ +
+   ∫_{max s 3}^∞ fSieve (t-1)/(t-1)`; (3.13)/(3.14) for `G`; derivatives of `G` for
+   `t > (5 ± 1)/2`.
+2. **Lemma 7** `fr r s < M(s) ≤ 4 𝔐(s)` (`M = MSieve`), and hence `M lower (s-1) ≤ C s² G lower' (s)`
+   via Lemma 8 and Lemma 6's corollary. This is needed to compare Corollary 1's error with the
+   majorant at large `s`.
+3. **Corollaries 1 and 3 to Lemma 13** (sum over `y^{1/β} < p < y^{1/α}` against the integrals),
+   via `lemma13_mono_of_subset` / `lemma13_anti_of_subset`.
+4. **Lemmas 11, 12.** With `x(t) = t² log⁵ t / L²`, `(log δ)' ≤ 5x(3 + 5/log t)` and
+   `1 - (1+x)^{-5} ≥ 5x/(1+5x)`; with Lemma 10's corollary `G_{r+1}(t) ≤ c₃ G_r(t-1) t/((t-1)² log t)`
+   the inequality `-τ' ≥ (1+x)^{5(t-1)} G_r(t-1) t/(t-1)²` (τ = δ G_{r+1}) holds as soon as
+   `log t ≥ 8c₃` and `20 c₃ t² log⁴ t / L² ≤ 1/2`; the latter holds for `t ≤ ξ` once `y` is large,
+   since `ξ² log⁴ ξ / L² ≤ (log log 3y)^{-0.4}`. So `s₀ = e^{8c₃}` (or larger) works.
+5. **Crude bound** ([I71] p. 24): `fail lower r y z ≤ Σ_{l > s - 2} SLT(z)^l / l!` (all failing
+   tuples of depth `l` have `z^{l+2} > y`; `e_{l+1}(1/p : p < z) = Σ_{p<z} e_l(1/p : p' < p)/p`),
+   together with `SLT(z) ≤ log log z + O(1)`.
+6. **Depth stabilisation.** For `r ≥ 3`: if `y ≤ Q_r(z)`, the least product of `r` distinct
+   primes `< z` (`+∞` if there are fewer), then `fail lower (r + j) y z = fail lower r y z`.
+   Proof by recursion with `Q_r(z) ≤ p · Q_{r-1}(p)` for `p < z`. Since `Q_r(z) ≥ r!`, the
+   depth is `≤ 2L / log log y` for large `y`, which is what [I71] uses before (4.8): the slack
+   `(r+1)/(r+2) - r/(r+1)` absorbs the `O(1/L²)` losses only for `r ≪ L / log log L`.
+7. **Theorem 4** (main terms): for all `r`, `lower`, `y > 1`, `s` in the domain with `s ≤ ξ(y)`,
+
+       fail lower r y (y^{1/s}) ≤ cR · (M lower s / L + c₇ · r/(r+1) · δ(s,y) · G lower s / L²).
+
+   Proof as in [I71, pp. 23–25]: the induction on `r`; the small-`y` case (4.8); the stabilised
+   case; otherwise split the prime sum at `y^{1/(ξ-1)}`; the inner IH at `(y/p, t_p - 1)` (check
+   `t_p - 1 ≤ ξ(y/p)`); Corollary 1 for the main part (closes exactly by item 1); Corollary 3 for
+   the error part; the crude bound plus the Lemma 9 lower bound (C2) for the part with
+   `p < y^{1/(ξ-1)}`, with the comparisons (4.4), (4.5), (4.9), (4.10) (use the `δ` growth for
+   `s ≥ ξ/2`).
+8. **Theorem 5** (support counts): the same scheme for `#{d ∈ rosserSet lower y z | ω(d) ≤ r}`
+   with Lemma 17 (`card_filter_rosserSet_succ`), giving
+   `≤ c₇ · r/(r+1) · δ(s,y) · G_{r+1}(s) · y / L²` for `s ≤ ξ`.
+9. **`LinearSieveEstimate`.** With `y = C₀ z²`, `s = 2 + log C₀ / log z ∈ [2, 2.5]`: take `r` large
+   (`fail_eq_of_card_lt`), then use Theorem 4, `R_asymp` (`R z = cR s/L · (1 + O(pntE))`) and
+   `one_sub_fSieve_div_ge`. This gives
+   `R z - rosserMain true y z ≤ R z (f(s)/s + O(1/L)) ≤ R z (1 - 3 log(s-1)/s + O(1/L))`,
+   and `3 log(s-1)/s ≥ log C₀ / log z` once `z` is large; choose `C₀` with `log C₀` larger than
+   twice the `O`-constant. Theorem 5 gives the support count `≪ y/L²`.
