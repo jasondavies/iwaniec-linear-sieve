@@ -115,24 +115,60 @@ at even indices) and `false` for `D⁺` (odd indices):
   (this is `ShiftedGcd.IwaniecBound`). Take `z` just above the `r`-th prime so that
   `primesLT z` are the first `r` primes.
 
-### C1. `IwaniecJacobsthal/SieveFunctions.lean` — [I71, §3] `g_n`, `f`, `F`
+### C1. `IwaniecJacobsthal/SieveFunctions.lean` — [I71, §3] `g_n`, `f`, `F` (done)
 
-Real functions on `ℝ` (values outside the stated domains are irrelevant but should be chosen so
-that the stated identities hold, e.g. odd `g` constant on `s ≤ 3`):
+Files: `SieveFunctions/Defs.lean` (`g`), `Bounds.lean` (Lemmas 3, 4), `Series.lean` (`f`, `F`,
+Corollary to Lemma 4), `LemmaFive.lean` (`M`, `f(2) = 2`); `SieveFunctions.lean` imports all four.
 
-* `g : ℕ → ℝ → ℝ` for `n ≥ 2` with (3.1)–(3.3):
-  `g 2 s = 3 log(3/(s-1)) + s - 4` on `[2,4]`, `0` for `s ≥ 4`;
-  `g (2n+1) s = ∫_s^∞ g (2n) (t-1)/(t-1) dt` for `s ≥ 3`, `= g (2n+1) 3` for `1 ≤ s ≤ 3`;
-  `g (2n+2) s = ∫_s^∞ g (2n+1) (t-1)/(t-1) dt` for `s ≥ 2` (`n ≥ 1`).
-  Continuous, nonnegative, antitone on their domains, `g i s = 0` for `s ≥ 2 + i`.
-* Lemmas 3, 4 ((3.4), (3.5) with `A = (1 + 3 log 3)/6 < 0.72`).
-* `f s = ∑' i ≥ 1, g (2i) s` (`s ≥ 2`), `F s = ∑' i ≥ 1, g (2i+1) s` (`s ≥ 1`); convergence,
-  continuity, (3.6), (3.7), `0 < f s`, `f s, F s = O(s e^{-s})`.
-* Lemma 5 (the part needed): `f 2 = 2` and (3.9)
-  `f s = f 4 + (F 3 + 3) log(3/(s-1)) + s - 4` for `2 ≤ s ≤ 4`; hence
-  `1 - f s / s ≥ 3 log(s - 1) / s` on `[2, 4]` (using `F 3 ≥ 0`).
-* `fr r s` = `f` (r even) / `F` (r odd) as in [I71] before Lemma 7, and partial sums as needed
-  by [I71, §4].
+* `g : ℕ → ℝ → ℝ` is defined on all of `ℝ` by clamping: `g 0 = g 1 = 0`;
+  `g 2 s = gTwoFormula (max 2 (min s 4))` with `gTwoFormula s = 3 log(3/(s-1)) + s - 4`;
+  `g (n+3) s = ∫ t in max s (gLower (n+3))..(n+5), shiftKernel (g (n+2)) t`, where
+  `gLower i = 2` (even `i`) / `3` (odd `i`) and `shiftKernel h t = h (t-1) / max (t-1) 1`.
+  Identities: `g_two_eq` (`s ∈ Icc 2 4`), `g_two_of_four_le`; `g_odd_eq_integral`
+  (`1 ≤ n`, `3 ≤ s`: integrable on `Ioi s` and `g (2n+1) s = ∫ t in Ioi s, g (2n) (t-1)/(t-1)`),
+  `g_odd_of_le_three` (`s ≤ 3 → g (2n+1) s = g (2n+1) 3`), `g_even_eq_integral` (`1 ≤ n`,
+  `2 ≤ s`), `g_even_of_le_two`, `g_add_three_eq` (finite upper limit `n + 5`).
+  Global properties (all `s : ℝ`): `continuous_g`, `g_nonneg`, `g_antitone`,
+  `g_eq_zero_of_le : (i:ℝ) + 2 ≤ s → g i s = 0`, `g_pos : 2 ≤ i → s < i + 2 → 0 < g i s`.
+* Lemma 3: `psi s = s⁻¹ * exp (s - 3) * (1 + 3 * log (3 / (s - 1)))`,
+  `psi_le_psi_two : s ∈ Icc 2 4 → psi s ≤ psi 2`, `psi_two`.
+* Lemma 4: `gLead = sSup ((fun s => g 2 s * s⁻¹ * exp s) '' Icc 2 4)` (`a`),
+  `gRatio = (1 + 3 log 3)/6` (`A`), `gRatio_eq : gRatio = exp 1 / 3 * psi 2`,
+  `gRatio_lt : gRatio < 0.72`, `gRatio_pos`, `gLead_nonneg`;
+  (3.4) `g_odd_le' : 1 ≤ n → 1 ≤ s → g (2n+1) s ≤ gLead * (exp 1 / 3) * gRatio^(n-1) * s * exp (-s)`
+  (also `g_odd_le n : 1 ≤ s → g (2n+3) s ≤ gLead * (exp 1/3) * gRatio^n * s * exp (-s)`);
+  (3.5) `g_even_le n : 2 ≤ s → g (2n+2) s ≤ gLead * gRatio^n * s * exp (-s)`;
+  `g_even_eq_on_Icc : s ∈ Icc 2 4 → g (2n+4) s = g (2n+4) 4 + g (2n+3) 3 * log (3/(s-1))`.
+* Corollary: `fSieve s = ∑' n, g (2n+2) s`, `FSieve s = ∑' n, g (2n+3) s` (summable for every
+  `s`: `summable_g_even`, `summable_g_odd`, geometric majorants `g_even_le_uniform`,
+  `g_odd_le_uniform`); `fr r = fSieve` (even `r`) / `FSieve` (odd `r`) (`fr_of_even`,
+  `fr_of_odd`). `continuous_fSieve`, `continuous_FSieve`, `fSieve_pos`, `FSieve_pos`,
+  `fSieve_antitone`, `FSieve_antitone`, `fSieve_of_le_two`, `FSieve_of_le_three` ((3.7) on
+  `s ≤ 3`), `fSieve_le : 2 ≤ s → fSieve s ≤ gLead * (1 - gRatio)⁻¹ * s * exp (-s)`,
+  `FSieve_le` (`1 ≤ s`, extra factor `exp 1 / 3`), `fSieve_isBigO`, `FSieve_isBigO`
+  (`=O[atTop] fun s => s * exp (-s)`); (3.6) `fSieve_eq_integral : 2 ≤ s →
+  fSieve s = (∫ t in Ioi s, FSieve (t-1)/(t-1)) + g 2 s` and (3.7) `FSieve_eq_integral : 3 ≤ s →
+  FSieve s = ∫ t in Ioi s, fSieve (t-1)/(t-1)` (integrability: `integrableOn_FSieve_shift`,
+  `integrableOn_fSieve_shift`). Partial sums: `sum_g_even_le_fSieve`, `sum_g_odd_le_FSieve`,
+  `g_even_le_fSieve`, `g_odd_le_FSieve`; `hasSum_g : HasSum (fun k => g (k+2) s) (fSieve s + FSieve s)`.
+* Lemma 5: (3.9) `fSieve_eq_on_Icc' : s ∈ Icc 2 4 →
+  fSieve s = fSieve 4 + (FSieve 3 + 3) * log (3/(s-1)) + s - 4`; `fSieve_four_add :
+  fSieve 4 + (FSieve 3 + 3) * log 3 = 4`; `fSieve_eq_on_Icc : s ∈ Icc 2 4 →
+  fSieve s = s - (FSieve 3 + 3) * log (s - 1)`; (3.10) `fSieve_two : fSieve 2 = 2`;
+  `le_one_sub_fSieve_div` and
+  `one_sub_fSieve_div_ge : ∀ s ∈ Icc 2 4, 1 - fSieve s / s ≥ 3 * Real.log (s - 1) / s`.
+  Derivatives: `hasDerivAt_FSieve` (`3 < s`), `hasDerivAt_fSieve_of_lt_four` (`2 < s < 4`),
+  `hasDerivAt_fSieve_of_four_lt`.
+* Iwaniec's `M` (for Lemma 7 / C2): `MSieve s = fSieve s + FSieve s + max (3 - s) 0`, i.e.
+  `f + F` on `s ≥ 3` (`MSieve_of_three_le`) and `3 + F(3) - s + f(s)` on `s ≤ 3`
+  (`MSieve_of_le_three`); `continuous_MSieve`, `MSieve_nonneg`, `MSieve_antitone`, `MSieve_le`,
+  `hasSum_g_MSieve : 3 ≤ s → HasSum (fun k => g (k+2) s) (MSieve s)`,
+  `fr_lt_MSieve : fr r s < MSieve s`, (3.8) `hasDerivAt_MSieve : 3 < s → s ≠ 4 →
+  HasDerivAt MSieve (-(MSieve (s-1)/(s-1))) s`.
+* Proof of `f(2) = 2`: `lemma5Q s = (s-1) * MSieve s - ∫ x in (s-1)..s, MSieve x` has derivative
+  `0` on `(3,4) ∪ (4,∞)` (`hasDerivAt_lemma5Q`), so is constant on `[3, ∞)` (`lemma5Q_const`), and
+  `|lemma5Q b| ≤ C b² e^{-b}` for `b ≥ 4`, so `lemma5Q_three : lemma5Q 3 = 0`;
+  `integral_MSieve_two_three` evaluates `∫_2^3 M` explicitly.
 
 ### C2. `IwaniecJacobsthal/SieveMajorants.lean` — [I71, §3] `𝔐`, `𝔚`, `𝔣`, `𝔉`
 
