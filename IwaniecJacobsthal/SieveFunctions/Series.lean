@@ -158,7 +158,8 @@ theorem fr_of_odd {r : ℕ} (hr : ¬ Even r) : fr r = FSieve := funext fun _ => 
 /-! ### The integral equations (3.6), (3.7) -/
 
 theorem shift_div_le {h : ℝ → ℝ} {C t : ℝ} (ht : 1 < t)
-    (hb : h (t - 1) ≤ C * (t - 1) * exp (-(t - 1))) : h (t - 1) / (t - 1) ≤ C * exp 1 * exp (-t) := by
+    (hb : h (t - 1) ≤ C * (t - 1) * exp (-(t - 1))) :
+    h (t - 1) / (t - 1) ≤ C * exp 1 * exp (-t) := by
   have ht1 : 0 < t - 1 := by linarith
   rw [div_le_iff₀ ht1]
   have e : exp (-(t - 1)) = exp 1 * exp (-t) := by rw [← exp_add]; ring_nf
