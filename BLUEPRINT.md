@@ -375,9 +375,52 @@ Items 1–4 are done, in `LinearSieve/Calculus.lean`, `LemmaSeven.lean`, `LemmaE
    the error part; the crude bound plus the Lemma 9 lower bound (C2) for the part with
    `p < y^{1/(ξ-1)}`, with the comparisons (4.4), (4.5), (4.9), (4.10) (use the `δ` growth for
    `s ≥ ξ/2`).
-8. **Theorem 5** (support counts): the same scheme for `#{d ∈ rosserSet lower y z | ω(d) ≤ r}`
-   with Lemma 17 (`card_filter_rosserSet_succ`), giving
-   `≤ c₇ · r/(r+1) · δ(s,y) · G_{r+1}(s) · y / L²` for `s ≤ ξ`.
+8. **Theorem 5** (support counts; done, `LinearSieve/TheoremFive{Aux,Count,}.lean`, helpers in
+   `namespace IwaniecJacobsthal.TheoremFive`):
+
+       theorem5 : ∃ c₇ : ℝ, 0 ≤ c₇ ∧ ∀ (r : ℕ) (lower : Bool) (y s : ℝ), 1 < y →
+         sMin lower ≤ s → s ≤ xi y →
+         (#{d ∈ rosserSet lower y (y ^ (1 / s)) | #d.primeFactors ≤ r} : ℝ) ≤
+           c₇ * ((r + 1) / (r + 2)) * delta s y * errMaj lower s * y / log y ^ 2
+
+       theorem5_card_rosserSet_le : ∃ K y₀ : ℝ, ∀ y ≥ y₀, ∀ s ∈ Set.Icc (2 : ℝ) 3,
+         (#(rosserSet true y (y ^ (1 / s))) : ℝ) ≤ K * y / log y ^ 2
+
+   Indexing: [I71]'s `A_{r,y}` counts `r + 1` levels, whence his `r/(r+1)` and `G_{r+1}`; with
+   Lemma 17 in the form `card_filter_rosserSet_succ` (count at flag `lower` = `1 + Σ_p` count at
+   `!lower`), the majorant at flag `lower` is `errMaj lower` and the factor is `(r+1)/(r+2)`
+   (positive at `r = 0`, where the count is `1`). The consequence takes `r = #(primesLT z)`,
+   `δ(s, y) ≤ (1 + 9 log⁵ 3)^{15}` (`delta_le_of_le_three`) and `𝔣 ≤ 2`.
+   Proof (induction on `r`, both flags; `exists_bound`, with `Bound c₇ r` the statement at depth
+   `r`). Constants in order: `c_G` (Lemma 9, `majG_ge_exp`), `C₅` (`SLT_le_loglog`), `C`
+   (`cor3_xi`); then `c₈` = max of the thresholds of `exists_card_small`, `cor3_xi`,
+   `exists_slack C`, `exists_card_filter_rosserSet_add_eq`, `exists_xi_large`, and `3`; then
+   `c₇ = max 1 (2 log² c₈ / min (𝔣(Ξ), 𝔉(Ξ)))` with `Ξ = log c₈ / (log log 3)^{11/5} ≥ ξ(y)` for
+   `y < c₈` (`xi_le_of_lt`). Cases:
+   * `y < c₈` (`small_le`): all elements are `< y` (`lt_of_mem_rosserSet_rpow`), so the count is
+     `≤ y` (`card_rosserSet_le`);
+   * `r = 0`, `y ≥ c₈`: the count is `1 ≤ δ G y / (8 L⁴)` (from `exists_card_small`);
+   * `y ≥ c₈`, `r + 3 > 2L/log L`: `exists_card_filter_rosserSet_add_eq` (count at `r + 1` =
+     count at `r`);
+   * main case (`step_main`): Lemma 17 split at `w = y^{1/(ξ-1)}` (`card_filter_succ_le`: the
+     primes `p < w` and the `1` give `≤ #(rosserSet lower y w)`); for `p ≥ w`, `t_p ≤ ξ - 1`,
+     the IH at `(y/p, t_p - 1)` (`inner_le`: `t_p - 1 ≤ ξ(y/p)` by `sub_one_le_xi_div`,
+     `(y/p)^{1/(t_p-1)} = p`, `sMin (!lower) ≤ t_p - 1` by `rosserPrimes_facts`, which also
+     covers the upper sieve with `s < 3` since `p³ < y`), then `cor3_xi`. With
+     `Q = δ(s,y) G(s) y/L²`, `ε = (log L)²/(8L²)`, `X = δ(s₀,y)(1 + C ξ² pntE(y^{1/ξ})) - 1`:
+     `δ(max s s₀) ≤ δ(s) δ(s₀)` (`delta_max_le`), `X ≤ ε` (`exists_slack`: `δ(s₀,y) ≤ e^{K/L²}`,
+     `C ξ² pntE(y^{1/ξ}) ≤ 1/L²` since `log y^{1/ξ} = λ^{11/5}`), the crude part `≤ Q ε`, and
+     `(r+2)/(r+3) - (r+1)/(r+2) ≥ 2ε` from `r + 3 ≤ 2L/log L` (`gap_le`); `close_step` closes.
+   The crude part (`exists_card_small`, [I71, p. 27] with (4.9), (4.10)): with `λ = lam y =
+   log log 3y`, `u = ξ(1 - 2/λ)`, `K = ⌊u⌋`: elements with `ω ≤ K` number `≤ (K+1)(2w)^K ≤
+   e^{L + 2ξ - L/λ}` (`card_filter_le_le`, `π(w) ≤ w + 1`), the others `≤ 2y(2eλ/u)^u ≤
+   2e^{L - ξ log ξ + ξ log λ + 5ξ}` (`card_filter_le_tail`, `u log u ≥ ξ log ξ - 3ξ`);
+   `crude_exponent_le` gives `8L⁴(1 + #) ≤ y e^{-ξ log ξ + (3/2) ξ log λ}`, and
+   `exp_le_delta_errMaj` gives `e^{-ξ log ξ + (3/2) ξ log λ} ≤ δ(s,y) G(s)` for `sMin ≤ s ≤ ξ`
+   (`s ≤ ξ/2`: Lemma 9 at `max s 3`; `s > ξ/2`: `δ ≥ (s² log⁵ s/L²)^{5s} ≥ e^{s(3 log λ - 5 log
+   128)}`, using `ξ²λ⁵/L² = λ^{3/5}`). All "large `y`" facts come from `eventually_scalar`
+   (`λ, log λ, λ^{1/5} ≥ c`, `λ - 1 ≤ log L ≤ λ`, `24λ ≤ ξ`, `16λ² ≤ L`, `λ/2 ≤ log(ξ/2)`,
+   `4 log λ + c ≤ log ξ ≤ λ`), proved from `log x = o(x)`.
 9. **`LinearSieveEstimate`.** With `y = C₀ z²`, `s = 2 + log C₀ / log z ∈ [2, 2.5]`: take `r` large
    (`fail_eq_of_card_lt`), then use Theorem 4, `R_asymp` (`R z = cR s/L · (1 + O(pntE))`) and
    `one_sub_fSieve_div_ge`. This gives
