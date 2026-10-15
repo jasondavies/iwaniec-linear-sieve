@@ -249,4 +249,108 @@ theorem lemma13_Ioc : ∃ C, 0 ≤ C ∧ ∀ (b : ℝ → ℝ) (A B : ℝ), 2 �
   calc _ ≤ (2 * pntE B + 2 * (C * pntE B)) * b A := key
     _ = (2 + 2 * C) * b A * pntE B := by ring
 
+theorem sum_of_forall_cast_eq {t : Finset ℕ} {v : ℝ} (h : ∀ p ∈ t, (p : ℝ) = v) (φ : ℝ → ℝ)
+    (hφ : 0 ≤ φ v) : 0 ≤ ∑ p ∈ t, φ p ∧ ∑ p ∈ t, φ p ≤ φ v := by
+  have hcard : t.card ≤ 1 := card_le_one.2 fun a ha b hb ↦ by
+    exact_mod_cast (h a ha).trans (h b hb).symm
+  have hcard' : (t.card : ℝ) ≤ 1 := by exact_mod_cast hcard
+  rw [sum_congr rfl fun p hp ↦ by rw [h p hp], sum_const, nsmul_eq_mul]
+  exact ⟨by positivity, by nlinarith⟩
+
+/-- [I71, Lemma 13], increasing case, for any set of primes between those in `(B, A)` and
+those in `[B, A]`. -/
+theorem lemma13_mono_of_subset : ∃ C, 0 ≤ C ∧ ∀ (b : ℝ → ℝ) (A B : ℝ) (s : Finset ℕ), 2 ≤ B →
+    B ≤ A → MonotoneOn b (Set.Icc B A) → (∀ x ∈ Set.Icc B A, 0 ≤ b x) →
+    (∀ p ∈ s, p.Prime ∧ B ≤ p ∧ (p : ℝ) ≤ A) → (∀ p : ℕ, p.Prime → B < p → (p : ℝ) < A → p ∈ s) →
+    |∑ p ∈ s, b p / p - ∫ x in B..A, b x / (x * log x)| ≤ C * b A * pntE B := by
+  obtain ⟨C, hC0, hC⟩ := lemma13_Ioc
+  refine ⟨C + 1, by linarith, fun b A B s hB hBA hb hb0 hs1 hs2 ↦ ?_⟩
+  have hB0 : 0 < B := by linarith
+  have hbA : 0 ≤ b A := hb0 A ⟨hBA, le_rfl⟩
+  have hbB : 0 ≤ b B := hb0 B ⟨le_rfl, hBA⟩
+  have hbBA : b B ≤ b A := hb ⟨le_rfl, hBA⟩ ⟨hBA, le_rfl⟩ hBA
+  have h1 := sum_of_forall_cast_eq (t := s \ primesIoc B A) (v := B) (fun p hp ↦ by
+      rw [Finset.mem_sdiff, mem_primesIoc] at hp
+      obtain ⟨hp1, hp2⟩ := hp
+      obtain ⟨hpp, hBp, hpA⟩ := hs1 p hp1
+      exact le_antisymm (not_lt.1 fun h ↦ hp2 ⟨hpp, h, hpA⟩) hBp)
+    (fun x ↦ b x / x) (div_nonneg hbB hB0.le)
+  have h2 := sum_of_forall_cast_eq (t := primesIoc B A \ s) (v := A) (fun p hp ↦ by
+      rw [Finset.mem_sdiff, mem_primesIoc] at hp
+      obtain ⟨⟨hpp, hBp, hpA⟩, hp2⟩ := hp
+      exact le_antisymm hpA (not_lt.1 fun h ↦ hp2 (hs2 p hpp hBp h)))
+    (fun x ↦ b x / x) (div_nonneg hbA (by linarith))
+  have h3 : b B / B ≤ b A * pntE B := by
+    calc b B / B ≤ b A / B := by gcongr
+      _ = b A * B⁻¹ := div_eq_mul_inv _ _
+      _ ≤ b A * pntE B := mul_le_mul_of_nonneg_left (inv_le_pntE hB) hbA
+  have h4 : b A / A ≤ b A * pntE B := by
+    calc b A / A ≤ b A / B := by gcongr
+      _ = b A * B⁻¹ := div_eq_mul_inv _ _
+      _ ≤ b A * pntE B := mul_le_mul_of_nonneg_left (inv_le_pntE hB) hbA
+  have hdiff := sum_sdiff_sub_sum_sdiff (s₁ := primesIoc B A) (s₂ := s) (f := fun p : ℕ ↦ b p / p)
+  have hI := hC b A B hB hBA hb hb0
+  rw [abs_le] at hI ⊢
+  constructor <;> nlinarith [pntE_pos B]
+
+/-- [I71, Lemma 13]: for `b ≥ 0` increasing on `[B, A]`, `2 ≤ B ≤ A`,
+`|∑_{B ≤ p ≤ A} b(p)/p - ∫_B^A b(x)/(x log x) dx| ≤ C b(A) exp(-κ √(log B))`. -/
+theorem lemma13_mono : ∃ C, ∀ (b : ℝ → ℝ) (A B : ℝ), 2 ≤ B → B ≤ A →
+    MonotoneOn b (Set.Icc B A) → (∀ x ∈ Set.Icc B A, 0 ≤ b x) →
+    |∑ p ∈ primesIcc B A, b p / p - ∫ x in B..A, b x / (x * log x)| ≤ C * b A * pntE B := by
+  obtain ⟨C, -, hC⟩ := lemma13_mono_of_subset
+  exact ⟨C, fun b A B hB hBA hb hb0 ↦ hC b A B _ hB hBA hb hb0 (fun p hp ↦ mem_primesIcc.1 hp)
+    fun p hp h1 h2 ↦ mem_primesIcc.2 ⟨hp, h1.le, h2.le⟩⟩
+
+theorem intervalIntegrable_div_mul_log {b : ℝ → ℝ} {A B : ℝ} (hB : 1 < B) (hBA : B ≤ A)
+    (hb : MonotoneOn b (Set.Icc B A) ∨ AntitoneOn b (Set.Icc B A)) :
+    IntervalIntegrable (fun x ↦ b x / (x * log x)) volume B A := by
+  simp_rw [div_eq_mul_inv (b _)]
+  have hc := continuousOn_inv_mul_log (v := A) hB
+  rw [← Set.uIcc_of_le hBA] at hc hb
+  rcases hb with hb | hb
+  · exact hb.intervalIntegrable.mul_continuousOn hc
+  · exact hb.intervalIntegrable.mul_continuousOn hc
+
+/-- [I71, Lemma 13], decreasing case, for any set of primes between those in `(B, A)` and
+those in `[B, A]`. -/
+theorem lemma13_anti_of_subset : ∃ C, 0 ≤ C ∧ ∀ (b : ℝ → ℝ) (A B : ℝ) (s : Finset ℕ), 2 ≤ B →
+    B ≤ A → AntitoneOn b (Set.Icc B A) → (∀ x ∈ Set.Icc B A, 0 ≤ b x) →
+    (∀ p ∈ s, p.Prime ∧ B ≤ p ∧ (p : ℝ) ≤ A) → (∀ p : ℕ, p.Prime → B < p → (p : ℝ) < A → p ∈ s) →
+    |∑ p ∈ s, b p / p - ∫ x in B..A, b x / (x * log x)| ≤ C * b B * pntE B := by
+  obtain ⟨C, hC0, hC⟩ := lemma13_mono_of_subset
+  refine ⟨2 * C, by linarith, fun b A B s hB hBA hb hb0 hs1 hs2 ↦ ?_⟩
+  set c := b B
+  have hc : 0 ≤ c := hb0 B ⟨le_rfl, hBA⟩
+  have hbA : 0 ≤ b A := hb0 A ⟨hBA, le_rfl⟩
+  have hbA' : b A ≤ c := hb ⟨le_rfl, hBA⟩ ⟨hBA, le_rfl⟩ hBA
+  have hb' : MonotoneOn (fun x ↦ c - b x) (Set.Icc B A) := fun x hx y hy hxy ↦ by
+    simp only; linarith [hb hx hy hxy]
+  have hb'0 : ∀ x ∈ Set.Icc B A, 0 ≤ c - b x := fun x hx ↦ by
+    simp only [c]; linarith [hb ⟨le_rfl, hBA⟩ hx hx.1]
+  have e1 := hC (fun _ ↦ c) A B s hB hBA (fun _ _ _ _ _ ↦ le_rfl) (fun _ _ ↦ hc) hs1 hs2
+  have e2 := hC (fun x ↦ c - b x) A B s hB hBA hb' hb'0 hs1 hs2
+  have hsum : ∑ p ∈ s, b p / p = ∑ p ∈ s, c / p - ∑ p ∈ s, (c - b p) / p := by
+    rw [← sum_sub_distrib]; exact sum_congr rfl fun p _ ↦ by ring
+  have hint : ∫ x in B..A, b x / (x * log x) =
+      (∫ x in B..A, c / (x * log x)) - ∫ x in B..A, (c - b x) / (x * log x) := by
+    rw [← integral_sub (intervalIntegrable_div_mul_log (by linarith) hBA
+      (Or.inl fun _ _ _ _ _ ↦ le_rfl)) (intervalIntegrable_div_mul_log (by linarith) hBA
+      (Or.inl hb'))]
+    exact integral_congr fun x _ ↦ by ring
+  rw [hsum, hint]
+  have h5 : 0 ≤ C * b A * pntE B := mul_nonneg (mul_nonneg hC0 hbA) (pntE_pos B).le
+  have h6 : C * (c - b A) * pntE B = C * c * pntE B - C * b A * pntE B := by ring
+  rw [abs_le] at e1 e2 ⊢
+  constructor <;> linarith
+
+/-- [I71, Lemma 13], decreasing case: for `b ≥ 0` decreasing on `[B, A]`, `2 ≤ B ≤ A`,
+`|∑_{B ≤ p ≤ A} b(p)/p - ∫_B^A b(x)/(x log x) dx| ≤ C b(B) exp(-κ √(log B))`. -/
+theorem lemma13_anti : ∃ C, ∀ (b : ℝ → ℝ) (A B : ℝ), 2 ≤ B → B ≤ A →
+    AntitoneOn b (Set.Icc B A) → (∀ x ∈ Set.Icc B A, 0 ≤ b x) →
+    |∑ p ∈ primesIcc B A, b p / p - ∫ x in B..A, b x / (x * log x)| ≤ C * b B * pntE B := by
+  obtain ⟨C, -, hC⟩ := lemma13_anti_of_subset
+  exact ⟨C, fun b A B hB hBA hb hb0 ↦ hC b A B _ hB hBA hb hb0 (fun p hp ↦ mem_primesIcc.1 hp)
+    fun p hp h1 h2 ↦ mem_primesIcc.2 ⟨hp, h1.le, h2.le⟩⟩
+
 end IwaniecJacobsthal
