@@ -361,4 +361,64 @@ theorem cor3_large : ∃ C, 0 ≤ C ∧ ∀ (lower : Bool) (y s b : ℝ) (S : Fi
   calc _ ≤ ∑ p ∈ S, Φ (log y / log p) / p := hsum
     _ ≤ _ := by nlinarith
 
+/-- Corollary 3 on `[s, a]` with `a ≤ e^{32}`: here `δ(t_p - 1, y/p) ≤ δ(e^{32}, y)` and Lemma 13
+is applied to `G'(t-1) t²/(t-1)²` directly. -/
+theorem cor3_small : ∃ C, 0 ≤ C ∧ ∀ (lower : Bool) (y s a : ℝ) (S : Finset ℕ), 1 < y →
+    errLower lower ≤ s → s ≤ a → a ≤ exp 32 → 2 ≤ y ^ (1 / a) →
+    (∀ p ∈ S, p.Prime ∧ y ^ (1 / a) ≤ p ∧ (p : ℝ) ≤ y ^ (1 / s)) →
+    (∀ p : ℕ, p.Prime → y ^ (1 / a) < p → (p : ℝ) < y ^ (1 / s) → p ∈ S) →
+    ∑ p ∈ S, delta (log y / log p - 1) (y / p) * errMaj (!lower) (log y / log p - 1) /
+        (p * log (y / p) ^ 2) ≤
+      delta (exp 32) y / log y ^ 2 *
+        (errMaj lower s - errMaj lower a + C * s ^ 2 * errMaj lower s * pntE (y ^ (1 / a))) := by
+  obtain ⟨C, hC0, hC⟩ := lemma13_param
+  refine ⟨32 * C, by linarith, fun lower y s a S hy hs hsa ha hB hS1 hS2 => ?_⟩
+  have hs2 : 2 ≤ s := (two_le_errLower lower).trans hs
+  have hL : 0 < log y := log_pos hy
+  have hL2 : 0 < log y ^ 2 := by positivity
+  set F : ℝ → ℝ := fun t => errMaj (!lower) (t - 1) * (t ^ 2 / (t - 1) ^ 2) with hFdef
+  have hF : AntitoneOn F (Icc s a) :=
+    antitoneOn_mul_of_nonneg (fun u _ v _ huv => errMaj_antitone _ (by linarith))
+      (antitoneOn_sq_div_sq_sub_one.mono fun t ht => show (1 : ℝ) < t by linarith [ht.1])
+      (fun t _ => (errMaj_pos _ _).le) fun t _ => by positivity
+  have hF0 : ∀ t ∈ Icc s a, 0 ≤ F t := fun t _ => by
+    have := errMaj_pos (!lower) (t - 1); positivity
+  have h13 := hC F y s a S hy (by linarith) hsa hB hF hF0 hS1 hS2
+  have hδ0 : 0 ≤ delta (exp 32) y :=
+    (delta_pos (by linarith [four_lt_of_exp_le (le_refl (exp 32))]) y).le
+  have hsum : ∑ p ∈ S, delta (log y / log p - 1) (y / p) * errMaj (!lower) (log y / log p - 1) /
+      (p * log (y / p) ^ 2) ≤ delta (exp 32) y / log y ^ 2 * ∑ p ∈ S, F (log y / log p) / p := by
+    rw [mul_sum]
+    refine sum_le_sum fun p hp => ?_
+    obtain ⟨hpp, hpB, hpA⟩ := hS1 p hp
+    have ht := (div_log_mem_Icc hy (by linarith) hsa ⟨hpB, hpA⟩).2
+    refine (cor3_summand_le hy hpp.one_lt (by linarith [ht.1]) (errMaj_pos _ _).le).trans ?_
+    have hg := growth_le_delta (y := y) (by linarith [ht.1] : (1 : ℝ) ≤ log y / log p)
+      (ht.2.trans ha)
+    have hF1 : 0 ≤ F (log y / log p) := hF0 _ ht
+    have hp0 : (0 : ℝ) < p := by exact_mod_cast hpp.pos
+    calc _ = (1 + (log y / log p) ^ 2 * log (log y / log p) ^ 5 / log y ^ 2) ^
+            (5 * (log y / log p - 1)) * F (log y / log p) / log y ^ 2 / p := by
+          simp only [F]; ring
+      _ ≤ delta (exp 32) y * F (log y / log p) / log y ^ 2 / p := by gcongr
+      _ = _ := by ring
+  have hint : ∫ t in s..a, F t / t = errMaj lower s - errMaj lower a := by
+    rw [← integral_errMaj_shift lower hs hsa]
+    refine intervalIntegral.integral_congr fun t ht => ?_
+    rw [uIcc_of_le hsa] at ht
+    have : t ≠ 0 := by linarith [ht.1]
+    have : t - 1 ≠ 0 := by linarith [ht.1]
+    simp only [F]
+    field_simp
+  have hFs : F s ≤ 32 * s ^ 2 * errMaj lower s := errMaj_shift_sq_le lower (!lower) hs2
+  rw [abs_le, hint] at h13
+  have hpE := pntE_pos (y ^ (1 / a))
+  have hmain : ∑ p ∈ S, F (log y / log p) / p ≤
+      errMaj lower s - errMaj lower a + 32 * C * s ^ 2 * errMaj lower s * pntE (y ^ (1 / a)) := by
+    have : C * F s * pntE (y ^ (1 / a)) ≤
+        C * (32 * s ^ 2 * errMaj lower s) * pntE (y ^ (1 / a)) := by gcongr
+    linarith [h13.2]
+  calc _ ≤ _ := hsum
+    _ ≤ _ := mul_le_mul_of_nonneg_left hmain (div_nonneg hδ0 hL2.le)
+
 end IwaniecJacobsthal
