@@ -13,3 +13,6 @@ import IwaniecJacobsthal.LinearSieve.Calculus
 import IwaniecJacobsthal.LinearSieve.LemmaSeven
 import IwaniecJacobsthal.LinearSieve.LemmaEleven
 import IwaniecJacobsthal.LinearSieve.Corollaries
+import IwaniecJacobsthal.LinearSieve.TheoremFiveAux
+import IwaniecJacobsthal.LinearSieve.TheoremFiveCount
+import IwaniecJacobsthal.LinearSieve.TheoremFive
