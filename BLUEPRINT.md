@@ -72,48 +72,76 @@ fixed `κ > 0`; we use one fixed `κ` everywhere.
 * `nth_prime_le : ∃ C, ∀ r ≥ 2, (Nat.nth Nat.Prime (r - 1) : ℝ) ≤ C * r * log r`
   (the `r`-th prime is `≪ r log r`).
 
-### B. `IwaniecJacobsthal/Rosser.lean`, `ShiftedSieve.lean`, `Jacobsthal.lean`
+### B. `IwaniecJacobsthal/Rosser.lean`, `ShiftedSieve.lean`, `Jacobsthal.lean` (done)
 
 Rosser's β = 2 linear sieve [I71, §2] in recursive form. With `lower = true` for `D⁻` (conditions
-at even indices) and `false` for `D⁺` (odd indices):
+at even indices) and `false` for `D⁺` (odd indices), `rosserPrimes lower y z` is the set of primes
+`p < z` with `lower ∨ p³ < y`, and
 
-    rosserSet lower y z = {1} ∪ ⋃_{p < z prime, lower ∨ p³ < y} p • rosserSet (!lower) (y/p) p
+    rosserSet lower y z = {1} ∪ ⋃_{p ∈ rosserPrimes lower y z} p • rosserSet (!lower) (y/p) p
 
-(well founded on `⌈z⌉₊`). Equivalently `d = p₁⋯p_l`, `p₁ > ⋯ > p_l`, `p < z`, and
-`p₁⋯p_m p_m² < y` for every `m ≤ l` of the right parity. Required:
+(well founded on `⌈z⌉₊`; unfolding lemma `rosserSet_eq`, induction principle
+`primesLT_induction`). Equivalently `d = p₁⋯p_l`, `p₁ > ⋯ > p_l`, `p₁ < z`, and
+`p₁⋯p_m p_m² < y` for every `m ≤ l` of the right parity. Proved (`Rosser.lean`):
 
-* elements are squarefree divisors of `primorialLT z`;
-* sieve property: for `m ∣ primorialLT z`,
-  `∑_{d ∈ rosserSet true y z, d ∣ m} μ d ≤ [m = 1] ≤ ∑_{d ∈ rosserSet false y z, d ∣ m} μ d`;
-* main sums `rosserMain lower y z = ∑_{d ∈ rosserSet lower y z} μ d / d` and the deficits
-  `fail : Bool → ℕ → ℝ → ℝ → ℝ` (depth-truncated, [I71] `Q_{r,y}`):
+* `squarefree_of_mem_rosserSet`, `primeFactors_subset_of_mem_rosserSet`,
+  `dvd_primorialLT_of_mem_rosserSet`;
+* `sum_rosserSet`: `∑_{d ∈ D} f d = f 1 + ∑_{p ∈ rosserPrimes} ∑_{d ∈ rosserSet (!lower) (y/p) p} f (p d)`;
+* sieve property for every `m : ℕ` (`rosserSieve_le_siftIndicator_le`,
+  `sum_moebius_rosserSet_true_le`, `le_sum_moebius_rosserSet_false`):
+  `∑_{d ∈ D⁻, d ∣ m} μ d ≤ [no p < z divides m] ≤ ∑_{d ∈ D⁺, d ∣ m} μ d`, via Buchstab's identity
+  `siftIndicator_eq`; for `m ∣ primorialLT z` the middle term is `[m = 1]`
+  (`rosserSieve_of_dvd_primorialLT`);
+* `R_eq : R z = 1 - ∑_{p < z} R p / p` ([I71, (2.11)]), `R_pos`, `R_nonneg`;
+* `rosserMain lower y z = ∑_{d ∈ rosserSet lower y z} μ d / d`, with
+  `rosserMain_eq : rosserMain lower y z = 1 - ∑_{p ∈ rosserPrimes} rosserMain (!lower) (y/p) p / p`;
+* `fail : Bool → ℕ → ℝ → ℝ → ℝ` exactly as below, `fail_nonneg`, `fail_mono` (monotone in `r`), and
+  for `#(primesLT z) < r` (`fail_eq_of_card_lt`, `rosserMain_true_eq`, `rosserMain_false_eq`):
+  `R z - rosserMain true y z = fail true r y z`, `rosserMain false y z - R z = fail false r y z`;
+  hence `rosserMain true y z ≤ R z ≤ rosserMain false y z`:
 
       fail _     0     y z = 0
       fail true  (r+1) y z = ∑_{p < z} fail false r (y/p) p / p
-      fail false (r+1) y z = ∑_{p < z, p³ < y} fail true r (y/p) p / p + ∑_{p < z, p³ ≥ y} R p / p
+      fail false (r+1) y z = ∑_{p < z, p³ < y} fail true r (y/p) p / p + ∑_{p < z, ¬ p³ < y} R p / p
 
-  with `fail ≥ 0`, monotone in `r`, and, once `r` exceeds the possible depth (e.g. `y < 2 ^ r`),
-  `R z - rosserMain true y z = fail true r y z`, `rosserMain false y z - R z = fail false r y z`;
-* counts: `card (rosserSet lower y z) = 1 + ∑_{p} card (rosserSet (!lower) (y/p) p)` (sum as in
-  the definition) and its depth-truncated version ([I71, Lemma 17]);
-* [I78, Lemma 1] (shifted sieve) for intervals: for primes `S` with `card S = card (primesLT z)`
-  and any `x : ℤ`, `X : ℕ`,
-  `#{k < X | ∀ q ∈ S, ¬ (q:ℤ) ∣ x + k} ≥ X * ∏_{q ∈ S} (1 - 1/q) * (rosserMain true y z / R z)
-     - card (rosserSet true y z)`;
-* final assembly `iwaniecBound_of_estimates`: from
+* counts: `card_rosserSet : #(rosserSet lower y z) = 1 + ∑_{p ∈ rosserPrimes} #(rosserSet (!lower) (y/p) p)`;
+  depth-truncated ([I71, Lemma 17]), counting elements with at most `n` prime factors:
+  `card_filter_rosserSet_zero` (`= 1` for `n = 0`) and `card_filter_rosserSet_succ`
+  (`#{d ∈ D : ω(d) ≤ n+1} = 1 + ∑_{p ∈ rosserPrimes} #{d ∈ rosserSet (!lower) (y/p) p : ω(d) ≤ n}`).
 
-      LinearSieveEstimate : ∃ C₀ c K z₀ : ℝ, 0 < c ∧ ∀ z ≥ z₀,
-        R z - rosserMain true (C₀ * z^2) z ≤ R z * (1 - c / log z) ∧
-        card (rosserSet true (C₀ * z^2) z) ≤ K * z^2 / (log z)^2
+`ShiftedSieve.lean`: [I78, Lemma 1] for intervals (`shiftedSieve`): for primes `S` with
+`#S = #(primesLT z)`, any `y`, `x : ℤ`, `X : ℕ`,
 
-  together with `R_asymp` (lower bound `R z ≥ c'/log z`) and `nth_prime_le`, derive
+    X * ∏_{q ∈ S} (1 - q⁻¹) * (rosserMain true y z / R z) - #(rosserSet true y z)
+      ≤ #{k ∈ range X | ∀ q ∈ S, ¬ (q:ℤ) ∣ x + k}
 
-      ∃ C : ℝ, ∀ S : Finset ℕ, (∀ p ∈ S, p.Prime) → 2 ≤ S.card →
-        ∀ (x : ℤ) (m : ℕ), (∀ k < m, ∃ p ∈ S, (p : ℤ) ∣ x + k) →
-          (m : ℝ) ≤ C * ((S.card : ℝ) * Real.log S.card) ^ 2
+(from `shiftedSieve_of_bijOn`, for any bijection `e : primesLT z → S` with `p ≤ e p`; the
+order-preserving one has this property, `exists_bijOn_primesLT_le`). Divisors of squarefree
+numbers are handled as sets of primes; the algebra is `sum_powerset_div_prod` (Möbius inversion
+`∑_A w(A)/∏_A g = ∏(1 - 1/g) ∑_B σ(B)/∏_B (g-1)`) and `prod_mul_sum_div_le_sum`. Also
+`R_le_prod_of_card_eq : R z ≤ ∏_{q ∈ S} (1 - q⁻¹)`.
 
-  (this is `ShiftedGcd.IwaniecBound`). Take `z` just above the `r`-th prime so that
-  `primesLT z` are the first `r` primes.
+`Jacobsthal.lean`: the final assembly `iwaniecBound_of_estimates`: from
+
+    LinearSieveEstimate : ∃ C₀ c K z₀ : ℝ, 0 < c ∧ ∀ z ≥ z₀,
+      R z - rosserMain true (C₀ * z^2) z ≤ R z * (1 - c / log z) ∧
+      #(rosserSet true (C₀ * z^2) z) ≤ K * z^2 / (log z)^2
+
+(this is [I78, Lemma 2]: (6) says `rosserMain true y z / R z = ∑ σₙ/φ(n) ≥ c / log z` once `C₀` is
+large, and (5) says `∑|λₙ| = #D⁻ ≪ y / log² y`, for `z ≥ z₀(C₀)`), together with
+`∃ c > 0, ∀ z ≥ 2, c / log z ≤ R z` (from `R_asymp`) and
+`∃ C, ∀ r ≥ 2, (Nat.nth Nat.Prime (r-1) : ℝ) ≤ C * r * log r` (`nth_prime_le`), it derives
+
+    ∃ C : ℝ, ∀ S : Finset ℕ, (∀ p ∈ S, p.Prime) → 2 ≤ S.card →
+      ∀ (x : ℤ) (m : ℕ), (∀ k < m, ∃ p ∈ S, (p : ℤ) ∣ x + k) →
+        (m : ℝ) ≤ C * ((S.card : ℝ) * Real.log S.card) ^ 2
+
+(this is `ShiftedGcd.IwaniecBound`). Intermediate step `exists_covering_length_le`: for
+`z ≥ z₁` and `#S = #(primesLT z)`, a covered run has length `m ≤ K z²`. Small `r` is handled
+without a separate argument: `S` (with `#S = r`) is enlarged to `N = N₀ r` primes
+(`exists_superset_card_eq`), where `N₀ = ⌈z₁⌉₊ + 2`, and `z = p_N + 1` (so `primesLT z` is the
+first `N` primes, `card_primesLT_nth_prime_add_one`, and `z ≥ z₁`); then
+`p_N ≪ N log N ≪_{N₀} r log r`.
 
 ### C1. `IwaniecJacobsthal/SieveFunctions.lean` — [I71, §3] `g_n`, `f`, `F`
 
