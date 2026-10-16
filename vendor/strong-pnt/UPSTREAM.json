@@ -12,10 +12,14 @@
       "note": "removed from Mathlib in v4.35.0; vendored unchanged at a new module path"
     }
   },
-  "entrypoint": "PrimeNumberTheoremAnd.StrongPNT",
+  "entrypoints": [
+    "PrimeNumberTheoremAnd.StrongPNT",
+    "PrimeNumberTheoremAnd.IEANTN.Mertens"
+  ],
   "local_lean": "4.35.0",
   "patches": {
     "PrimeNumberTheoremAnd/EulerMaclaurin.lean": "import Mathlib.MeasureTheory.Function.Floor (no longer imported transitively)",
+    "PrimeNumberTheoremAnd/IEANTN/Mertens.lean": "import Mathlib.Analysis.SpecialFunctions.Integrability.Log (LogMeromorphic was renamed); integrableOn_indicator_iff now takes a NullMeasurableSet",
     "PrimeNumberTheoremAnd/MellinCalculus.lean": "Integrable.piecewise now takes a NullMeasurableSet",
     "PrimeNumberTheoremAnd/StrongPNT.lean": "BorelCaratheodoryDeriv: replace field_simp; ring by an explicit rewrite",
     "PrimeNumberTheoremAnd/Tactic/AdditiveCombination.lean": "import the vendored LinearCombinationPrime"
@@ -35,6 +39,11 @@
       "source": "PrimeNumberTheoremAnd",
       "upstream_sha256": "44d2c28b251be0296f897e43a75a055f346a6199849b54ab204240fe4099e6c2",
       "local_sha256": "44d2c28b251be0296f897e43a75a055f346a6199849b54ab204240fe4099e6c2"
+    },
+    "PrimeNumberTheoremAnd/IEANTN/Mertens.lean": {
+      "source": "PrimeNumberTheoremAnd",
+      "upstream_sha256": "6f71a221604463ba1479872012cfb12b885a9e6a8f8abb87a08b4c12c4dca60b",
+      "local_sha256": "4118d652ad0d671a7977df5bd57e13398534f6e27a539a00806d4d52bf2bc7bd"
     },
     "PrimeNumberTheoremAnd/Mathlib/Algebra/Notation/Support.lean": {
       "source": "PrimeNumberTheoremAnd",
