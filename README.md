@@ -56,7 +56,7 @@ local patches.
 | `PrimeSums` | `Σ 1/p`, `∏ (1 - 1/p)` with PNT errors; [I71, Lemmas 13, 14]; `p_r ≪ r log r` |
 | `Rosser` | Rosser's sieve: supports `D^±`, sieve property, deficits, support recursions ([I71, §2]) |
 | `SieveFunctions` | `g_n`, `f`, `F`, `f(2) = 2` ([I71, §3, Lemmas 3–5]) |
-| `SieveMajorants` | `𝔐`, `𝔚`, `𝔣`, `𝔉` ([I71, §3, Lemmas 6, 8–10]) |
+| `SieveMajorants` | `𝔐`, `𝔚`, `𝔣`, `𝔉` ([I71, §3, Lemmas 6, 8–10]); the asymptotics of `𝔐` (Theorem 1); the Dickman function |
 | `LinearSieve` | [I71, §4]: Lemmas 7, 11, 12, Corollaries, crude bounds, Theorems 4, 5, and `linearSieveEstimate` |
 | `Jacobsthal` | [I78]: the shifted sieve (Lemma 1), the reduction, and `iwaniecBound` |
 
@@ -67,8 +67,12 @@ local patches.
 * The Mertens constant `e^{-γ}` is replaced by the (unspecified) limit `cR` of `R(z) log z`;
   it cancels. The values `F(3) = 2e^γ - 3` and `f(s) = s - 2e^γ log(s-1)` are not needed: we
   prove `f(2) = 2` and use only `F(3) ≥ 0`, which gives `1 - f(s)/s ≥ 3 log(s-1)/s`.
-* [I71, Lemma 9] quotes the asymptotics of the Dickman function from Hua's book; we prove the
-  needed lower bound by comparison with an explicit subsolution.
+* [I71, Theorem 1 and Lemma 9] quote the asymptotics of the Dickman function `ϱ` from Hua's book
+  and deduce those of `𝔐` from `𝔐(s+2) ≪ ϱ(s) ≪ 𝔐(s)`. We instead prove the asymptotics of `𝔐`
+  (`bigM_asymp`) and Lemma 9 directly from (3.12), by comparison with the explicit sub- and
+  supersolutions `exp(-Φ₁)`, `exp(-Φ₋₅)`, `Φ_c(s) = s(log s + log log s - 1 + (log log s + c)/log s)`;
+  we then define `ϱ`, prove Iwaniec's two comparisons, and deduce de Bruijn's asymptotics of `ϱ`
+  (`dickman_asymp`) from those of `𝔐`.
 * Several small gaps in [I71] are filled (e.g. Lemma 10 assumes, without proof, that
   `𝔐(t-1)/𝔐(t)` increases; the monotonicity used in Corollary 3 does not follow from Lemma 12;
   the slack in Theorem 4's induction must be `(log L)²/L²` rather than `1/L²`); see

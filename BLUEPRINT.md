@@ -253,7 +253,50 @@ Files `IwaniecLinearSieve/SieveMajorants/{Delay,Defs,Properties,Majorants,Lemmas
   κ * exp (-(s * log s + s * log (log s) + 2 * s)) ≤ bigM s` and
   `majG_ge_exp : ∃ c, ∀ r s, 3 ≤ s → exp (-(s * log s) - s * log (log s) - c * s) ≤ majG r s`,
   by comparison with the subsolution `lemma9Fun` of (3.12).
+  The upper bound and the asymptotics of `𝔐` are in section E.
 * Lemma 7 (`f_r < M ≤ 4𝔐`) needs `M = f + F` from C1; state it after both are merged.
+
+### E. Full 1971: asymptotics of `𝔐` (F3)
+
+Files `IwaniecLinearSieve/SieveMajorants/{Asymptotic,Dickman}.lean`. [I71] deduces the asymptotics
+of `𝔐` in Theorem 1 from those of the Dickman function `ϱ` (quoted from Hua) via
+`𝔐(s+2) ≪ ϱ(s) ≪ 𝔐(s)`. We prove the asymptotics of `𝔐` directly from (3.12), and then transfer
+them to `ϱ` by Iwaniec's comparisons.
+
+* Comparison exponents: `asymPhi c s = s (log s + log log s - 1 + (log log s + c)/log s)`
+  (`= asymPhi 0 s + c s/log s`, `asymPhi_eq_add`), with derivative `asymPsi c (log s)`
+  (`hasDerivAt_asymPhi`); `asymPsi c` is increasing on `[2, ∞)` for `c ≤ 4`
+  (`monotoneOn_asymPsi`), so `asymPhi_sub_mem` bounds `Φ_c(s) - Φ_c(x)` on `[s-1, s]`, `s ≥ 9`.
+* Numerical inequalities: `asymPsi_one_facts` (`λ = ψ₁(log t)`: `2 ≤ λ`, `λ t ≤ e^λ`, `t ≥ 8`),
+  `asymPsi_neg_five_facts` (`μ = ψ₋₅(log s)`: `e^μ ≤ μ (s-2)`, `s ≥ e²⁰`), using `log_sq_le`
+  (`(log L)² ≤ L`).
+* Comparison principle `lt_of_sub_super`: a subsolution `f` and a supersolution `g` of
+  `A(s) y(s) = ∫_{s-1}^s w y` (`A, w > 0`) with `f < g` on `[a-1, a]` satisfy `f < g` on
+  `[a-1, ∞)` (first crossing).
+* (3.12) as `coefA_mul_bigM`, `coefA s = ((s-1)² - 1/2)/s`; `exp(-Φ₁)` is a subsolution for
+  `s ≥ 9` (`coefA_mul_le_integral`), `exp(-Φ₋₅)` a supersolution for `s ≥ e²⁰`
+  (`integral_le_coefA_mul`); hence `bigM_ge_exp_asymPhi : ∃ κ > 0, ∀ s ≥ 9,
+  κ * exp (-asymPhi 1 s) ≤ bigM s` and `bigM_le_exp_asymPhi : ∃ C, ∀ s ≥ exp 20,
+  bigM s ≤ C * exp (-asymPhi (-5) s)`.
+* **Theorem 1, asymptotics of `𝔐`**: `bigM_asymp : ∃ C s₀ : ℝ, ∀ s ≥ s₀,
+  |log (bigM s) + s * (log s + log (log s) - 1 + log (log s) / log s)| ≤ C * s / log s`
+  (with `s₀ = e²⁰`).
+* Intermediate claims of [I71, p. 15]: `bigM_lt_integral : 3 ≤ s →
+  bigM s < 1 / (s - 2) * ∫ x in (s-1)..s, bigM x`; `bigM_add_two_le : ∃ C s₀, ∀ s ≥ s₀,
+  bigM (s + 2) ≤ exp (-(s * (log s + log (log s) - 1 + log (log s) / log s)) + C * s / log s)`.
+* **Lemma 9**: `majG_mul_exp_le : ∃ c₂, ∀ r s, 3 ≤ s →
+  majG r s * exp (s * log s + s * log (log s)) ≤ exp (c₂ * s)`; two-sided form
+  `lemma9 : ∃ c₂, ∀ r s, 3 ≤ s → exp (-(c₂ * s)) ≤ majG r s * exp (s log s + s log log s) ∧
+  majG r s * exp (s log s + s log log s) ≤ exp (c₂ * s)`.
+* Dickman function (`Dickman.lean`): `dickman u = Delay.sol dickmanKer 1 (u + 2)`, so
+  `dickman_of_le_one` (`ϱ = 1` on `(-∞, 1]`), `hasDerivAt_dickman : 1 < u →
+  HasDerivAt dickman (-(dickman (u-1) / u)) u`; `dickman_integral_identity : 1 ≤ u →
+  u * dickman u = ∫ x in (u-1)..u, dickman x`; `dickman_pos`, `dickman_antitone`,
+  `dickman_le_one`. Iwaniec's comparisons: `dickman_le_bigM : ∃ C, ∀ s, dickman s ≤ C * bigM s`
+  (`𝔐` is a supersolution of `ϱ`'s equation, `integral_bigM_le_sq_div_mul`) and
+  `bigM_add_two_le_dickman : ∃ C, ∀ s, bigM (s + 2) ≤ C * dickman s` (`𝔐(·+2)` is a
+  subsolution, by `bigM_lt_integral`). With `asymPhi_add_two_sub_le` these give de Bruijn's
+  asymptotics `dickman_asymp`, in the same form as `bigM_asymp`.
 
 ### D. [I71, §4–5]: from the sieve functions to `LinearSieveEstimate`
 

@@ -3,6 +3,8 @@ import IwaniecLinearSieve.SieveMajorants.Defs
 import IwaniecLinearSieve.SieveMajorants.Properties
 import IwaniecLinearSieve.SieveMajorants.Majorants
 import IwaniecLinearSieve.SieveMajorants.Lemmas
+import IwaniecLinearSieve.SieveMajorants.Asymptotic
+import IwaniecLinearSieve.SieveMajorants.Dickman
 
 /-!
 # [I71, §3]: the functions `𝔐`, `𝔚`, `𝔣`, `𝔉`, `G_r`
@@ -16,4 +18,8 @@ import IwaniecLinearSieve.SieveMajorants.Lemmas
   `majf_eq_integral`, Corollary to Lemma 6 `majG_mem`, `majG_antitone`, `hasDerivAt_majG_succ`.
 * `Lemmas`: Lemma 8 `bigM_sub_one_lt`, Lemma 10 `bigM_mul_log_div_lt` and its Corollary
   `majG_succ_mul_log_div_lt`, Lemma 9 (lower bound) `majG_ge_exp`.
+* `Asymptotic`: Theorem 1, the asymptotics of `𝔐` (`bigM_asymp`), by comparison with explicit
+  sub- and supersolutions of (3.12); Lemma 9 in full (`majG_mul_exp_le`, `lemma9`).
+* `Dickman`: the Dickman function `dickman` (`ϱ`), `ϱ = O(𝔐)`, `𝔐(s+2) = O(ϱ(s))`, and its
+  asymptotics `dickman_asymp`.
 -/

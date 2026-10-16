@@ -3,7 +3,41 @@ import IwaniecLinearSieve.SieveMajorants.Lemmas
 /-!
 # The asymptotics of `𝔐` ([I71, Theorem 1 and Lemma 9])
 
-test
+[I71, Theorem 1] states
+`𝔐(s) = exp{-s(log s + log log s - 1 + log log s/log s) + O(s/log s)}`, deduced on p. 15 from
+the asymptotics of the Dickman function `ϱ` (quoted from Hua's book) via `𝔐(s+2) ≪ ϱ(s) ≪ 𝔐(s)`.
+We prove it directly from (3.12), `A(s) 𝔐(s) = ∫_{s-1}^s (1 - 1/(2x²)) 𝔐(x) dx` with
+`A(s) = ((s-1)² - 1/2)/s`, by comparison with explicit sub- and supersolutions.
+
+## The argument
+
+Let `L = log s`, `ℓ = log L` and
+`Φ_c(s) = s (L + ℓ - 1 + (ℓ + c)/L) = Φ₀(s) + c s/L` (`asymPhi`). Then
+`Φ_c'(s) = ψ_c(L) = L + ℓ + (ℓ + c + 1)/L - (ℓ + c - 1)/L²` (`asymPsi`), and `ψ_c` is increasing
+on `[2, ∞)` for `c ≤ 4` (`L³ ψ_c'(L) ≥ L³ - L + 3`). By the mean value theorem, for
+`s ≥ 9` and `s - 1 ≤ x ≤ s`, `ψ_c(log(s-1)) (s-x) ≤ Φ_c(s) - Φ_c(x) ≤ ψ_c(log s) (s-x)`, hence
+`(e^λ - 1)/λ ≤ ∫_{s-1}^s e^{Φ_c(s) - Φ_c(x)} dx ≤ (e^μ - 1)/μ` with `λ = ψ_c(log(s-1))`,
+`μ = ψ_c(log s)`.
+
+* Subsolution `h = exp(-Φ₁)`, `s ≥ 9`: with `t = s - 1`, `λ = ψ₁(log t) ≥ 2` and `λ t ≤ e^λ`
+  (`asymPsi_one_facts`; from `log λ ≤ ℓ + λ/L - 1` and `2L² - (2ℓ+2)L + ℓ ≥ 0`). As the weight is
+  `≥ w₀ = 1 - 1/(2(s-1)²)` and `A(s)/w₀ = (s-1)²/s`, it suffices that
+  `λ (s-1)² ≤ s (e^λ - 1)`, which follows (`coefA_mul_le_integral`).
+* Supersolution `h = exp(-Φ₋₅)`, `s ≥ e²⁰`: `μ = ψ₋₅(L)` satisfies `e^μ ≤ μ (s - 2)`
+  (`asymPsi_neg_five_facts`): writing `μ = L + ℓ + D`, `|D| ≤ 1`, and using
+  `log μ ≥ ℓ + 1 - L/μ`, `log(s-2) ≥ L + 1 - s/(s-2)`, `2μ ≤ s - 2`, this reduces to
+  `D (μ - 1) ≤ ℓ - 1`, which holds since `ℓ² ≤ L`. As the weight is `≤ 1` and
+  `A(s) ≥ s - 2`, `h` is a supersolution (`integral_le_coefA_mul`).
+
+The comparison principle `lt_of_sub_super` (a first-crossing argument) then gives
+`κ e^{-Φ₁(s)} ≤ 𝔐(s) ≤ C e^{-Φ₋₅(s)}` for `s ≥ e²⁰`, i.e. `bigM_asymp` with `s₀ = e²⁰`.
+
+## Main results
+
+* `bigM_asymp`: [I71, Theorem 1], the asymptotics of `𝔐`;
+* `bigM_add_two_le`, `bigM_lt_integral`: the intermediate claims in [I71, proof of Lemma 9];
+* `majG_mul_exp_le`: [I71, Lemma 9], `G_r(s) exp(s log s + s log log s) ≤ exp(c₂ s)`;
+  `lemma9`: the two-sided form, with `majG_ge_exp`.
 -/
 
 open Real Set Filter Topology MeasureTheory
