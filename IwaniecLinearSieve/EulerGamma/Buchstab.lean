@@ -51,8 +51,8 @@ theorem mul_buchstab {u : ℝ} (hu : u ≠ 0) : u * buchstab u = buchstabAux (u 
   rw [buchstab, mul_div_cancel₀ _ hu]
 
 theorem continuousOn_buchstab : ContinuousOn buchstab (Ioi 0) :=
-  ((continuous_buchstabAux.comp (continuous_id.add continuous_const)).continuousOn).div continuousOn_id
-    fun _ hu => (mem_Ioi.1 hu).ne'
+  ((continuous_buchstabAux.comp (continuous_id.add continuous_const)).continuousOn).div
+    continuousOn_id fun _ hu => (mem_Ioi.1 hu).ne'
 
 theorem measurable_buchstab : Measurable buchstab :=
   (continuous_buchstabAux.measurable.comp (measurable_add_const 1)).div measurable_id
@@ -340,7 +340,8 @@ theorem integral_mul_exp_mul_buchstab {s : ℝ} (hs : 0 < s) :
     rw [setIntegral_congr_fun measurableSet_Ioc (g := fun u => exp (-(s * u))) fun u hu => by
       simp only
       rw [buchstab_of_le_two hu.2]
-      field_simp [(show (0 : ℝ) < u by linarith [hu.1]).ne'], ← intervalIntegral.integral_of_le one_le_two]
+      field_simp [(show (0 : ℝ) < u by linarith [hu.1]).ne'],
+      ← intervalIntegral.integral_of_le one_le_two]
     rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (f := fun u => -exp (-(s * u)) / s)
       (fun x _ => by
         have := ((((hasDerivAt_id x).const_mul s).neg).exp.neg).div_const s
