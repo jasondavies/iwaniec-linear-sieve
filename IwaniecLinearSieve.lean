@@ -23,4 +23,11 @@ import IwaniecLinearSieve.General.RosserK
 import IwaniecLinearSieve.General.Totient
 import IwaniecLinearSieve.General.LemmaSixteen
 import IwaniecLinearSieve.EulerGamma
+import IwaniecLinearSieve.Main.Basic
+import IwaniecLinearSieve.Main.TheoremOne
+import IwaniecLinearSieve.Main.Fundamental
+import IwaniecLinearSieve.Main.Corollary
+import IwaniecLinearSieve.Main.TheoremTwo
+import IwaniecLinearSieve.Main.TheoremThree
 import IwaniecLinearSieve.Jacobsthal
+import IwaniecLinearSieve.Main.TheoremOneFull

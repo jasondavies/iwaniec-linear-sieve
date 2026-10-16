@@ -31,12 +31,15 @@ It depends only on the axioms `propext`, `Classical.choice` and `Quot.sound`, an
 * J. Friedlander, H. Iwaniec, *Opera de Cribro*, AMS (2010), §12.4–12.6, for the modern form of
   the same argument.
 
-The proof follows [I71] lemma by lemma (with `k = 1`); `BLUEPRINT.md` maps each lemma to its
-Lean statement and records every deviation. From [I71] we formalise §§2–4 in full: Rosser's
-sieve, the functions of §3, Theorem 4 (main term with error `O(1/log y)`) and Theorem 5 (support
-of size `O(y/log² y)`). Theorems 1–3, which package these for general sequences and `k`, are
-formalised only in the case [I78] needs: the lower bound of Theorem 1 at level `y = C₀ z²`
-(`linearSieveEstimate`).
+[I71] is formalised in full: §2 (Lemmas 1, 2 for general `k` and sequences), §3 (the functions
+`f`, `F`, `𝔐`, `𝔚`, Lemmas 3–10, including Lemma 5 with `F(3) = 2e^γ - 3` and the asymptotics of
+`𝔐`), §4 (Lemmas 11–17, Theorem 4: main term with error `O(1/log y)`; Theorem 5: support of size
+`O(y / log² y)`) and §5 (Theorem 1 with its Corollary, Theorems 2 and 3), in the module
+`IwaniecLinearSieve.Main`: `theorem1_full`, `corollary_upper`, `corollary_lower`, `theorem2`
+(`C₀(r) ≪ r² log² r`), `theorem3_fst`, `theorem3_snd`. [I78] uses only the lower bound of
+Theorem 1 at level `y = C₀ z²` (`linearSieveEstimate`), so `iwaniecBound` does not depend on §5 or
+on the results involving `γ`. `BLUEPRINT.md` maps each lemma to its Lean statement and records
+every deviation; the most notable are listed below.
 
 ## Prime number theorem
 
@@ -60,13 +63,14 @@ local patches.
 | `SieveMajorants` | `𝔐`, `𝔚`, `𝔣`, `𝔉` ([I71, §3, Lemmas 6, 8–10]); the asymptotics of `𝔐` (Theorem 1); the Dickman function |
 | `LinearSieve` | [I71, §4]: Lemmas 7, 11, 12, Corollaries, crude bounds, Theorems 4, 5, and `linearSieveEstimate` |
 | `General` | [I71, §2] for general `k` and sequences: `A_k(M; z)`, `R_k`, Lemma 1 with arbitrary truncations and its Corollary, Lemma 2, (2.12), (2.13); `k/φ(k) ≪ log log 3k`; Lemma 16 |
+| `Main` | [I71, §1, §5]: Theorems 1–3 and the Corollary; a fundamental lemma for small `z` |
 | `Jacobsthal` | [I78]: the shifted sieve (Lemma 1), the reduction, and `iwaniecBound` |
 | `EulerGamma` | Euler's constant: `R(z) log z → e^{-γ}`, Buchstab's `ω` and `ω(∞) = e^{-γ}`, [I71, Lemma 5] in full (`F(3) = 2e^γ - 3`), Theorem 4 with `e^γ` |
 
 ## Deviations from the papers
 
-* The core estimates (Theorems 4 and 5) are for `k = 1`, as in [I71]'s proof; general `k` is
-  reduced to `k = 1` by (2.12), (2.13) (`General`).
+* The core estimates (Theorems 4 and 5, [I71, §§3–4]) are for `k = 1`, as in [I71]'s proof;
+  general `k` and sequences enter through §2 (`General`, via (2.12), (2.13)) and §5 (`Main`).
 * The error `exp(-√log x)` in [I71] is `exp(-κ √log x)` for a fixed `κ > 0` from the PNT.
 * The main chain (`theorem4`, `iwaniecBound`) works with the limit `cR` of `R(z) log z` in
   place of the Mertens constant `e^{-γ}` (it cancels), and uses from [I71, Lemma 5] only
@@ -85,6 +89,12 @@ local patches.
   supersolutions `exp(-Φ₁)`, `exp(-Φ₋₅)`, `Φ_c(s) = s(log s + log log s - 1 + (log log s + c)/log s)`;
   we then define `ϱ`, prove Iwaniec's two comparisons, and deduce de Bruijn's asymptotics of `ϱ`
   (`dickman_asymp`) from those of `𝔐`.
+* Theorems 1–3 ([I71, §5]): the error terms need no `log log 3k` (since `R ≤ R_k`, so
+  `1/R_k ≤ 1/R`), although `theorem1` and the Corollary are stated with it as printed. Theorem 1
+  holds for `s ≤ ξ(y)`; the Corollary and (1.6) also need `z ≤ y^{1/ξ(y)}`, which [I71] does
+  not treat: there we prove a fundamental lemma from the crude bounds at a lower sieve level.
+  (1.3) is stated for `2 ≤ z ≤ y` with `F(s) + (3 - s)⁺` (our `F` is constant below 3), (1.4)
+  for all `z ≥ 2`, (1.5) for `s ≥ 2`. Theorem 2 sifts by `z > P_r` rather than `z = P_r`.
 * Several small gaps in [I71] are filled (e.g. Lemma 10 assumes, without proof, that
   `𝔐(t-1)/𝔐(t)` increases; the monotonicity used in Corollary 3 does not follow from Lemma 12;
   the slack in Theorem 4's induction must be `(log L)²/L²` rather than `1/L²`); see
