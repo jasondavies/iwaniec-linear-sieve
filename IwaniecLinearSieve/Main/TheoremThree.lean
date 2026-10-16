@@ -258,4 +258,183 @@ theorem theorem3_fst : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Finset ℤ) (
     have h0 : 0 ≤ 2 / (R Y₁ * e) * (y * Rk k z * (exp 1 / (s * log s)) ^ s) := by positivity
     linarith
 
+namespace Main
+
+/-- `log log 16y ≤ log 3 + log log 3y` (from `16 y ≤ (3y)³`). -/
+theorem loglog_sixteen_le {y : ℝ} (hy : 1 < y) :
+    log (log (16 * y)) ≤ log 3 + log (log (3 * y)) := by
+  have h00 : 1 ≤ y ^ 2 := by nlinarith
+  have h0 : y ≤ y ^ 3 := by nlinarith
+  have h1 : 16 * y ≤ (3 * y) ^ 3 := by nlinarith
+  have h2 : log (16 * y) ≤ 3 * log (3 * y) := by
+    have := log_le_log (by linarith) h1
+    rwa [log_pow, Nat.cast_ofNat] at this
+  have h3 : 0 < log (16 * y) := log_pos (by linarith)
+  calc log (log (16 * y)) ≤ log (3 * log (3 * y)) := log_le_log h3 h2
+    _ = log 3 + log (log (3 * y)) := log_mul (by norm_num) (log_pos (by linarith : (1 : ℝ) < 3 * y)).ne'
+
+theorem log_three_le_two : log 3 ≤ 2 := by
+  rw [log_le_iff_le_exp (by norm_num)]
+  linarith [add_one_le_exp (2 : ℝ), add_one_le_exp (1 : ℝ), exp_add 1 1,
+    show exp 2 = exp 1 * exp 1 by rw [← exp_add]; norm_num]
+
+/-- `log log log 16y ≤ log log 3y + 1`. -/
+theorem logloglog_le {y : ℝ} (hy : 1 < y) :
+    log (log (log (16 * y))) ≤ log (log (3 * y)) + 1 := by
+  have h16 : 1 < log (16 * y) := by
+    rw [lt_log_iff_exp_lt (by linarith)]
+    linarith [exp_one_lt_d9]
+  have h1 := log_le_sub_one_of_pos (log_pos h16)
+  have h2 := loglog_sixteen_le hy
+  linarith [log_three_le_two]
+
+/-- `log log log 16y ≤ log 3 + log log log 3y` when `log log 3y ≥ 1`. -/
+theorem logloglog_le_log {y : ℝ} (hy : 1 < y) (hl : 1 ≤ log (log (3 * y))) :
+    log (log (log (16 * y))) ≤ log 3 + log (log (log (3 * y))) := by
+  have h16 : 1 < log (16 * y) := by
+    rw [lt_log_iff_exp_lt (by linarith)]
+    linarith [exp_one_lt_d9]
+  have h2 := loglog_sixteen_le hy
+  have h3 : log 3 + log (log (3 * y)) ≤ 3 * log (log (3 * y)) := by
+    linarith [log_three_le_two]
+  calc log (log (log (16 * y))) ≤ log (3 * log (log (3 * y))) :=
+        log_le_log (log_pos h16) (h2.trans h3)
+    _ = log 3 + log (log (log (3 * y))) := log_mul (by norm_num) (by linarith)
+
+end Main
+
+open Main
+
+/-- **[I71, Theorem 3]**, (1.6): under `(*)`, for `z ≥ 2` with
+`log z < log y · log log log 16y / (2 log log 3y)`,
+`|A_k(M; z) - y R_k(z)| ≤ C y R_k(z) / log y`. -/
+theorem theorem3_snd : ∃ C : ℝ, ∀ (k : ℕ) (M : Finset ℤ) (y z : ℝ), 1 < y →
+    (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ z →
+    log z < log y * log (log (log (16 * y))) / (2 * log (log (3 * y))) →
+    |(siftedCount k M z : ℝ) - y * Rk k z| ≤ C * y * Rk k z / log y := by
+  obtain ⟨C₃, hC₃, h15⟩ := theorem3_fst
+  obtain ⟨CF, YF, hCF, hYF, hFL⟩ := fundamental_lemma
+  have hev : ∀ᶠ y : ℝ in atTop, YF ≤ y ∧ exp (exp 1) ≤ y ∧
+      2 ≤ log (log (log (3 * y))) ∧
+      4 + 2 * log (log (log (log (3 * y)))) ≤ log (log (log (3 * y))) := by
+    have hm := tendsto_log_atTop.comp tendsto_log_log_three_mul
+    filter_upwards [eventually_ge_atTop YF, eventually_ge_atTop (exp (exp 1)),
+      hm.eventually (eventually_ge_atTop 2),
+      hm.eventually (TheoremFive.eventually_add_mul_log_le 4 2)] with y h1 h2 h3 h4
+    exact ⟨h1, h2, h3, h4⟩
+  obtain ⟨Y₀, hY₀⟩ := eventually_atTop.1 hev
+  set Y₂ := max Y₀ 2
+  have hY₂ : 1 < Y₂ := lt_of_lt_of_le one_lt_two (le_max_right _ _)
+  have hLY : 0 < log Y₂ := log_pos hY₂
+  have ha := loglog_three_pos
+  set κ₀ := 1 / 2 + 1 / (2 * log (log 3))
+  set Z := log Y₂ * κ₀
+  have hRZ := R_pos (exp Z)
+  refine ⟨2 * log Y₂ / R (exp Z) + C₃ + CF, fun k M y z hy hM hz hlz => ?_⟩
+  have hL : 0 < log y := log_pos hy
+  set l := log (log (3 * y)) with hl
+  have hl0 : 0 < l := TheoremFour.loglog_three_mul_pos hy
+  have hz1 : 1 < z := by linarith
+  have hlz0 : 0 < log z := log_pos hz1
+  have hT : 0 < y * Rk k z := mul_pos (by linarith) (Rk_pos k z)
+  have hTL : 0 ≤ y * Rk k z / log y := by positivity
+  have hsplit : (2 * log Y₂ / R (exp Z) + C₃ + CF) * y * Rk k z / log y =
+      2 * log Y₂ / R (exp Z) * (y * Rk k z / log y) + C₃ * (y * Rk k z / log y) +
+        CF * (y * Rk k z / log y) := by ring
+  have hp1 : 0 ≤ 2 * log Y₂ / R (exp Z) * (y * Rk k z / log y) := by positivity
+  have hp2 : 0 ≤ C₃ * (y * Rk k z / log y) := by positivity
+  have hp3 : 0 ≤ CF * (y * Rk k z / log y) := by positivity
+  rw [hsplit]
+  rcases lt_or_ge y Y₂ with hyY | hyY
+  · -- bounded `y`: `log z ≤ Z` and the claim is trivial
+    have hll : log (log 3) ≤ l :=
+      log_le_log (log_pos (by norm_num)) (log_le_log (by norm_num) (by linarith))
+    have hlll := logloglog_le hy
+    have hκ : log (log (log (16 * y))) / (2 * l) ≤ κ₀ := by
+      calc log (log (log (16 * y))) / (2 * l) ≤ (l + 1) / (2 * l) := by gcongr
+        _ = 1 / 2 + 1 / (2 * l) := by field_simp
+        _ ≤ κ₀ := by rw [show κ₀ = 1 / 2 + 1 / (2 * log (log 3)) from rfl]; gcongr
+    have hzZ : log z ≤ Z := by
+      have hLL : log y ≤ log Y₂ := log_le_log (by linarith) hyY.le
+      have hκ0 : 0 ≤ κ₀ := by positivity
+      calc log z ≤ log y * log (log (log (16 * y))) / (2 * l) := hlz.le
+        _ = log y * (log (log (log (16 * y))) / (2 * l)) := by ring
+        _ ≤ log Y₂ * κ₀ := mul_le_mul hLL hκ (by
+            have := hlz0.trans hlz
+            rw [mul_div_assoc] at this
+            exact (pos_of_mul_pos_right this hL.le).le) hLY.le
+    have hRk : R (exp Z) ≤ Rk k z := by
+      refine (R_antitone ?_).trans (R_le_Rk k z)
+      rw [← exp_log (by linarith : (0 : ℝ) < z)]
+      exact exp_le_exp.2 hzZ
+    have h2 : 2 * y ≤ 2 * log Y₂ / R (exp Z) * (y * Rk k z / log y) := by
+      have hLL : log y ≤ log Y₂ := log_le_log (by linarith) hyY.le
+      calc 2 * y = 2 * log Y₂ / R (exp Z) * (y * R (exp Z) / log Y₂) := by field_simp
+        _ ≤ 2 * log Y₂ / R (exp Z) * (y * Rk k z / log y) := by
+            gcongr
+    have := abs_siftedCount_sub_le hy.le hM z
+    linarith
+  obtain ⟨hYF', hee, hm2, hm⟩ := hY₀ y (le_trans (le_max_left _ _) hyY)
+  have hlam := one_le_loglog_of_le hee
+  set s := log y / log z with hs
+  have hs0 : 0 < s := by positivity
+  have hzs : y ^ (1 / s) = z := rpow_one_div_log_div (by linarith) hz1 hL.ne'
+  have hls : log y / s = log z := by rw [hs]; field_simp
+  rcases le_or_gt (log y / l ^ 6) s with hsl | hsl
+  · -- `log z ≤ λ⁶`: the fundamental lemma
+    have hlog : log z ≤ l ^ 6 := by
+      rw [← hls, div_le_iff₀ hs0]
+      rwa [div_le_iff₀ (by positivity), mul_comm] at hsl
+    have := hFL k M y z hYF' hM hz hlog
+    rw [show CF * y * Rk k z / log y = CF * (y * Rk k z / log y) by ring] at this
+    linarith
+  -- `s < log y / λ⁶`: (1.5)
+  set m := log l with hm_def
+  set l₃ := log (log (log (16 * y))) with hl₃
+  have hl₃0 : 0 < l₃ := by
+    by_contra h
+    push Not at h
+    have : log y * l₃ / (2 * l) ≤ 0 :=
+      div_nonpos_of_nonpos_of_nonneg (mul_nonpos_of_nonneg_of_nonpos hL.le h) (by positivity)
+    linarith
+  have hl₃m : l₃ ≤ m + 2 := by linarith [logloglog_le_log hy hlam, log_three_le_two]
+  have hlm : l = exp m := (exp_log hl0).symm
+  have hlogm : log m ≤ m / 2 - 2 := by linarith
+  have hm0 : 0 < m := by linarith
+  -- `s > 2λ/λ₃ ≥ λ/m`
+  have hs1 : 2 * l / l₃ < s := by
+    rw [hs, div_lt_div_iff₀ hl₃0 hlz0]
+    have := hlz
+    rw [lt_div_iff₀ (by positivity)] at this
+    linarith
+  have hs2 : l / m ≤ 2 * l / l₃ := by
+    rw [div_le_div_iff₀ hm0 hl₃0]; nlinarith
+  have hlogs : m - log m ≤ log s := by
+    have := log_le_log (by positivity) (hs2.trans hs1.le)
+    rwa [log_div hl0.ne' hm0.ne'] at this
+  have hlogs1 : 1 ≤ log s := by linarith
+  have hs2' : 2 ≤ s := by
+    have : exp 1 ≤ s := by rw [← exp_log hs0]; exact exp_le_exp.2 hlogs1
+    linarith [add_one_le_exp (1 : ℝ)]
+  have hE : (exp 1 / (s * log s)) ^ s ≤ 1 / log y := by
+    rw [rpow_exp_one_div_eq (by linarith)]
+    have hll : 0 ≤ log (log s) := log_nonneg hlogs1
+    have h1 : l ≤ 2 * l / l₃ * (m - log m - 1) := by
+      rw [div_mul_eq_mul_div, le_div_iff₀ hl₃0]; nlinarith
+    have h2 : 2 * l / l₃ * (m - log m - 1) ≤ s * (log s - 1) :=
+      mul_le_mul hs1.le (by linarith) (by linarith) hs0.le
+    have h3 : s * (1 - log s - log (log s)) ≤ -l := by nlinarith
+    calc exp (s * (1 - log s - log (log s))) ≤ exp (-l) := exp_le_exp.2 h3
+      _ = 1 / log (3 * y) := by
+          rw [exp_neg, hl, exp_log (log_pos (by linarith : (1 : ℝ) < 3 * y)), one_div]
+      _ ≤ 1 / log y := one_div_le_one_div_of_le hL (log_le_log (by linarith) (by linarith))
+  have h := h15 k M y s hy hM hs2' hsl
+  rw [hzs] at h
+  have : C₃ * y * Rk k z * (exp 1 / (s * log s)) ^ s ≤ C₃ * (y * Rk k z / log y) := by
+    rw [show C₃ * y * Rk k z * (exp 1 / (s * log s)) ^ s =
+      C₃ * (y * Rk k z) * (exp 1 / (s * log s)) ^ s by ring,
+      show C₃ * (y * Rk k z / log y) = C₃ * (y * Rk k z) * (1 / log y) by ring]
+    gcongr
+  linarith
+
 end IwaniecLinearSieve
