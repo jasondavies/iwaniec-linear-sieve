@@ -65,7 +65,8 @@ local patches.
 
 ## Deviations from the papers
 
-* `k = 1` in [I71, §§3–4]; general `k` and sequences enter through §2 (`General`) and §5 (`Main`).
+* `k = 1` in [I71, §§3–4]; general `k` and sequences enter through §2 (`General`) and §5
+  (`Main`).
 * The error `exp(-√log x)` in [I71] is `exp(-κ √log x)` for a fixed `κ > 0` from the PNT.
 * The Mertens constant `e^{-γ}` is replaced by the (unspecified) limit `cR` of `R(z) log z`;
   it cancels. The values `F(3) = 2e^γ - 3` and `f(s) = s - 2e^γ log(s-1)` are not needed: we
