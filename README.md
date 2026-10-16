@@ -46,7 +46,8 @@ with relative error `o(1/log x)` uniformly over all scales; this needs PNT-stren
 `ψ(x) = x + O(x exp(-c √log x))` (`StrongPNT`) from
 [PrimeNumberTheoremAnd](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd), whose
 15-file import closure is vendored in `vendor/strong-pnt` (Apache 2.0) and ported to
-Lean 4.35.0; `vendor/strong-pnt/UPSTREAM.json` records the revision, file hashes and the four
+Lean 4.35.0, together with its `IEANTN/Mertens.lean` (Mertens' theorems with the constant
+`e^{-γ}`); `vendor/strong-pnt/UPSTREAM.json` records the revision, file hashes and the five
 local patches.
 
 ## Layout
@@ -60,14 +61,24 @@ local patches.
 | `LinearSieve` | [I71, §4]: Lemmas 7, 11, 12, Corollaries, crude bounds, Theorems 4, 5, and `linearSieveEstimate` |
 | `General` | [I71, §2] for general `k` and sequences: `A_k(M; z)`, `R_k`, Lemma 1 with arbitrary truncations and its Corollary, Lemma 2, (2.12), (2.13); `k/φ(k) ≪ log log 3k`; Lemma 16 |
 | `Jacobsthal` | [I78]: the shifted sieve (Lemma 1), the reduction, and `iwaniecBound` |
+| `EulerGamma` | Euler's constant: `R(z) log z → e^{-γ}`, Buchstab's `ω` and `ω(∞) = e^{-γ}`, [I71, Lemma 5] in full (`F(3) = 2e^γ - 3`), Theorem 4 with `e^γ` |
 
 ## Deviations from the papers
 
-* `k = 1` throughout [I71].
+* The core estimates (Theorems 4 and 5) are for `k = 1`, as in [I71]'s proof; general `k` is
+  reduced to `k = 1` by (2.12), (2.13) (`General`).
 * The error `exp(-√log x)` in [I71] is `exp(-κ √log x)` for a fixed `κ > 0` from the PNT.
-* The Mertens constant `e^{-γ}` is replaced by the (unspecified) limit `cR` of `R(z) log z`;
-  it cancels. The values `F(3) = 2e^γ - 3` and `f(s) = s - 2e^γ log(s-1)` are not needed: we
-  prove `f(2) = 2` and use only `F(3) ≥ 0`, which gives `1 - f(s)/s ≥ 3 log(s-1)/s`.
+* The main chain (`theorem4`, `iwaniecBound`) works with the limit `cR` of `R(z) log z` in
+  place of the Mertens constant `e^{-γ}` (it cancels), and uses from [I71, Lemma 5] only
+  `f(2) = 2` and `F(3) ≥ 0`, which gives `1 - f(s)/s ≥ 3 log(s-1)/s`. The parts involving `γ`
+  are proved separately in `EulerGamma`: `cR = e^{-γ}` (Mertens' third theorem, from
+  PrimeNumberTheoremAnd), `theorem4_exp` (Theorem 4 with `e^γ`), and Lemma 5 in full, with
+  Buchstab's limit `ω(∞) = e^{-γ}` (quoted by [I71] from Jurkat–Richert) proved via the Laplace
+  transform of `ω` and `γ = -∫₀^∞ e^{-t} log t dt`; the convergence of `ω` comes from Iwaniec's
+  identity `ω = w = (2s - W(s))/(s(3 + F(3)))` and the decay of `W = f - F`.
+* [I71, Lemma 5] prints `F(s) = s - 6 + 2e^γ (1 - ∫_1^{s-2} log x/(x+1) dx)` on `[3, 5]`; the
+  correct formula, which we prove, is `F(s) = 2e^γ (1 + ∫_1^{s-2} log x/(x+1) dx) - s` (the two
+  agree at `s = 3`, but `F` is decreasing).
 * [I71, Theorem 1 and Lemma 9] quote the asymptotics of the Dickman function `ϱ` from Hua's book
   and deduce those of `𝔐` from `𝔐(s+2) ≪ ϱ(s) ≪ 𝔐(s)`. We instead prove the asymptotics of `𝔐`
   (`bigM_asymp`) and Lemma 9 directly from (3.12), by comparison with the explicit sub- and

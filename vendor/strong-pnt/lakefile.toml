@@ -16,5 +16,5 @@ name = "Architect"
 
 [[lean_lib]]
 name = "PrimeNumberTheoremAnd"
-roots = ["PrimeNumberTheoremAnd.StrongPNT"]
+roots = ["PrimeNumberTheoremAnd.StrongPNT", "PrimeNumberTheoremAnd.IEANTN.Mertens"]
 globs = ["PrimeNumberTheoremAnd.+"]
