@@ -26,6 +26,7 @@ prime-number input is the de la Vallée Poussin prime number theorem
 | Sieve functions | [I71, §3]: `g_n`, `f`, `F`, Lemmas 3–10, `𝔐`, `𝔚`, `𝔣`, `𝔉`, `f(2) = 2` | `IwaniecLinearSieve.SieveFunctions` |
 | Estimates | [I71, §4]: Lemmas 11–17, Theorems 4, 5 | `IwaniecLinearSieve.MainTerm`, `IwaniecLinearSieve.Remainder` |
 | Linear sieve | [I71, §5]: Theorem 1 lower bound (1.2)/(1.4), as needed by [I78, Lemma 2] | `IwaniecLinearSieve.LinearSieve` |
+| Theorems 1–3 | [I71, §1, §5]: Theorems 1–3 and the Corollary, general `k` and sequences (section E, T1) | `IwaniecLinearSieve.Main` |
 | Jacobsthal | [I78]: Lemma 1 (shifted sieve), Theorem, Corollary | `IwaniecLinearSieve.Jacobsthal.ShiftedSieve`, `IwaniecLinearSieve.Jacobsthal.Reduction`, `IwaniecLinearSieve.Jacobsthal` |
 
 ## Deviations from the papers
@@ -597,3 +598,124 @@ general-`k`, general-sequence parts of [I71, §2], the size of `k/φ(k)` used in
   telescoping identity `TheoremFour.sum_R_div_eq` for the inner sum instead of Lemma 14, then
   Lemma 13 (`lemma13_param`) for the outer sum; Lemma 14 only bounds `∑ 1/(p₁ log p₁)` in the
   error. For `s ≥ 4` both sides are trivial (`d2 = 0`).
+
+### E. Full 1971: Theorems 1–3 (T1)
+
+Files `IwaniecLinearSieve/Main/{Basic,TheoremOne,Fundamental,Corollary,TheoremTwo,TheoremThree}.lean`
+([I71, §1 and §5]). Notation: `L = log y`, `λ = log log 3y`, `ξ(y) = L/λ^{11/5}` (`xi`),
+`δ(s, y) = (1 + s² log⁵ s/L²)^{5s}` (`delta`), `z = y^{1/s}`, `(*)` is
+`∀ d, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1`. All constants are absolute (uniform in
+`k`, `M`, `y`, `s`, `z`), and all statements use only `fSieve`, `FSieve`, `bigM`, `Rk`, `R` (the
+Mertens constant `cR` of `R_asymp` is used inside the proofs only).
+
+**Preliminaries** (`Basic.lean`). `siftedCount_le_fail_of_level`, `fail_le_siftedCount_of_level`:
+(2.7), (2.8) with Lemma 2 and (2.12), (2.13) for Rosser's sieve of level `D` applied to a sequence of
+density `y` (from `lemma1_cor_upper/lower` with `rosserTrunc D`; `siftedCount_le_fail` is `D = y`).
+Trivial bounds `siftedCount_le_add_one` (`A ≤ |M| ≤ y + 1`, from `(*)` at `d = 1`), `Rk_le_one`,
+`abs_siftedCount_sub_le` (`|A - y R_k| ≤ 2y`, `y ≥ 1`). `pntE_mul_log_le : 1 ≤ z → pntE z * log z ≤ 2/κ²`;
+`mainMaj_le_four_mul_bigM : sMin lower ≤ s → mainMaj lower s ≤ 4 𝔐(s)` (Lemma 7, and
+`F(3) + 3 - s < 3 = 𝔐(s)` on `[1, 2]`); `exists_cR_div_R_le : cR / R(z) ≤ log z (1 + K pntE z)`
+(Mertens in the form `1/R(y^{1/s}) = L/(cR s) (1 + O(pntE))`).
+
+**Theorem 1** (`TheoremOne.lean`).
+
+    theorem theorem1_core : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Finset ℤ) (y s : ℝ), 1 < y → (*) →
+        s ≤ xi y →
+        (1 ≤ s → A_k(M; y^{1/s}) ≤ y R_k(y^{1/s}) (1 + mainMaj false s / s + C δ(s,y) 𝔐(s) / L)) ∧
+        (2 ≤ s → y R_k(y^{1/s}) (1 - fSieve s / s - C δ(s,y) 𝔐(s) / L) ≤ A_k(M; y^{1/s}))
+
+    theorem theorem1 : ∃ c₀ : ℝ, 0 < c₀ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Finset ℤ) (y s : ℝ), 1 < y →
+        (*) → s ≤ log y / log (log (3 * y)) ^ (11 / 5 : ℝ) →
+        (3 ≤ s → A_k(M; y^{1/s}) < y R_k(y^{1/s}) (1 + FSieve s / s +
+            c₀ (1 + s² log⁵ s / L²)^{5s} 𝔐(s) log (log (3k)) / L)) ∧
+        (2 ≤ s → y R_k(y^{1/s}) (1 - fSieve s / s -
+            c₀ (1 + s² log⁵ s / L²)^{5s} 𝔐(s) log (log (3k)) / L) < A_k(M; y^{1/s}))
+
+(the Lean statements are written out with `siftedCount`, `Rk`, `^ (1 / s)`). Proof of the core:
+for `y ≥ y₀` (`exists_xi_large`, so `z ≥ 2`), with `r = π(z) + 1`:
+* `exists_fail_div_R_le`: Theorem 4 (`r/(r+1) ≤ 1`) and `exists_cR_div_R_le` give
+  `fail/R(z) ≤ (1 + K pntE z) log z (M(s)/L + c₇ δ G/L²)`, `log z = L/s`; the PNT part
+  `K pntE(z) M(s)/s = K (pntE z log z) M(s)/L ≤ 4 K (2/κ²) 𝔐/L`, and `G ≤ 2𝔐/3`, `s ≥ 1`;
+* `exists_card_rosserSet_le`: Theorem 5 at depth `π(z)` (`card_primeFactors_le_card_primesLT`, so
+  the filter is void) gives `#D^± ≤ c₇ δ G y/L²`, and `R_k(z) ≥ R(z) ≥ c/log z = cs/L ≥ c/L`.
+For `1 < y < y₀`: `s ≤ ξ(y) ≤ Ξ = log y₀/(log log 3)^{11/5}` (`xi_le_of_lt`), so
+`C δ 𝔐(s)/L ≥ C 𝔐(Ξ)/log y₀ ≥ 2/R(y₀)`, which makes the upper bound `≥ 2y > y + 1 ≥ A` and the
+lower bracket negative. Then `theorem1` takes `c₀ = (C + 1)/log log 3` (`lt_loglog_err`).
+
+Deviations: (i) `s ≤ ξ(y)` instead of `s < ξ(y)`; (ii) **`log log 3k` is not needed**: [I71]
+bounds `1/R_k(z) < (k/φ(k))/R(z) ≪ log log 3k/R(z)`, but `R(z) ≤ R_k(z)` (`R_le_Rk`) gives
+`1/R_k(z) ≤ 1/R(z)`, so the core form has no `k` at all (`theorem1` is stated with `log log 3k`
+as printed, using `log log 3k ≥ log log 3 > 0`); (iii) the upper bound of the core holds for
+`1 ≤ s` with `F(s) + (3 - s)⁺`. The paper's formulas `f(s) = s - 2e^γ log(s-1)`, `F(s) = …` and
+`𝔐(s) = exp(…)` are separate results (`bigM_asymp` for `𝔐`).
+
+**Fundamental lemma** (`Fundamental.lean`). Theorem 1 only covers `s ≤ ξ(y)`, i.e.
+`log z ≥ λ^{11/5}`; [I71] uses the Corollary and (1.6) for all `z` without comment. We add:
+
+    theorem fundamental_lemma : ∃ C Y : ℝ, 0 ≤ C ∧ 1 < Y ∧ ∀ (k : ℕ) (M : Finset ℤ) (y z : ℝ),
+        Y ≤ y → (*) → 2 ≤ z → log z ≤ log (log (3 * y)) ^ 6 →
+        |A_k(M; z) - y R_k(z)| ≤ C y R_k(z) / log y
+
+Proof: Rosser's sieve at the level `D = z^{λ+2}` (density still `y`), `r = π(z) + 1`.
+`fail_le_tail` with `u = λ`, `X = 6 log λ + |C₅| + 1 ≥ Σ_{p<z} 1/p` (`SLT_le_loglog`) gives
+`fail ≤ 2 exp(-λ log λ + λ log X + λ)`; with `1/R(z) ≤ λ⁶/c` this is `≤ e^{-λ} ≤ 1/L`.
+`#D^± ≤ D ≤ exp((λ+2)λ⁶) ≤ c y/(λ⁶ L)` (`TheoremFive.card_rosserSet_le`, `e^λ = log 3 + L`)
+`≤ y R(z)/L`. The scalar inequalities are `eventually_fl` (in `l = λ → ∞`).
+
+**Corollary** (`Corollary.lean`), with `s = log y / log z`:
+
+    theorem corollary_upper : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Finset ℤ) (y z : ℝ),
+        (*) → 2 ≤ z → z ≤ y →
+        A_k(M; z) < y R_k(z) (1 + (FSieve s + max (3 - s) 0) / s + e₁ log (log (3k)) / L)
+    theorem corollary_lower : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Finset ℤ) (y z : ℝ),
+        1 < y → (*) → 2 ≤ z →
+        y R_k(z) (1 - fSieve s / s - e₁ log (log (3k)) / L) < A_k(M; z)
+
+Ranges: (1.4) for all `z ≥ 2` (trivial for `s < 2`, where `f(s) = 2`); (1.3) for `2 ≤ z ≤ y`
+(`s ≥ 1`), with `F(s) + (3-s)⁺` (= `F(s)` for `s ≥ 3`): our `F` is constant below 3, while the
+Jurkat–Richert upper function there is `2e^γ/s = 1 + (F(3) + 3 - s)/s`. For `z > y` the absolute
+error `e₁ log log 3k / L` is not comparable to the main term `≍ 1/s`, so we exclude it.
+Proof: `y < Y = max(Y_F, e^e)`: trivial as in Theorem 1; `s ≤ ξ(y)`: Theorem 1 with
+`exists_delta_mul_bigM_le : ∃ B, 0 ≤ B ∧ ∀ y s, 1 < y → 1 ≤ s → s ≤ xi y → δ(s,y) 𝔐(s) ≤ B`
+(for large `y`: `s² log⁴ s/L² ≤ ξ² log⁴ ξ/L² ≤ λ^{-2/5} ≤ 1/10` by
+`xi_sq_mul_log_pow_four_div_le`, so `δ ≤ exp(s log s/2)`, against
+`𝔐(s) ≤ 3 exp(c₂ s - s log s - s log log s)` from `majG_mul_exp_le`; for bounded `y`, `s` and
+`s/L ≤ (log log 3)^{-11/5}` are bounded); `s > ξ(y)`: `log z < L/ξ = λ^{11/5} ≤ λ⁶`
+(`div_le_loglog_pow_six`) and the fundamental lemma.
+
+**Theorem 2** (`TheoremTwo.lean`):
+
+    theorem theorem2 : ∃ C : ℝ, ∀ r : ℕ, 2 ≤ r → ∀ (x : ℤ) (m : ℕ),
+        (∀ k < m, ∃ i < r, (Nat.nth Nat.Prime i : ℤ) ∣ x + k) → (m : ℝ) ≤ C * r ^ 2 * log r ^ 2
+
+As in [I71, p. 29], from (1.4) with `k = 1`: `M = {x, …, x + N - 1}` satisfies `(*)` with `y = N`
+(`abs_multiplesCount_interval_sub_le`, from `abs_card_filter_dvd_sub_le`), `c = e₁ log log 3 + 1`,
+`N = ⌈e^c z²⌉`, `z = max(P_r + 1, e^{2c+2})`, so `s ∈ [2 + c/log z, 4]`;
+`one_sub_fSieve_div_ge` (`1 - f(s)/s ≥ 3 log(s-1)/s`) and `log(1 + x) ≥ x/(1 + x)` make the
+bracket of (1.4) `≥ (2c - e₁ log log 3)/L > 0`, so if `m ≥ N` then `0 < A_1(M; z) = 0`. Hence
+`m < N ≤ e^c z² + 1 ≪ (r log r)²` by `nth_prime_le`. Deviation: [I71] sifts by `z = P_r`, which
+does not remove the multiples of `P_r` itself; we use `z ≥ P_r + 1`.
+
+**Theorem 3** (`TheoremThree.lean`):
+
+    theorem theorem3_fst : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Finset ℤ) (y s : ℝ), 1 < y → (*) →
+        2 ≤ s → s < log y / log (log (3 * y)) ^ 6 →
+        |A_k(M; y^{1/s}) - y R_k(y^{1/s})| ≤ C y R_k(y^{1/s}) (exp 1 / (s * log s)) ^ s
+    theorem theorem3_snd : ∃ C : ℝ, ∀ (k : ℕ) (M : Finset ℤ) (y z : ℝ), 1 < y → (*) → 2 ≤ z →
+        log z < log y * log (log (log (16 * y))) / (2 * log (log (3 * y))) →
+        |A_k(M; z) - y R_k(z)| ≤ C y R_k(z) / log y
+
+(1.5): no `k`-dependence (so [I71]'s reduction `k = k₁k₂`, `k₁ < [z+1]!` is not needed). For
+`λ ≥ 1`: `s ≤ ξ`, `L > 2`, `s² log⁶ s ≤ L²` (as `log s ≤ λ`), so `δ ≤ exp(5s/log s)`; with
+`bigM_asymp`, `δ 𝔐 ≤ (e/(s log s))^s` for `log log s ≥ C + 5`, and both sides are bounded above
+and below on `[2, s₁]` (`exists_le_rpow_exp_one_div`); together `exists_delta_mul_bigM_le_rpow`.
+Then Theorem 1 with `f, F + (3-s)⁺ ≤ 4𝔐` (`mainMaj_le_four_mul_bigM`). For `y < e^e`, `s` is
+bounded (`s < L/λ⁶ ≤ e/(log log 3)⁶`) and the claim is trivial. Range: `s ≥ 2` (for `s ≤ 1`,
+`(e/(s log s))^s` is meaningless, and Theorem 1 has no lower bound below 2).
+(1.6): `s = L/log z > 2λ/λ₃`, `λ₃ = log log log 16y ≤ log 3 + log λ` (`logloglog_le_log`, from
+`16y ≤ (3y)³`). For large `y` (`m = log λ ≥ 2`, `m ≥ 2 log m + 4`): if `s < L/λ⁶`, then
+`s ≥ λ/m`, `log s ≥ m - log m ≥ 3` and `s(log s + log log s - 1) ≥ (2λ/λ₃)(m - log m - 1) ≥ λ`,
+so `(e/(s log s))^s ≤ e^{-λ} ≤ 1/L` (`rpow_exp_one_div_eq`) and (1.5) applies; if `s ≥ L/λ⁶`
+(`log z ≤ λ⁶`, not covered by [I71]'s argument), the fundamental lemma applies. For bounded `y`,
+`log z < L (λ + 1)/(2λ)` (`logloglog_le`) is bounded and the claim is trivial. ([I71]'s proof
+drops the factor 2 of the hypothesis; the hypothesis as stated is what we use.)
