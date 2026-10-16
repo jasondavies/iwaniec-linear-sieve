@@ -30,12 +30,10 @@ namespace Main
 
 /-- The interval `{x, …, x + N - 1}` satisfies `(*)` with `y = N` (for any `k`). -/
 theorem abs_multiplesCount_interval_sub_le (x : ℤ) (N d : ℕ) :
-    |(multiplesCount ((range N).image fun k : ℕ ↦ x + k) d : ℝ) - (N : ℝ) / d| ≤ 1 := by
-  have hinj : Function.Injective fun k : ℕ ↦ x + k := fun a b h ↦ by
-    simpa using h
-  have hcount : multiplesCount ((range N).image fun k : ℕ ↦ x + k) d =
+    |(multiplesCount ((range N).val.map fun k : ℕ ↦ x + k) d : ℝ) - (N : ℝ) / d| ≤ 1 := by
+  have hcount : multiplesCount ((range N).val.map fun k : ℕ ↦ x + k) d =
       #((range N).filter fun k : ℕ ↦ (d : ℤ) ∣ x + k) := by
-    rw [multiplesCount, filter_image, card_image_of_injective _ hinj]
+    rw [multiplesCount, Multiset.countP_map, card_def, filter_val]
   rw [hcount]
   rcases Nat.eq_zero_or_pos d with rfl | hd
   · simp only [Nat.cast_zero, div_zero, sub_zero]
@@ -90,13 +88,13 @@ theorem theorem2 : ∃ C : ℝ, ∀ r : ℕ, 2 ≤ r → ∀ (x : ℤ) (m : ℕ)
   have hmN : m < N := by
     by_contra hmN
     rw [not_lt] at hmN
-    set M := (range N).image fun k : ℕ ↦ x + k
+    set M := (range N).val.map fun k : ℕ ↦ x + k
     have hM : ∀ d : ℕ, d.Coprime 1 → |(multiplesCount M d : ℝ) - y / d| ≤ 1 :=
       fun d _ ↦ abs_multiplesCount_interval_sub_le x N d
     have hA : siftedCount 1 M z = 0 := by
-      rw [siftedCount, card_eq_zero, filter_eq_empty_iff]
+      rw [siftedCount, Multiset.countP_eq_zero]
       intro a ha
-      obtain ⟨k, hk, rfl⟩ := mem_image.1 ha
+      obtain ⟨k, hk, rfl⟩ := Multiset.mem_map.1 ha
       obtain ⟨i, hi, hdvd⟩ := hcov k (lt_of_lt_of_le (mem_range.1 hk) hmN)
       push Not
       refine ⟨Nat.nth Nat.Prime i, ?_, hdvd⟩

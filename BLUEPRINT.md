@@ -8,8 +8,10 @@ Goal: a Lean 4 / Mathlib proof of
 
 following
 
-* [I71] H. Iwaniec, *On the error term in the linear sieve*, Acta Arith. 19 (1971), 1–30;
-* [I78] H. Iwaniec, *On the problem of Jacobsthal*, Demonstratio Math. 11 (1978), 225–231.
+* [I71] H. Iwaniec, *On the error term in the linear sieve*, Acta Arith. 19 (1971), 1–30,
+  doi:10.4064/aa-19-1-1-30;
+* [I78] H. Iwaniec, *On the problem of Jacobsthal*, Demonstratio Math. 11 (1978), 225–231,
+  doi:10.1515/dema-1978-0121.
 
 [I71] is followed lemma by lemma, specialised to `k = 1` (the only case [I78] uses). The
 prime-number input is the de la Vallée Poussin prime number theorem
@@ -503,7 +505,8 @@ Items 1–4 are done, in `LinearSieve/Calculus.lean`, `LemmaSeven.lean`, `LemmaE
 
 Files `IwaniecLinearSieve/General/{Defs,LemmaOne,RosserK,Totient,LemmaSixteen}.lean`: the
 general-`k`, general-sequence parts of [I71, §2], the size of `k/φ(k)` used in [I71, §5], and
-[I71, Lemmas 14, 16] as stated. `M` is a `Finset ℤ`; `k : ℕ` is arbitrary (Iwaniec: `k ≥ 1`).
+[I71, Lemmas 14, 16] as stated. `M` is a `Multiset ℤ` (Iwaniec writes `M = {a₁, …, aₙ}`; repeated terms count with multiplicity, and
+a `Finset` is the special case `M.val`); `k : ℕ` is arbitrary (Iwaniec: `k ≥ 1`).
 
 * Notation (`Defs.lean`): `primesLTk k z` (primes `p < z`, `p ∤ k`),
   `Rk k z = ∏_{p < z, p ∤ k} (1 - 1/p)` (`Rk_one : Rk 1 z = R z`),
@@ -691,12 +694,12 @@ Trivial bounds `siftedCount_le_add_one` (`A ≤ |M| ≤ y + 1`, from `(*)` at `d
 
 **Theorem 1** (`TheoremOne.lean`).
 
-    theorem theorem1_core : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Finset ℤ) (y s : ℝ), 1 < y → (*) →
+    theorem theorem1_core : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Multiset ℤ) (y s : ℝ), 1 < y → (*) →
         s ≤ xi y →
         (1 ≤ s → A_k(M; y^{1/s}) ≤ y R_k(y^{1/s}) (1 + mainMaj false s / s + C δ(s,y) 𝔐(s) / L)) ∧
         (2 ≤ s → y R_k(y^{1/s}) (1 - fSieve s / s - C δ(s,y) 𝔐(s) / L) ≤ A_k(M; y^{1/s}))
 
-    theorem theorem1 : ∃ c₀ : ℝ, 0 < c₀ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Finset ℤ) (y s : ℝ), 1 < y →
+    theorem theorem1 : ∃ c₀ : ℝ, 0 < c₀ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Multiset ℤ) (y s : ℝ), 1 < y →
         (*) → s ≤ log y / log (log (3 * y)) ^ (11 / 5 : ℝ) →
         (3 ≤ s → A_k(M; y^{1/s}) < y R_k(y^{1/s}) (1 + FSieve s / s +
             c₀ (1 + s² log⁵ s / L²)^{5s} 𝔐(s) log (log (3k)) / L)) ∧
@@ -724,7 +727,7 @@ as printed, using `log log 3k ≥ log log 3 > 0`); (iii) the upper bound of the 
 **Fundamental lemma** (`Fundamental.lean`). Theorem 1 only covers `s ≤ ξ(y)`, i.e.
 `log z ≥ λ^{11/5}`; [I71] uses the Corollary and (1.6) for all `z` without comment. We add:
 
-    theorem fundamental_lemma : ∃ C Y : ℝ, 0 ≤ C ∧ 1 < Y ∧ ∀ (k : ℕ) (M : Finset ℤ) (y z : ℝ),
+    theorem fundamental_lemma : ∃ C Y : ℝ, 0 ≤ C ∧ 1 < Y ∧ ∀ (k : ℕ) (M : Multiset ℤ) (y z : ℝ),
         Y ≤ y → (*) → 2 ≤ z → log z ≤ log (log (3 * y)) ^ 6 →
         |A_k(M; z) - y R_k(z)| ≤ C y R_k(z) / log y
 
@@ -736,10 +739,10 @@ Proof: Rosser's sieve at the level `D = z^{λ+2}` (density still `y`), `r = π(z
 
 **Corollary** (`Corollary.lean`), with `s = log y / log z`:
 
-    theorem corollary_upper : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Finset ℤ) (y z : ℝ),
+    theorem corollary_upper : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Multiset ℤ) (y z : ℝ),
         (*) → 2 ≤ z → z ≤ y →
         A_k(M; z) < y R_k(z) (1 + (FSieve s + max (3 - s) 0) / s + e₁ log (log (3k)) / L)
-    theorem corollary_lower : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Finset ℤ) (y z : ℝ),
+    theorem corollary_lower : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Multiset ℤ) (y z : ℝ),
         1 < y → (*) → 2 ≤ z →
         y R_k(z) (1 - fSieve s / s - e₁ log (log (3k)) / L) < A_k(M; z)
 
@@ -770,10 +773,10 @@ does not remove the multiples of `P_r` itself; we use `z ≥ P_r + 1`.
 
 **Theorem 3** (`TheoremThree.lean`):
 
-    theorem theorem3_fst : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Finset ℤ) (y s : ℝ), 1 < y → (*) →
+    theorem theorem3_fst : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Multiset ℤ) (y s : ℝ), 1 < y → (*) →
         2 ≤ s → s < log y / log (log (3 * y)) ^ 6 →
         |A_k(M; y^{1/s}) - y R_k(y^{1/s})| ≤ C y R_k(y^{1/s}) (exp 1 / (s * log s)) ^ s
-    theorem theorem3_snd : ∃ C : ℝ, ∀ (k : ℕ) (M : Finset ℤ) (y z : ℝ), 1 < y → (*) → 2 ≤ z →
+    theorem theorem3_snd : ∃ C : ℝ, ∀ (k : ℕ) (M : Multiset ℤ) (y z : ℝ), 1 < y → (*) → 2 ≤ z →
         log z < log y * log (log (log (16 * y))) / (2 * log (log (3 * y))) →
         |A_k(M; z) - y R_k(z)| ≤ C y R_k(z) / log y
 

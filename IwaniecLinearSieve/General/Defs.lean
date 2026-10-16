@@ -4,7 +4,8 @@ import IwaniecLinearSieve.PrimeSums.Product
 /-!
 # Notation with `k` ([I71, §1])
 
-For `k : ℕ` (Iwaniec takes `k ≥ 1`) and a finite set `M` of integers:
+For `k : ℕ` (Iwaniec takes `k ≥ 1`) and a finite sequence `M` of integers, taken as a multiset
+(Iwaniec writes `M = {a₁, …, aₙ}`; repeated values count with multiplicity):
 
 * `primesLTk k z`: the primes `p < z` with `p ∤ k`;
 * `Rk k z = R_k(z) = ∏_{p < z, p ∤ k} (1 - 1/p)`, with `Rk 1 z = R z` (`Rk_one`);
@@ -26,13 +27,13 @@ noncomputable def primesLTk (k : ℕ) (z : ℝ) : Finset ℕ := (primesLT z).fil
 /-- Iwaniec's `R_k(z) = ∏_{p < z, p ∤ k} (1 - 1/p)`. -/
 noncomputable def Rk (k : ℕ) (z : ℝ) : ℝ := ∏ p ∈ primesLTk k z, (1 - (p : ℝ)⁻¹)
 
-/-- Iwaniec's `A_k(M; z)`: the number of elements of `M` not divisible by any prime `p < z`
+/-- Iwaniec's `A_k(M; z)`: the number of terms of `M` not divisible by any prime `p < z`
 with `p ∤ k`. -/
-noncomputable def siftedCount (k : ℕ) (M : Finset ℤ) (z : ℝ) : ℕ :=
-  #{a ∈ M | ∀ p ∈ primesLTk k z, ¬ (p : ℤ) ∣ a}
+noncomputable def siftedCount (k : ℕ) (M : Multiset ℤ) (z : ℝ) : ℕ :=
+  M.countP fun a ↦ ∀ p ∈ primesLTk k z, ¬ (p : ℤ) ∣ a
 
-/-- Iwaniec's `|M_d|`: the number of elements of `M` divisible by `d`. -/
-def multiplesCount (M : Finset ℤ) (d : ℕ) : ℕ := #{a ∈ M | (d : ℤ) ∣ a}
+/-- Iwaniec's `|M_d|`: the number of terms of `M` divisible by `d`. -/
+def multiplesCount (M : Multiset ℤ) (d : ℕ) : ℕ := M.countP fun a ↦ (d : ℤ) ∣ a
 
 variable {k : ℕ} {z : ℝ} {p : ℕ}
 

@@ -22,7 +22,7 @@ open Real Finset Filter
 
 namespace IwaniecLinearSieve
 
-variable {k : ℕ} {M : Finset ℤ} {y D z : ℝ}
+variable {k : ℕ} {M : Multiset ℤ} {y D z : ℝ}
 
 /-- (2.7), Lemma 2 and (2.12) for Rosser's sieve of level `D` applied to a sequence of density
 `y`: under `(*)`, for `r > π(z)`,
@@ -65,8 +65,8 @@ theorem siftedCount_le_add_one
   have h1 := (abs_le.1 (hM 1 (Nat.coprime_one_left k))).2
   have h2 : siftedCount k M z ≤ multiplesCount M 1 := by
     unfold siftedCount multiplesCount
-    calc _ ≤ #M := card_filter_le _ _
-      _ = _ := by rw [filter_true_of_mem fun a _ ↦ by simp]
+    calc _ ≤ Multiset.card M := Multiset.countP_le_card _ _
+      _ = _ := by rw [Multiset.countP_eq_card.2 fun a _ ↦ by simp]
   have h2' : (siftedCount k M z : ℝ) ≤ multiplesCount M 1 := by exact_mod_cast h2
   simp only [Nat.cast_one, div_one] at h1
   linarith

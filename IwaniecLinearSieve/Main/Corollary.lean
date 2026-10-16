@@ -189,7 +189,7 @@ open Main
 `A_k(M; z) < y R_k(z) (1 + (F(s) + (3 - s)⁺)/s + e₁ log log 3k / log y)`.
 For `s ≥ 3` this is (1.3) as printed; for `1 ≤ s < 3` the term `(3 - s)⁺` corrects our
 convention `F(s) = F(3)` below 3 (see the module docstring). -/
-theorem corollary_upper : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Finset ℤ) (y z : ℝ),
+theorem corollary_upper : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Multiset ℤ) (y z : ℝ),
     (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ z → z ≤ y →
     (siftedCount k M z : ℝ) < y * Rk k z * (1 + (FSieve (log y / log z) +
       max (3 - log y / log z) 0) / (log y / log z) + e₁ * log (log (3 * k)) / log y) := by
@@ -264,7 +264,7 @@ theorem corollary_upper : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k �
 /-- **Corollary to [I71, Theorem 1]**, (1.4): under `(*)`, for `y > 1`, `z ≥ 2` and
 `s = log y / log z`, `A_k(M; z) > y R_k(z) (1 - f(s)/s - e₁ log log 3k / log y)`. (For `s < 2`,
 i.e. `z > y^{1/2}`, this is trivial, as `f(s) = 2`.) -/
-theorem corollary_lower : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Finset ℤ) (y z : ℝ),
+theorem corollary_lower : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Multiset ℤ) (y z : ℝ),
     1 < y → (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ z →
     y * Rk k z * (1 - fSieve (log y / log z) / (log y / log z) -
       e₁ * log (log (3 * k)) / log y) < siftedCount k M z := by

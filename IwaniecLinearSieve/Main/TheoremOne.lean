@@ -164,7 +164,7 @@ open Main
 
 * `A_k(M; y^{1/s}) ≤ y R_k(y^{1/s}) (1 + (F(s) + (3 - s)⁺)/s + C δ(s, y) 𝔐(s)/log y)` for `s ≥ 1`;
 * `A_k(M; y^{1/s}) ≥ y R_k(y^{1/s}) (1 - f(s)/s - C δ(s, y) 𝔐(s)/log y)` for `s ≥ 2`. -/
-theorem theorem1_core : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Finset ℤ) (y s : ℝ), 1 < y →
+theorem theorem1_core : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Multiset ℤ) (y s : ℝ), 1 < y →
     (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → s ≤ xi y →
     (1 ≤ s → (siftedCount k M (y ^ (1 / s)) : ℝ) ≤
       y * Rk k (y ^ (1 / s)) * (1 + mainMaj false s / s + C * delta s y * bigM s / log y)) ∧
@@ -303,7 +303,7 @@ where `δ(s, y) = (1 + s² log⁵ s / log² y)^{5s}`.
 
 [I71] assumes `s < ξ(y)`; we allow `s ≤ ξ(y)`. The factor `log log 3k` is not needed
 (`theorem1_core`). -/
-theorem theorem1 : ∃ c₀ : ℝ, 0 < c₀ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Finset ℤ) (y s : ℝ), 1 < y →
+theorem theorem1 : ∃ c₀ : ℝ, 0 < c₀ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Multiset ℤ) (y s : ℝ), 1 < y →
     (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) →
     s ≤ log y / log (log (3 * y)) ^ (11 / 5 : ℝ) →
     (3 ≤ s → (siftedCount k M (y ^ (1 / s)) : ℝ) < y * Rk k (y ^ (1 / s)) *

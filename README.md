@@ -30,13 +30,16 @@ vendored prime number theorem against that allowlist (CI runs both).
 * [I78] H. Iwaniec, *On the problem of Jacobsthal*, Demonstratio Math. 11 (1978), 225–231
   ([doi:10.1515/dema-1978-0121](https://doi.org/10.1515/dema-1978-0121)): the shifted sieve
   (Lemma 1), the estimates quoted from [I71] (Lemma 2), the Theorem and its Corollary.
-* [I71] H. Iwaniec, *On the error term in the linear sieve*, Acta Arith. 19 (1971), 1–30: the
+* [I71] H. Iwaniec, *On the error term in the linear sieve*, Acta Arith. 19 (1971), 1–30
+  ([doi:10.4064/aa-19-1-1-30](https://doi.org/10.4064/aa-19-1-1-30)): the
   Rosser–Iwaniec linear sieve at the sifting limit, with an `O(1/log y)` error in the main term
   (Theorem 4) and support of size `O(y / log² y)` (Theorem 5).
-* J. Friedlander, H. Iwaniec, *Opera de Cribro*, AMS (2010), §12.4–12.6, for the modern form of
+* J. Friedlander, H. Iwaniec, *Opera de Cribro*, AMS Colloquium Publications 57 (2010)
+  ([doi:10.1090/coll/057](https://doi.org/10.1090/coll/057)), §12.4–12.6, for the modern form of
   the same argument.
 
-[I71] is formalised in full: §2 (Lemmas 1, 2 for general `k` and sequences), §3 (the functions
+[I71] is formalised in full: §2 (Lemmas 1, 2 for general `k` and finite sequences `M`, as multisets, so repeated terms count
+with multiplicity), §3 (the functions
 `f`, `F`, `𝔐`, `𝔚`, Lemmas 3–10, including Lemma 5 with `F(3) = 2e^γ - 3` and the asymptotics of
 `𝔐`), §4 (Lemmas 11–17, Theorem 4: main term with error `O(1/log y)`; Theorem 5: support of size
 `O(y / log² y)`) and §5 (Theorem 1 with its Corollary, Theorems 2 and 3), in the module
@@ -80,7 +83,7 @@ their upstream names, a single file should not import both.
 | `SieveFunctions` | `g_n`, `f`, `F`, `f(2) = 2` ([I71, §3, Lemmas 3–5]) |
 | `SieveMajorants` | `𝔐`, `𝔚`, `𝔣`, `𝔉` ([I71, §3, Lemmas 6, 8–10]); the asymptotics of `𝔐` (Theorem 1); the Dickman function |
 | `LinearSieve` | [I71, §4]: Lemmas 7, 11, 12, Corollaries, crude bounds, Theorems 4, 5, and `linearSieveEstimate` |
-| `General` | [I71, §2] for general `k` and sequences: `A_k(M; z)`, `R_k`, Lemma 1 with arbitrary truncations and its Corollary, Lemma 2, (2.12), (2.13); `k/φ(k) ≪ log log 3k`; Lemma 16 |
+| `General` | [I71, §2] for general `k` and finite sequences (multisets) `M`: `A_k(M; z)`, `R_k`, Lemma 1 with arbitrary truncations and its Corollary, Lemma 2, (2.12), (2.13); `k/φ(k) ≪ log log 3k`; Lemma 16 |
 | `Main` | [I71, §1, §5]: Theorems 1–3 and the Corollary; a fundamental lemma for small `z` |
 | `Jacobsthal` | [I78]: the shifted sieve for intervals, the reduction, and `iwaniecBound`; `Jacobsthal.LemmaOne`, `.LemmaTwo`, `.Theorem`: Lemmas 1, 2, the Theorem and the Corollary as stated |
 | `EulerGamma` | Euler's constant: `R(z) log z → e^{-γ}`, Buchstab's `ω` and `ω(∞) = e^{-γ}`, [I71, Lemma 5] in full (`F(3) = 2e^γ - 3`), Theorem 4 with `e^γ` |

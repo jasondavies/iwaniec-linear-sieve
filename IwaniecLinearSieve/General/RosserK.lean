@@ -174,7 +174,7 @@ theorem le_rosserMainK_true_fail (hy : 0 ≤ y) (k : ℕ) {r : ℕ} (hr : #(prim
   rw [rosserMain_true_eq hr]
   field_simp [(R_pos z).ne']
 
-variable {M : Finset ℤ}
+variable {M : Multiset ℤ}
 
 /-- [I71, (2.7)] for Rosser's sieve: under `(*)`, `A_k(M; z) ≤ y G_k(z) + Σ₁(z)`, where
 `Σ₁(z) = #{d ∈ D⁺ : (d, k) = 1}`. -/

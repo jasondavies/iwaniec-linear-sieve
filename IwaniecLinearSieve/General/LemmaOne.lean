@@ -271,42 +271,49 @@ theorem truncSieve_sift (n : ℕ) :
       rw [truncSieve_succ, siftIndicatorK_eq, truncPrimes_true]
       exact sub_le_sub_left (sum_le_sum fun p _ ↦ ih.1 heven _ _ _) _
 
-/-! ### Lemma 1 for finite sets of integers -/
+/-! ### Lemma 1 for finite sequences of integers -/
 
 /-- `∑_{d ∈ D} μ(d) |M_d| = ∑_{a ∈ M} ∑_{d ∈ D, d ∣ a} μ(d)`. -/
-theorem sum_moebius_mul_multiplesCount (D : Finset ℕ) (M : Finset ℤ) :
-    ∑ d ∈ D, μ d * (multiplesCount M d : ℤ) = ∑ a ∈ M, ∑ d ∈ D.filter (· ∣ a.natAbs), μ d := by
-  simp_rw [multiplesCount, card_filter, Nat.cast_sum, mul_sum, sum_filter]
-  rw [sum_comm]
-  refine sum_congr rfl fun a _ ↦ sum_congr rfl fun d _ ↦ ?_
-  simp [Int.natCast_dvd]
+theorem sum_moebius_mul_multiplesCount (D : Finset ℕ) (M : Multiset ℤ) :
+    ∑ d ∈ D, μ d * (multiplesCount M d : ℤ) =
+      (M.map fun a ↦ ∑ d ∈ D.filter (· ∣ a.natAbs), μ d).sum := by
+  induction M using Multiset.induction_on with
+  | empty => simp [multiplesCount]
+  | cons a M ih =>
+    rw [Multiset.map_cons, Multiset.sum_cons, ← ih, sum_filter, ← sum_add_distrib]
+    refine sum_congr rfl fun d _ ↦ ?_
+    simp only [multiplesCount, Multiset.countP_cons, Int.natCast_dvd]
+    split_ifs <;> push_cast <;> ring
 
-theorem siftedCount_eq_sum (k : ℕ) (M : Finset ℤ) (z : ℝ) :
-    (siftedCount k M z : ℤ) = ∑ a ∈ M, siftIndicatorK k z a.natAbs := by
-  simp_rw [siftedCount, card_filter, Nat.cast_sum, siftIndicatorK, Int.natCast_dvd]
-  refine sum_congr rfl fun a _ ↦ ?_
-  split_ifs <;> simp
+theorem siftedCount_eq_sum (k : ℕ) (M : Multiset ℤ) (z : ℝ) :
+    (siftedCount k M z : ℤ) = (M.map fun a ↦ siftIndicatorK k z a.natAbs).sum := by
+  induction M using Multiset.induction_on with
+  | empty => simp [siftedCount]
+  | cons a M ih =>
+    rw [Multiset.map_cons, Multiset.sum_cons, ← ih]
+    simp only [siftedCount, Multiset.countP_cons, siftIndicatorK, Int.natCast_dvd]
+    split_ifs <;> push_cast <;> ring
 
 /-- [I71, (2.1)] for any even depth `n`:
 `A_k(M; z) ≤ ∑_{d ∈ D⁺} μ(d) |M_d|`. -/
-theorem siftedCount_le_sum (hn : Even n) (h : List ℕ) (M : Finset ℤ) (z : ℝ) :
+theorem siftedCount_le_sum (hn : Even n) (h : List ℕ) (M : Multiset ℤ) (z : ℝ) :
     (siftedCount k M z : ℤ) ≤
       ∑ d ∈ truncSet f k false n h z, μ d * (multiplesCount M d : ℤ) := by
   rw [siftedCount_eq_sum, sum_moebius_mul_multiplesCount]
-  exact sum_le_sum fun a _ ↦ (truncSieve_sift n).1 hn h z a.natAbs
+  exact Multiset.sum_map_le_sum_map _ _ fun a _ ↦ (truncSieve_sift n).1 hn h z a.natAbs
 
 /-- [I71, (2.2)] for any odd depth `n`:
 `A_k(M; z) ≥ ∑_{d ∈ D⁻} μ(d) |M_d|`. -/
-theorem sum_le_siftedCount (hn : Odd n) (h : List ℕ) (M : Finset ℤ) (z : ℝ) :
+theorem sum_le_siftedCount (hn : Odd n) (h : List ℕ) (M : Multiset ℤ) (z : ℝ) :
     ∑ d ∈ truncSet f k true n h z, μ d * (multiplesCount M d : ℤ) ≤
       (siftedCount k M z : ℤ) := by
   rw [siftedCount_eq_sum, sum_moebius_mul_multiplesCount]
-  exact sum_le_sum fun a _ ↦ (truncSieve_sift n).2 hn h z a.natAbs
+  exact Multiset.sum_map_le_sum_map _ _ fun a _ ↦ (truncSieve_sift n).2 hn h z a.natAbs
 
 /-- [I71, Lemma 1, (2.1)]: for arbitrary truncation functions `f`, every `r` and `z`,
 `A_k(M; z) ≤ |M| - ∑ |M_{p₁}| + ∑ |M_{p₁p₂}| - ⋯ + ∑ |M_{p₁⋯p_{2r}}|`, the sums running over
 `p_{2r} < ⋯ < p₁ < z`, `pᵢ ∤ k`, with `p_{2i+1} < f_{2i}(p₁, …, p_{2i})`. -/
-theorem lemma1_upper (f : List ℕ → ℝ) (k r : ℕ) (M : Finset ℤ) (z : ℝ) :
+theorem lemma1_upper (f : List ℕ → ℝ) (k r : ℕ) (M : Multiset ℤ) (z : ℝ) :
     (siftedCount k M z : ℤ) ≤
       ∑ d ∈ truncSet f k false (2 * r) [] z, μ d * (multiplesCount M d : ℤ) :=
   siftedCount_le_sum (even_two_mul r) [] M z
@@ -314,7 +321,7 @@ theorem lemma1_upper (f : List ℕ → ℝ) (k r : ℕ) (M : Finset ℤ) (z : �
 /-- [I71, Lemma 1, (2.2)]: for arbitrary truncation functions `f`, every `r ≥ 1` and `z`,
 `A_k(M; z) ≥ |M| - ∑ |M_{p₁}| + ∑ |M_{p₁p₂}| - ⋯ - ∑ |M_{p₁⋯p_{2r-1}}|`, the sums running over
 `p_{2r-1} < ⋯ < p₁ < z`, `pᵢ ∤ k`, with `p_{2i} < f_{2i-1}(p₁, …, p_{2i-1})`. -/
-theorem lemma1_lower (f : List ℕ → ℝ) (k : ℕ) {r : ℕ} (hr : 1 ≤ r) (M : Finset ℤ) (z : ℝ) :
+theorem lemma1_lower (f : List ℕ → ℝ) (k : ℕ) {r : ℕ} (hr : 1 ≤ r) (M : Multiset ℤ) (z : ℝ) :
     ∑ d ∈ truncSet f k true (2 * r - 1) [] z, μ d * (multiplesCount M d : ℤ) ≤
       (siftedCount k M z : ℤ) :=
   sum_le_siftedCount (Nat.Even.sub_odd (by omega) (even_two_mul r) odd_one) [] M z
@@ -327,7 +334,7 @@ noncomputable def truncMain (f : List ℕ → ℝ) (k : ℕ) (lower : Bool) (n :
     (z : ℝ) : ℝ :=
   ∑ d ∈ truncSet f k lower n h z, (μ d : ℝ) / d
 
-theorem sum_moebius_mul_le_of_approx {D : Finset ℕ} {M : Finset ℤ} {y : ℝ}
+theorem sum_moebius_mul_le_of_approx {D : Finset ℕ} {M : Multiset ℤ} {y : ℝ}
     (hM : ∀ d ∈ D, |(multiplesCount M d : ℝ) - y / d| ≤ 1) :
     |∑ d ∈ D, (μ d : ℝ) * multiplesCount M d - y * ∑ d ∈ D, (μ d : ℝ) / d| ≤ #D := by
   rw [mul_sum, ← sum_sub_distrib]
@@ -343,7 +350,7 @@ theorem sum_moebius_mul_le_of_approx {D : Finset ℕ} {M : Finset ℤ} {y : ℝ}
 
 /-- [I71, (2.5), (2.7)] for any even depth: under `(*) |M_d - y/d| ≤ 1` for `(d, k) = 1`,
 `A_k(M; z) ≤ y G(z) + Σ₁(z)` with `Σ₁(z) = #D⁺`. -/
-theorem lemma1_cor_upper (hn : Even n) (h : List ℕ) {M : Finset ℤ} {y : ℝ}
+theorem lemma1_cor_upper (hn : Even n) (h : List ℕ) {M : Multiset ℤ} {y : ℝ}
     (hM : ∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :
     (siftedCount k M z : ℝ) ≤
       y * truncMain f k false n h z + #(truncSet f k false n h z) := by
@@ -358,7 +365,7 @@ theorem lemma1_cor_upper (hn : Even n) (h : List ℕ) {M : Finset ℤ} {y : ℝ}
 
 /-- [I71, (2.6), (2.8)] for any odd depth: under `(*) |M_d - y/d| ≤ 1` for `(d, k) = 1`,
 `A_k(M; z) ≥ y D(z) - Σ₂(z)` with `Σ₂(z) = #D⁻`. -/
-theorem lemma1_cor_lower (hn : Odd n) (h : List ℕ) {M : Finset ℤ} {y : ℝ}
+theorem lemma1_cor_lower (hn : Odd n) (h : List ℕ) {M : Multiset ℤ} {y : ℝ}
     (hM : ∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :
     y * truncMain f k true n h z - #(truncSet f k true n h z) ≤ (siftedCount k M z : ℝ) := by
   have h1 : ∑ d ∈ truncSet f k true n h z, (μ d : ℝ) * multiplesCount M d ≤

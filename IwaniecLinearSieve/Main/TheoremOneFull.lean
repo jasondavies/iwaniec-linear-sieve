@@ -17,7 +17,7 @@ namespace IwaniecLinearSieve
 
 /-- **[I71, Theorem 1]**, with the formulas for `f`, `F` and `𝔐` stated there. -/
 theorem theorem1_full :
-    (∃ c₀ : ℝ, 0 < c₀ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Finset ℤ) (y s : ℝ), 1 < y →
+    (∃ c₀ : ℝ, 0 < c₀ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Multiset ℤ) (y s : ℝ), 1 < y →
       (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) →
       s ≤ log y / log (log (3 * y)) ^ (11 / 5 : ℝ) →
       (3 ≤ s → (siftedCount k M (y ^ (1 / s)) : ℝ) <

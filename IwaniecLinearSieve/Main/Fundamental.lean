@@ -70,7 +70,7 @@ open Main
 
 /-- **Fundamental lemma** (for `log z ≤ (log log 3y)⁶`): under `(*)`,
 `|A_k(M; z) - y R_k(z)| ≤ C y R_k(z) / log y` for all large `y`, uniformly in `k` and `M`. -/
-theorem fundamental_lemma : ∃ C Y : ℝ, 0 ≤ C ∧ 1 < Y ∧ ∀ (k : ℕ) (M : Finset ℤ) (y z : ℝ),
+theorem fundamental_lemma : ∃ C Y : ℝ, 0 ≤ C ∧ 1 < Y ∧ ∀ (k : ℕ) (M : Multiset ℤ) (y z : ℝ),
     Y ≤ y → (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ z →
     log z ≤ log (log (3 * y)) ^ 6 →
     |(siftedCount k M z : ℝ) - y * Rk k z| ≤ C * y * Rk k z / log y := by
