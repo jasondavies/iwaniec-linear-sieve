@@ -1,4 +1,4 @@
-name = "iwaniec_jacobsthal"
+name = "iwaniec_linear_sieve"
 version = "0.1.0"
 defaultTargets = ["IwaniecJacobsthal"]
 

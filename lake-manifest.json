@@ -99,6 +99,6 @@
    "inputRev": "v4.35.0",
    "inherited": true,
    "configFile": "lakefile.toml"}],
- "name": "iwaniec_jacobsthal",
+ "name": "iwaniec_linear_sieve",
  "lakeDir": ".lake",
  "fixedToolchain": false}
