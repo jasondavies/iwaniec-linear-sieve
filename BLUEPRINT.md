@@ -444,7 +444,8 @@ Items 1–4 are done, in `LinearSieve/Calculus.lean`, `LemmaSeven.lean`, `LemmaE
    128)}`, using `ξ²λ⁵/L² = λ^{3/5}`). All "large `y`" facts come from `eventually_scalar`
    (`λ, log λ, λ^{1/5} ≥ c`, `λ - 1 ≤ log L ≤ λ`, `24λ ≤ ξ`, `16λ² ≤ L`, `λ/2 ≤ log(ξ/2)`,
    `4 log λ + c ≤ log ξ ≤ λ`), proved from `log x = o(x)`.
-9. **`LinearSieveEstimate`.** With `y = C₀ z²`, `s = 2 + log C₀ / log z ∈ [2, 2.5]`: take `r` large
+9. **`LinearSieveEstimate`** (done, `LinearSieve/Estimate.lean`: `linearSieveEstimate`, with
+   `C₀ = exp (2 c₇ (1 + 9 log⁵ 3)^{15} + 5)`, `c = 1`; and `iwaniecBound`). With `y = C₀ z²`, `s = 2 + log C₀ / log z ∈ [2, 2.5]`: take `r` large
    (`fail_eq_of_card_lt`), then use Theorem 4, `R_asymp` (`R z = cR s/L · (1 + O(pntE))`) and
    `one_sub_fSieve_div_ge`. This gives
    `R z - rosserMain true y z ≤ R z (f(s)/s + O(1/L)) ≤ R z (1 - 3 log(s-1)/s + O(1/L))`,
