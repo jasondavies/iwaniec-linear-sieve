@@ -280,4 +280,237 @@ theorem asymPsi_neg_five_facts {s : ℝ} (hs : exp 20 ≤ s) :
   calc exp mu ≤ exp (log mu + log (s - 2)) := exp_le_exp.2 (by linarith)
     _ = mu * (s - 2) := by rw [exp_add, exp_log hmu0, exp_log hs2']
 
+/-! ### Sub- and supersolutions of (3.12) -/
+
+/-- The coefficient `((s-1)² - 1/2)/s` of (3.12). -/
+noncomputable def coefA (s : ℝ) : ℝ := ((s - 1) ^ 2 - 1 / 2) / s
+
+theorem continuousOn_asymPhi (c : ℝ) : ContinuousOn (asymPhi c) (Ioi 1) :=
+  fun _ hx => (hasDerivAt_asymPhi c hx).continuousAt.continuousWithinAt
+
+theorem continuousOn_exp_neg_asymPhi (c : ℝ) {a : ℝ} (ha : 1 < a) :
+    ContinuousOn (fun x => exp (-asymPhi c x)) (Ici a) :=
+  ((continuousOn_asymPhi c).mono fun _ hx => lt_of_lt_of_le ha hx).neg.rexp
+
+theorem continuousOn_weight {a : ℝ} (ha : 0 < a) :
+    ContinuousOn (fun x : ℝ => 1 - 1 / (2 * x ^ 2)) (Ici a) := by
+  refine continuousOn_const.sub (continuousOn_const.div (continuousOn_const.mul
+    (continuousOn_id.pow 2)) fun x hx => ?_)
+  have : 0 < x := lt_of_lt_of_le ha hx
+  positivity
+
+theorem intervalIntegrable_weight_exp (c : ℝ) {s : ℝ} (hs : 3 ≤ s) :
+    IntervalIntegrable (fun x => (1 - 1 / (2 * x ^ 2)) * exp (-asymPhi c x)) volume (s - 1) s :=
+  ContinuousOn.intervalIntegrable_of_Icc (by linarith)
+    (((continuousOn_weight (a := s - 1) (by linarith)).mul
+      (continuousOn_exp_neg_asymPhi c (a := s - 1) (by linarith))).mono Icc_subset_Ici_self)
+
+/-- `∫_{s-1}^s e^{-λ(x-(s-1))} dx = (1 - e^{-λ})/λ`. -/
+theorem integral_exp_neg_mul_unit' (s : ℝ) {l : ℝ} (hl : l ≠ 0) :
+    ∫ x in (s - 1)..s, exp (-(l * (x - (s - 1)))) = (1 - exp (-l)) / l := by
+  have := integral_exp_neg_mul_unit (s - 1) hl
+  rwa [sub_add_cancel] at this
+
+/-- `exp(-Φ₁)` is a subsolution of (3.12) for `s ≥ 9`. -/
+theorem coefA_mul_le_integral {s : ℝ} (hs : 9 ≤ s) :
+    coefA s * exp (-asymPhi 1 s) ≤
+      ∫ x in (s - 1)..s, (1 - 1 / (2 * x ^ 2)) * exp (-asymPhi 1 x) := by
+  obtain ⟨hl2, hlt⟩ := asymPsi_one_facts (t := s - 1) (by linarith)
+  set l := asymPsi 1 (log (s - 1)) with hl
+  set H := exp (-asymPhi 1 s) with hH
+  have hl0 : 0 < l := by linarith
+  have hs0 : 0 < s := by linarith
+  set w₀ := 1 - 1 / (2 * (s - 1) ^ 2) with hw₀
+  have hpt : ∀ x ∈ Icc (s - 1) s, w₀ * (H * exp l) * exp (-(l * (x - (s - 1)))) ≤
+      (1 - 1 / (2 * x ^ 2)) * exp (-asymPhi 1 x) := by
+    intro x hx
+    have hwx : w₀ ≤ 1 - 1 / (2 * x ^ 2) := by
+      have : 1 / (2 * x ^ 2) ≤ 1 / (2 * (s - 1) ^ 2) :=
+        one_div_le_one_div_of_le (by nlinarith) (by nlinarith [hx.1])
+      rw [hw₀]; linarith
+    have hhx : H * exp l * exp (-(l * (x - (s - 1)))) ≤ exp (-asymPhi 1 x) := by
+      rw [hH, ← exp_add, ← exp_add, exp_le_exp]
+      have := (asymPhi_sub_mem (c := 1) le_rfl hs hx.1 hx.2).1
+      linarith
+    rw [mul_assoc]
+    exact mul_le_mul hwx hhx (by positivity) (weight_mem (by linarith [hx.1])).1.le
+  have hint : w₀ * (H * exp l) * ((1 - exp (-l)) / l) ≤
+      ∫ x in (s - 1)..s, (1 - 1 / (2 * x ^ 2)) * exp (-asymPhi 1 x) := by
+    rw [← integral_exp_neg_mul_unit' s hl0.ne', ← intervalIntegral.integral_const_mul]
+    exact intervalIntegral.integral_mono_on (by linarith)
+      ((by fun_prop : Continuous fun x =>
+        w₀ * (H * exp l) * exp (-(l * (x - (s - 1))))).intervalIntegrable _ _)
+      (intervalIntegrable_weight_exp 1 (by linarith)) hpt
+  refine le_trans ?_ hint
+  have ea : exp l * (1 - exp (-l)) = exp l - 1 := by
+    rw [mul_sub, mul_one, ← exp_add]; simp
+  have e : w₀ * (H * exp l) * ((1 - exp (-l)) / l) =
+      H * (((s - 1) ^ 2 - 1 / 2) * (exp l - 1) / ((s - 1) ^ 2 * l)) := by
+    rw [← ea, hw₀]
+    have : s - 1 ≠ 0 := by linarith
+    field_simp
+  rw [e, coefA, mul_comm]
+  refine mul_le_mul_of_nonneg_left ?_ (exp_pos _).le
+  have hr : 0 ≤ (s - 1) ^ 2 - 1 / 2 := by nlinarith
+  rw [div_le_div_iff₀ hs0 (mul_pos (by nlinarith) hl0)]
+  have : l * (s - 1) ^ 2 ≤ s * (exp l - 1) := by nlinarith
+  nlinarith [mul_le_mul_of_nonneg_left this hr]
+
+/-- `exp(-Φ₋₅)` is a supersolution of (3.12) for `s ≥ e²⁰`. -/
+theorem integral_le_coefA_mul {s : ℝ} (hs : exp 20 ≤ s) :
+    ∫ x in (s - 1)..s, (1 - 1 / (2 * x ^ 2)) * exp (-asymPhi (-5) x) ≤
+      coefA s * exp (-asymPhi (-5) s) := by
+  have hs9 : 9 ≤ s := by linarith [add_one_le_exp 20]
+  obtain ⟨hm0, hme⟩ := asymPsi_neg_five_facts hs
+  set m := asymPsi (-5) (log s) with hm
+  set H := exp (-asymPhi (-5) s) with hH
+  have hs0 : 0 < s := by linarith
+  have hpt : ∀ x ∈ Icc (s - 1) s, (1 - 1 / (2 * x ^ 2)) * exp (-asymPhi (-5) x) ≤
+      H * exp m * exp (-(m * (x - (s - 1)))) := by
+    intro x hx
+    have hw := weight_mem (x := x) (by linarith [hx.1])
+    have hhx : exp (-asymPhi (-5) x) ≤ H * exp m * exp (-(m * (x - (s - 1)))) := by
+      rw [hH, ← exp_add, ← exp_add, exp_le_exp]
+      have := (asymPhi_sub_mem (c := -5) (by norm_num) hs9 hx.1 hx.2).2
+      linarith
+    calc (1 - 1 / (2 * x ^ 2)) * exp (-asymPhi (-5) x) ≤ 1 * exp (-asymPhi (-5) x) :=
+          mul_le_mul_of_nonneg_right hw.2 (exp_pos _).le
+      _ ≤ _ := by rw [one_mul]; exact hhx
+  have hint : ∫ x in (s - 1)..s, (1 - 1 / (2 * x ^ 2)) * exp (-asymPhi (-5) x) ≤
+      H * exp m * ((1 - exp (-m)) / m) := by
+    rw [← integral_exp_neg_mul_unit' s hm0.ne', ← intervalIntegral.integral_const_mul]
+    exact intervalIntegral.integral_mono_on (by linarith)
+      (intervalIntegrable_weight_exp (-5) (by linarith))
+      ((by fun_prop : Continuous fun x =>
+        H * exp m * exp (-(m * (x - (s - 1))))).intervalIntegrable _ _) hpt
+  refine hint.trans ?_
+  have ea : exp m * ((1 - exp (-m)) / m) = (exp m - 1) / m := by
+    rw [mul_div_assoc', mul_sub, mul_one, ← exp_add]; simp
+  rw [mul_assoc, ea, coefA, mul_comm (((s - 1) ^ 2 - 1 / 2) / s)]
+  refine mul_le_mul_of_nonneg_left ?_ (exp_pos _).le
+  rw [div_le_div_iff₀ hm0 hs0]
+  nlinarith
+
+/-! ### Comparison of `𝔐` with `exp(-Φ_c)` -/
+
+/-- (3.12) in the form `A(s) 𝔐(s) = ∫_{s-1}^s (1 - 1/(2x²)) 𝔐(x) dx`. -/
+theorem coefA_mul_bigM {s : ℝ} (hs : 3 ≤ s) :
+    coefA s * bigM s = ∫ x in (s - 1)..s, (1 - 1 / (2 * x ^ 2)) * bigM x := by
+  rw [coefA, div_mul_eq_mul_div, bigM_integral_identity hs]
+
+theorem coefA_pos {s : ℝ} (hs : 3 ≤ s) : 0 < coefA s := by
+  unfold coefA
+  have : 0 < (s - 1) ^ 2 - 1 / 2 := by nlinarith
+  positivity
+
+theorem asymPhi_nonneg {c : ℝ} (hc : 0 ≤ c) {s : ℝ} (hs : 8 ≤ s) : 0 ≤ asymPhi c s := by
+  have hL := two_le_log_of_eight_le hs
+  have hl := (log_le_sub_one_of_two_le hL).1
+  unfold asymPhi
+  have : 0 ≤ (log (log s) + c) / log s := by positivity
+  have : 0 ≤ s := by linarith
+  have : 0 ≤ log s + log (log s) - 1 + (log (log s) + c) / log s := by linarith
+  positivity
+
+/-- Lower bound: `𝔐(s) ≥ κ exp(-Φ₁(s))` for `s ≥ 9`. -/
+theorem bigM_ge_exp_asymPhi : ∃ κ > 0, ∀ s ≥ 9, κ * exp (-asymPhi 1 s) ≤ bigM s := by
+  set κ := bigM 10 / 2 with hκ
+  have hκ0 : 0 < κ := by have := bigM_pos 10; positivity
+  refine ⟨κ, hκ0, fun s hs => ?_⟩
+  have := lt_of_sub_super (A := coefA) (w := fun x => 1 - 1 / (2 * x ^ 2))
+    (f := fun x => κ * exp (-asymPhi 1 x)) (g := bigM) (a := 10)
+    (continuousOn_const.mul (continuousOn_exp_neg_asymPhi 1 (by norm_num)))
+    continuous_bigM.continuousOn (continuousOn_weight (by norm_num))
+    (fun x hx => (weight_mem (by linarith [hx.le])).1) (fun s hs => coefA_pos (by linarith))
+    (fun s hs => ?_) (fun s hs => (coefA_mul_bigM (by linarith)).ge) (fun x hx => ?_) s
+    (by norm_num; linarith)
+  · exact this.le
+  · rw [intervalIntegral.integral_congr (g := fun x => κ * ((1 - 1 / (2 * x ^ 2)) *
+      exp (-asymPhi 1 x))) (fun x _ => by simp only; ring), intervalIntegral.integral_const_mul,
+      mul_left_comm]
+    exact mul_le_mul_of_nonneg_left (coefA_mul_le_integral (by linarith)) hκ0.le
+  · have h1 : exp (-asymPhi 1 x) ≤ 1 := by
+      rw [exp_le_one_iff, neg_nonpos]
+      exact asymPhi_nonneg zero_le_one (by norm_num at hx; linarith [hx.1])
+    have h2 : bigM 10 ≤ bigM x := bigM_antitone hx.2
+    have h3 := bigM_pos 10
+    show κ * exp (-asymPhi 1 x) < bigM x
+    nlinarith
+
+/-- Upper bound: `𝔐(s) ≤ C exp(-Φ₋₅(s))` for `s ≥ e²⁰`. -/
+theorem bigM_le_exp_asymPhi : ∃ C, ∀ s ≥ exp 20, bigM s ≤ C * exp (-asymPhi (-5) s) := by
+  set a := exp 20 with ha
+  have ha21 : 21 ≤ a := by linarith [add_one_le_exp 20]
+  obtain ⟨x₀, hx₀, hmax⟩ := isCompact_Icc.exists_isMaxOn (nonempty_Icc.2 (by linarith : a - 1 ≤ a))
+    (((continuousOn_asymPhi (-5)).mono fun x hx => by
+      simp only [mem_Ioi]; linarith [hx.1]) : ContinuousOn (asymPhi (-5)) (Icc (a - 1) a))
+  set C := 4 * exp (asymPhi (-5) x₀) with hC
+  refine ⟨C, fun s hs => ?_⟩
+  have := lt_of_sub_super (A := coefA) (w := fun x => 1 - 1 / (2 * x ^ 2))
+    (f := bigM) (g := fun x => C * exp (-asymPhi (-5) x)) (a := a)
+    continuous_bigM.continuousOn
+    (continuousOn_const.mul (continuousOn_exp_neg_asymPhi (-5) (by linarith)))
+    (continuousOn_weight (by linarith))
+    (fun x hx => (weight_mem (by linarith [hx.le])).1) (fun s hs => coefA_pos (by linarith))
+    (fun s hs => (coefA_mul_bigM (by linarith)).le) (fun s hs => ?_) (fun x hx => ?_) s
+    (by linarith)
+  · exact this.le
+  · rw [intervalIntegral.integral_congr (g := fun x => C * ((1 - 1 / (2 * x ^ 2)) *
+      exp (-asymPhi (-5) x))) (fun x _ => by simp only; ring), intervalIntegral.integral_const_mul,
+      mul_left_comm]
+    exact mul_le_mul_of_nonneg_left (integral_le_coefA_mul hs) (by positivity)
+  · show bigM x < C * exp (-asymPhi (-5) x)
+    have h1 : asymPhi (-5) x ≤ asymPhi (-5) x₀ := hmax hx
+    have h2 : 4 ≤ C * exp (-asymPhi (-5) x) := by
+      rw [hC, mul_assoc, ← exp_add]
+      have : 1 ≤ exp (asymPhi (-5) x₀ + -asymPhi (-5) x) := one_le_exp (by linarith)
+      linarith
+    linarith [bigM_le_three x]
+
+/-- **The asymptotics of `𝔐`** ([I71, Theorem 1]):
+`𝔐(s) = exp{-s (log s + log log s - 1 + log log s / log s) + O(s / log s)}`. -/
+theorem bigM_asymp : ∃ C s₀ : ℝ, ∀ s ≥ s₀,
+    |Real.log (bigM s) + s * (Real.log s + Real.log (Real.log s) - 1 +
+      Real.log (Real.log s) / Real.log s)| ≤ C * s / Real.log s := by
+  obtain ⟨κ, hκ, hlow⟩ := bigM_ge_exp_asymPhi
+  obtain ⟨C, hup⟩ := bigM_le_exp_asymPhi
+  refine ⟨|log κ| + |log C| + 5, exp 20, fun s hs => ?_⟩
+  have hs9 : 9 ≤ s := by linarith [add_one_le_exp 20]
+  have hs0 : 0 < s := by linarith
+  have hL : 0 < log s := log_pos (by linarith)
+  have hsL : 1 ≤ s / log s := by
+    rw [le_div_iff₀ hL, one_mul]; linarith [log_le_sub_one_of_pos hs0]
+  have hM := bigM_pos s
+  have e0 : s * (log s + log (log s) - 1 + log (log s) / log s) = asymPhi 0 s := by
+    unfold asymPhi; rw [add_zero]
+  rw [e0]
+  have h1 := hlow s hs9
+  have h2 := hup s hs
+  have hC : 0 < C := by
+    by_contra h
+    push Not at h
+    have : C * exp (-asymPhi (-5) s) ≤ 0 := mul_nonpos_of_nonpos_of_nonneg h (exp_pos _).le
+    linarith
+  -- logarithmic forms
+  have l1 : log κ - asymPhi 1 s ≤ log (bigM s) := by
+    have := log_le_log (by positivity) h1
+    rwa [log_mul hκ.ne' (exp_pos _).ne', log_exp, ← sub_eq_add_neg] at this
+  have l2 : log (bigM s) ≤ log C - asymPhi (-5) s := by
+    have := log_le_log hM h2
+    rwa [log_mul hC.ne' (exp_pos _).ne', log_exp, ← sub_eq_add_neg] at this
+  rw [asymPhi_eq_add 1 s] at l1
+  rw [asymPhi_eq_add (-5) s] at l2
+  have e1 : (|log κ| + |log C| + 5) * s / log s =
+      (|log κ| + |log C|) * (s / log s) + 5 * (s / log s) := by ring
+  have e2 : 1 * s / log s = s / log s := by ring
+  have e3 : -5 * s / log s = -(5 * (s / log s)) := by ring
+  rw [e2] at l1
+  rw [e3] at l2
+  rw [e1, abs_le]
+  have k1 := neg_abs_le (log κ)
+  have k2 := le_abs_self (log C)
+  have k3 : 0 ≤ |log κ| := abs_nonneg _
+  have k4 : 0 ≤ |log C| := abs_nonneg _
+  constructor <;> nlinarith
+
 end IwaniecLinearSieve
