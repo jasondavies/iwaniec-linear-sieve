@@ -17,4 +17,5 @@ import IwaniecLinearSieve.LinearSieve.TheoremFiveAux
 import IwaniecLinearSieve.LinearSieve.TheoremFiveCount
 import IwaniecLinearSieve.LinearSieve.TheoremFive
 import IwaniecLinearSieve.LinearSieve.Estimate
+import IwaniecLinearSieve.EulerGamma
 import IwaniecLinearSieve.Jacobsthal

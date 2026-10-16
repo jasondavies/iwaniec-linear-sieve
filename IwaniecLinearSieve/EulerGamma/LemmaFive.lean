@@ -11,7 +11,8 @@ Here we complete [I71, Lemma 5] following Iwaniec. Let `A = F(3) + 3` and extend
 * `W(s) = s W'(s+1) = f(s) - F(3) - 3 + s` on `[2, 3]`,
 * `W(s) = s W'(s+1) = 2s - A` on `(-∞, 2]` (`WSieve`).
 
-Then `W'(s) = W(s-1)/(s-1)` for `s > 2` (`hasDerivAt_WSieve`; we do not need the points `3`, `4`),
+Then `W'(s) = W(s-1)/(s-1)` for `s > 2` (`hasDerivAt_WSieve`; first for `s ≠ 3, 4`, then at
+`3` and `4` by continuity of the right-hand side),
 so `w(s) = (2s - W(s))/(s A)` satisfies `w(s) = 1/s` on `[1, 2]` and `(s w(s))' = w(s - 1)` for
 `s > 2`: `w` is Buchstab's function `ω` (`buchstab_eq_wSieve`). Since `W(s) = O(s e^{-s})`,
 `ω(s) - 2/A = O(e^{-s})`, so by `eq_exp_neg_of_integrableOn_buchstab_sub` `2/A = e^{-γ}`, i.e.
@@ -66,7 +67,7 @@ theorem continuous_WSieve : Continuous WSieve := by
   exact this
 
 /-- [I71, (3.8)] for the extended `W`: `W'(s) = W(s-1)/(s-1)` for `s > 2`, `s ≠ 3, 4`. -/
-theorem hasDerivAt_WSieve {s : ℝ} (hs : 2 < s) (hs3 : s ≠ 3) (hs4 : s ≠ 4) :
+theorem hasDerivAt_WSieve_of_ne {s : ℝ} (hs : 2 < s) (hs3 : s ≠ 3) (hs4 : s ≠ 4) :
     HasDerivAt WSieve (WSieve (s - 1) / (s - 1)) s := by
   have hs1 : s - 1 ≠ 0 := by linarith
   rcases lt_or_gt_of_ne hs3 with h3 | h3
@@ -104,6 +105,57 @@ theorem hasDerivAt_WSieve {s : ℝ} (hs : 2 < s) (hs3 : s ≠ 3) (hs4 : s ≠ 4)
     field_simp
     ring
 
+theorem continuousOn_WSieve_shift :
+    ContinuousOn (fun t => WSieve (t - 1) / (t - 1)) (Ioi 2) :=
+  (continuous_WSieve.comp (continuous_sub_right 1)).continuousOn.div
+    (continuous_sub_right 1).continuousOn fun t ht => by linarith [mem_Ioi.1 ht]
+
+/-- [I71, (3.8)] for the extended `W` (Iwaniec: `W` is of class `C¹` on `s ≥ 2`):
+`W'(s) = W(s-1)/(s-1)` for `s > 2`. -/
+theorem hasDerivAt_WSieve {s : ℝ} (hs : 2 < s) :
+    HasDerivAt WSieve (WSieve (s - 1) / (s - 1)) s := by
+  have hc := continuousOn_WSieve_shift
+  -- `W(y) = W(s) + ∫_s^y W(t-1)/(t-1) dt` for `y > 2`
+  have heq : ∀ y ∈ Ioi (2 : ℝ),
+      WSieve y = WSieve s + ∫ t in s..y, WSieve (t - 1) / (t - 1) := by
+    intro y hy
+    have hsub : uIcc s y ⊆ Ioi 2 := by
+      intro t ht
+      rw [mem_uIcc] at ht
+      simp only [mem_Ioi] at hy ⊢
+      rcases ht with ht | ht <;> linarith [ht.1]
+    have := integral_eq_of_hasDerivAt_off_countable (f := WSieve)
+      (f' := fun t => WSieve (t - 1) / (t - 1)) (s := {3, 4}) (Set.toFinite _).countable
+      continuous_WSieve.continuousOn (fun t ht => by
+        simp only [Set.mem_sdiff, mem_insert_iff, mem_singleton_iff, not_or] at ht
+        refine hasDerivAt_WSieve_of_ne ?_ ht.2.1 ht.2.2
+        have := ht.1.1
+        rw [min_lt_iff] at this
+        simp only [mem_Ioi] at hy
+        rcases this with h | h <;> linarith)
+      ((hc.mono hsub).intervalIntegrable)
+    linarith
+  have hF : HasDerivAt (fun y => WSieve s + ∫ t in s..y, WSieve (t - 1) / (t - 1))
+      (WSieve (s - 1) / (s - 1)) s :=
+    (intervalIntegral.integral_hasDerivAt_right
+      ((hc.mono fun t ht => by
+        rw [uIcc_self, mem_singleton_iff] at ht
+        exact ht ▸ hs).intervalIntegrable)
+      (hc.stronglyMeasurableAtFilter isOpen_Ioi s hs)
+      (hc.continuousAt (Ioi_mem_nhds hs))).const_add _
+  refine hF.congr_of_eventuallyEq ?_
+  filter_upwards [Ioi_mem_nhds hs] with y hy
+  exact heq y hy
+
+/-- [I71, (3.8)]: `W = f - F` satisfies `W'(s) = W(s-1)/(s-1)` for `s ≥ 4`. -/
+theorem hasDerivAt_fSieve_sub_FSieve {s : ℝ} (hs : 4 ≤ s) :
+    HasDerivAt (fun s => fSieve s - FSieve s)
+      ((fSieve (s - 1) - FSieve (s - 1)) / (s - 1)) s := by
+  rw [← WSieve_of_three_le (by linarith)]
+  refine (hasDerivAt_WSieve (by linarith)).congr_of_eventuallyEq ?_
+  filter_upwards [Ioi_mem_nhds (show (3 : ℝ) < s by linarith)] with u hu
+  exact (WSieve_of_three_le (le_of_lt hu)).symm
+
 theorem wSieve_of_mem_Icc {s : ℝ} (hs : s ∈ Icc (1 : ℝ) 2) : wSieve s = 1 / s := by
   have hs0 : s ≠ 0 := by linarith [hs.1]
   rw [wSieve, WSieve_of_le_two hs.2]
@@ -115,10 +167,10 @@ theorem continuousOn_wSieve : ContinuousOn wSieve (Ici 1) :=
     (continuous_id.mul continuous_const).continuousOn fun s hs =>
       mul_ne_zero (by linarith [hs.out]) FSieve_three_add_three_pos.ne'
 
-theorem hasDerivAt_mul_wSieve {s : ℝ} (hs : 2 < s) (hs3 : s ≠ 3) (hs4 : s ≠ 4) :
+theorem hasDerivAt_mul_wSieve {s : ℝ} (hs : 2 < s) :
     HasDerivAt (fun u => u * wSieve u) (wSieve (s - 1)) s := by
   have hA : FSieve 3 + 3 ≠ 0 := FSieve_three_add_three_pos.ne'
-  have hd := (((hasDerivAt_id' s).const_mul 2).sub (hasDerivAt_WSieve hs hs3 hs4)).div_const
+  have hd := (((hasDerivAt_id' s).const_mul 2).sub (hasDerivAt_WSieve hs)).div_const
     (FSieve 3 + 3)
   have hd' := hd.congr_of_eventuallyEq (f₁ := fun u => u * wSieve u) (by
     filter_upwards [Ioi_mem_nhds (show (0 : ℝ) < s by linarith)] with u hu
@@ -132,10 +184,8 @@ theorem hasDerivAt_mul_wSieve {s : ℝ} (hs : 2 < s) (hs3 : s ≠ 3) (hs4 : s �
 
 /-- [I71, Lemma 5]: Iwaniec's `w` is Buchstab's function `ω` on `[1, ∞)`. -/
 theorem wSieve_eqOn_buchstab : EqOn wSieve buchstab (Ici 1) :=
-  eqOn_buchstab (S := {3, 4}) (Set.toFinite _).countable continuousOn_wSieve
-    (fun _ hu => wSieve_of_mem_Icc hu) fun _ hu hS => by
-      simp only [mem_insert_iff, mem_singleton_iff, not_or] at hS
-      exact hasDerivAt_mul_wSieve hu hS.1 hS.2
+  eqOn_buchstab (S := ∅) countable_empty continuousOn_wSieve
+    (fun _ hu => wSieve_of_mem_Icc hu) fun _ hu _ => hasDerivAt_mul_wSieve hu
 
 theorem buchstab_eq_wSieve {u : ℝ} (hu : 1 ≤ u) :
     buchstab u = (2 * u - WSieve u) / (u * (FSieve 3 + 3)) :=
