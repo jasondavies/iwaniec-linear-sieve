@@ -1,4 +1,4 @@
-import PrimeNumberTheoremAnd.StrongPNT
+import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.StrongPNT
 import IwaniecLinearSieve.Basic
 
 /-!

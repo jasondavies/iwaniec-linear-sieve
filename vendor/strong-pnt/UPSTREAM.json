@@ -9,106 +9,125 @@
       "repository": "https://github.com/leanprover-community/mathlib4",
       "revision": "v4.34.0",
       "path": "Mathlib/Tactic/LinearCombinationPrime.lean",
-      "note": "removed from Mathlib in v4.35.0; vendored unchanged at a new module path"
+      "note": "removed from Mathlib in v4.35.0; vendored at a new module path"
     }
   },
+  "module_prefix": "Every upstream module `M` is vendored as `IwaniecLinearSieveVendor.M` (file `IwaniecLinearSieveVendor/M.lean`, imports rewritten accordingly) so that the vendored copy cannot collide with PrimeNumberTheoremAnd or LeanArchitect in a downstream workspace; local_sha256 includes this rewrite",
   "entrypoints": [
-    "PrimeNumberTheoremAnd.StrongPNT",
-    "PrimeNumberTheoremAnd.IEANTN.Mertens"
+    "IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.StrongPNT",
+    "IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.IEANTN.Mertens"
   ],
   "local_lean": "4.35.0",
   "patches": {
-    "PrimeNumberTheoremAnd/EulerMaclaurin.lean": "import Mathlib.MeasureTheory.Function.Floor (no longer imported transitively)",
-    "PrimeNumberTheoremAnd/IEANTN/Mertens.lean": "import Mathlib.Analysis.SpecialFunctions.Integrability.Log (LogMeromorphic was renamed); integrableOn_indicator_iff now takes a NullMeasurableSet",
-    "PrimeNumberTheoremAnd/MellinCalculus.lean": "Integrable.piecewise now takes a NullMeasurableSet",
-    "PrimeNumberTheoremAnd/StrongPNT.lean": "BorelCaratheodoryDeriv: replace field_simp; ring by an explicit rewrite",
-    "PrimeNumberTheoremAnd/Tactic/AdditiveCombination.lean": "import the vendored LinearCombinationPrime"
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/EulerMaclaurin.lean": "import Mathlib.MeasureTheory.Function.Floor (no longer imported transitively)",
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/IEANTN/Mertens.lean": "import Mathlib.Analysis.SpecialFunctions.Integrability.Log (LogMeromorphic was renamed); integrableOn_indicator_iff now takes a NullMeasurableSet",
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/MellinCalculus.lean": "Integrable.piecewise now takes a NullMeasurableSet",
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/StrongPNT.lean": "BorelCaratheodoryDeriv: replace field_simp; ring by an explicit rewrite",
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/Tactic/AdditiveCombination.lean": "import the vendored LinearCombinationPrime",
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/ZetaBounds.lean": "ENNReal.addLECancellable_iff_ne is deprecated: use ENNReal.addLECancellable_iff_ne_top"
   },
   "files": {
-    "PrimeNumberTheoremAnd/Auxiliary.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/Auxiliary.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/Auxiliary.lean",
       "upstream_sha256": "6a57cc112e9a6dbe780c019cb22fa1469733afc78976f3aeeaaa80949acf0cfc",
       "local_sha256": "6a57cc112e9a6dbe780c019cb22fa1469733afc78976f3aeeaaa80949acf0cfc"
     },
-    "PrimeNumberTheoremAnd/EulerMaclaurin.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/EulerMaclaurin.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/EulerMaclaurin.lean",
       "upstream_sha256": "a1def4a9f8f0b36864c5d480db137c1d86be3db1a47b67ae151e587a99167146",
       "local_sha256": "349a2be84b697c6262f57c61a91e739c9d78f45ba73751a1404a21a29e7b6f48"
     },
-    "PrimeNumberTheoremAnd/Fourier.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/Fourier.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/Fourier.lean",
       "upstream_sha256": "44d2c28b251be0296f897e43a75a055f346a6199849b54ab204240fe4099e6c2",
-      "local_sha256": "44d2c28b251be0296f897e43a75a055f346a6199849b54ab204240fe4099e6c2"
+      "local_sha256": "a1cb03db149cbe37181fd15522645d8afcbd7a2a4040ddc0a182ba1a33ff603f"
     },
-    "PrimeNumberTheoremAnd/IEANTN/Mertens.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/IEANTN/Mertens.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/IEANTN/Mertens.lean",
       "upstream_sha256": "6f71a221604463ba1479872012cfb12b885a9e6a8f8abb87a08b4c12c4dca60b",
-      "local_sha256": "4118d652ad0d671a7977df5bd57e13398534f6e27a539a00806d4d52bf2bc7bd"
+      "local_sha256": "9d5ddf42fdf35c6b0deba66d87819526ea4b7401fde6be8d15d656ae653f99ac"
     },
-    "PrimeNumberTheoremAnd/Mathlib/Algebra/Notation/Support.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/Mathlib/Algebra/Notation/Support.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/Mathlib/Algebra/Notation/Support.lean",
       "upstream_sha256": "e688bf925c2130b291c536d3b93b72c20e41ae95d530c90915921d75a6f52504",
       "local_sha256": "e688bf925c2130b291c536d3b93b72c20e41ae95d530c90915921d75a6f52504"
     },
-    "PrimeNumberTheoremAnd/Mathlib/Analysis/SpecialFunctions/Log/Basic.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/Mathlib/Analysis/SpecialFunctions/Log/Basic.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/Mathlib/Analysis/SpecialFunctions/Log/Basic.lean",
       "upstream_sha256": "7e3e2b8f84e6c170051a6474272455bed2432e6fddac5660072318b9b4eda7ec",
       "local_sha256": "7e3e2b8f84e6c170051a6474272455bed2432e6fddac5660072318b9b4eda7ec"
     },
-    "PrimeNumberTheoremAnd/Mathlib/Tactic/LinearCombinationPrime.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/Mathlib/Tactic/LinearCombinationPrime.lean": {
       "source": "mathlib",
+      "upstream_path": "Mathlib/Tactic/LinearCombinationPrime.lean",
       "upstream_sha256": "97be47e7235bf64079129748fa9ebfb9e9cb7e740202764233ab941715d6c1f8",
       "local_sha256": "97be47e7235bf64079129748fa9ebfb9e9cb7e740202764233ab941715d6c1f8"
     },
-    "PrimeNumberTheoremAnd/MediumPNT.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/MediumPNT.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/MediumPNT.lean",
       "upstream_sha256": "f177fb6df5f6058fdab158dd951922f64a052246892bd319c1b0b9d7feb27d3f",
-      "local_sha256": "f177fb6df5f6058fdab158dd951922f64a052246892bd319c1b0b9d7feb27d3f"
+      "local_sha256": "6a4c61a8ce60892df39a57432e385f8330c777d5b49070db95c94cd213755457"
     },
-    "PrimeNumberTheoremAnd/MellinCalculus.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/MellinCalculus.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/MellinCalculus.lean",
       "upstream_sha256": "2267fb70ecae3467007b4ba4023f263cfa51a2f57c9527a9f66230484bcc0ebf",
-      "local_sha256": "478c58748962878aeacbaf589e08251e22f250d5780a9db5e59fb14b94c3db14"
+      "local_sha256": "d6e0ee513c6bbbfc9e1e14fc30d5eb2b344efeda3d0aa9bd4b8b26d8a591600a"
     },
-    "PrimeNumberTheoremAnd/Rectangle.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/Rectangle.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/Rectangle.lean",
       "upstream_sha256": "ab1c0c7c16ad9f3765e439fe42a739d4d25f09aa991df6c4c303f77380a89885",
-      "local_sha256": "ab1c0c7c16ad9f3765e439fe42a739d4d25f09aa991df6c4c303f77380a89885"
+      "local_sha256": "58045cf03d06fd2c117e4c8ab82ae5ba57b589795e6f7a24f610430cf7fc28f5"
     },
-    "PrimeNumberTheoremAnd/ResidueCalcOnRectangles.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/ResidueCalcOnRectangles.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/ResidueCalcOnRectangles.lean",
       "upstream_sha256": "6a8ab0005546490f91b615f6bfbe8818ba21f3afe008a893174ab1a0e3e45cb8",
-      "local_sha256": "6a8ab0005546490f91b615f6bfbe8818ba21f3afe008a893174ab1a0e3e45cb8"
+      "local_sha256": "060d40d86112fc1e7ed0a97c42192bcde2b088aefe7fac82b1daf6ee9a2078c9"
     },
-    "PrimeNumberTheoremAnd/SmoothExistence.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/SmoothExistence.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/SmoothExistence.lean",
       "upstream_sha256": "e689045a2d7f92c71c68fda6aa69a89d4a8692187475ba432ed010f453110ea0",
-      "local_sha256": "e689045a2d7f92c71c68fda6aa69a89d4a8692187475ba432ed010f453110ea0"
+      "local_sha256": "751a8fef75e6842994a22093f2a7ef6733359727c069e858f99ec4dea4d7b97f"
     },
-    "PrimeNumberTheoremAnd/Sobolev.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/Sobolev.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/Sobolev.lean",
       "upstream_sha256": "fe06e13fad5b47dbd324307ba246110515c4cb50f4c41d6cb15764fd53b1b8ef",
       "local_sha256": "fe06e13fad5b47dbd324307ba246110515c4cb50f4c41d6cb15764fd53b1b8ef"
     },
-    "PrimeNumberTheoremAnd/StrongPNT.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/StrongPNT.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/StrongPNT.lean",
       "upstream_sha256": "ee449fe4f69ac1e6f589d5fa5b0f94ff1edb31cdad50feebf383541b40065f3c",
-      "local_sha256": "9151ab4e148bf837401100fc32af0edb1ba447b539906f30cc8e7cac97862fec"
+      "local_sha256": "5285bf9553f783159ebb0c099b90e40a76a3b7468164e8f5ef8a4f4cdf435013"
     },
-    "PrimeNumberTheoremAnd/Tactic/AdditiveCombination.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/Tactic/AdditiveCombination.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/Tactic/AdditiveCombination.lean",
       "upstream_sha256": "ea898bb0a4889d82fe4b94b7052daa73083d1f3aa3cddb5336f0513580a17040",
-      "local_sha256": "a2b08fafe1d0687e746652de7850a0418ff4d13d63bf83d7b1e692edfb6acc11"
+      "local_sha256": "259de96266cd8645c6b176e1f64e1d58b9acb568c128f19503f6a49cd8b8751b"
     },
-    "PrimeNumberTheoremAnd/ZetaBounds.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/ZetaBounds.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/ZetaBounds.lean",
       "upstream_sha256": "5cf9bcbc85029d5ef23a41eda28827c9fcc68af62e47b199a46d54981b20d6e1",
-      "local_sha256": "5cf9bcbc85029d5ef23a41eda28827c9fcc68af62e47b199a46d54981b20d6e1"
+      "local_sha256": "5d3c9501beda082b7836ba8330bd5860eb0f7e01dac37aae47dcd7b972ba58b3"
     },
-    "PrimeNumberTheoremAnd/ZetaConj.lean": {
+    "IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/ZetaConj.lean": {
       "source": "PrimeNumberTheoremAnd",
+      "upstream_path": "PrimeNumberTheoremAnd/ZetaConj.lean",
       "upstream_sha256": "08a9153c6500464c574f466a5569e82adbd5fb152a96a914fbb77c3208d0a71c",
-      "local_sha256": "08a9153c6500464c574f466a5569e82adbd5fb152a96a914fbb77c3208d0a71c"
+      "local_sha256": "87ac376c39fe5b92d6349cf56c3ec601c40ee2e5766b287681a65752605313ac"
     }
   }
 }

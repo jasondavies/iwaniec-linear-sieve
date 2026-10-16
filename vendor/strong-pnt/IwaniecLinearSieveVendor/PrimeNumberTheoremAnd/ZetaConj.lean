@@ -1,4 +1,4 @@
-import Architect
+import IwaniecLinearSieveVendor.Architect
 import Mathlib.Analysis.Calculus.Deriv.Star
 import Mathlib.Analysis.Normed.Module.Connected
 import Mathlib.NumberTheory.Harmonic.ZetaAsymp

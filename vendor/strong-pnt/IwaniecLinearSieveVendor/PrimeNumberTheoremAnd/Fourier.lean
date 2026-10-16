@@ -3,7 +3,7 @@ import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 import Mathlib.Topology.ContinuousMap.Bounded.Basic
 import Mathlib.Order.Filter.ZeroAndBoundedAtFilter
 import Mathlib.Analysis.Fourier.FourierTransformDeriv
-import PrimeNumberTheoremAnd.Sobolev
+import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Sobolev
 
 open FourierTransform Real Complex MeasureTheory Filter Topology BoundedContinuousFunction
   SchwartzMap VectorFourier BigOperators

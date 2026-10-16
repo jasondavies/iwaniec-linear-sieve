@@ -329,7 +329,8 @@ theorem iwaniec_theorem : ∃ c : ℝ, 0 < c ∧ ∀ S : Finset ℕ, (∀ q ∈ 
       _ ≤ X := hX
   have hmz := hcore z hz S' hS' (hcard'.trans hcardz.symm) x X hX'
   rw [hcardz] at hmz
-  have hmz' : N ^ 2 ≤ #((range X).filter fun k : ℕ ↦ ∀ q ∈ S', ¬ (q : ℤ) ∣ x + k) := by exact_mod_cast hmz
+  have hmz' : N ^ 2 ≤ #((range X).filter fun k : ℕ ↦ ∀ q ∈ S', ¬ (q : ℤ) ∣ x + k) := by
+    exact_mod_cast hmz
   have hmono : #((range X).filter fun k : ℕ ↦ ∀ q ∈ S', ¬ (q : ℤ) ∣ x + k) ≤
       #((range X).filter fun k : ℕ ↦ ∀ q ∈ S, ¬ (q : ℤ) ∣ x + k) :=
     card_le_card fun k hk ↦ by

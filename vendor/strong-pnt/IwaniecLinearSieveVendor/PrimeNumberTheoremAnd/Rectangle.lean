@@ -1,4 +1,4 @@
-import Architect
+import IwaniecLinearSieveVendor.Architect
 import Mathlib.Analysis.Complex.Convex
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.Normed.Order.Lattice

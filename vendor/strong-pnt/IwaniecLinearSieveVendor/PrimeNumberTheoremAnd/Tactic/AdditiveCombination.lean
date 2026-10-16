@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Abby J. Goldberg, Mario Carneiro, Heather Macbeth
 -/
 import Mathlib.Tactic.Abel
-import PrimeNumberTheoremAnd.Mathlib.Tactic.LinearCombinationPrime
+import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Mathlib.Tactic.LinearCombinationPrime
 
 /-!
 # additive_combination Tactic

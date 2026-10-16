@@ -1,5 +1,5 @@
 import IwaniecLinearSieve.PrimeSums.Product
-import PrimeNumberTheoremAnd.IEANTN.Mertens
+import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.IEANTN.Mertens
 
 /-!
 # Mertens' third theorem with the constant `e^{-γ}`

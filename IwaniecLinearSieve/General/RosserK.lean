@@ -112,7 +112,8 @@ noncomputable def rosserMainK (k : ℕ) (lower : Bool) (y z : ℝ) : ℝ :=
   exact filter_true_of_mem fun d _ ↦ Nat.coprime_one_right d
 
 theorem truncMain_rosserTrunc (hy : 0 ≤ y) (k : ℕ) (lower : Bool) {n : ℕ}
-    (hn : #(primesLT z) ≤ n) : truncMain (rosserTrunc y) k lower n [] z = rosserMainK k lower y z := by
+    (hn : #(primesLT z) ≤ n) :
+    truncMain (rosserTrunc y) k lower n [] z = rosserMainK k lower y z := by
   rw [truncMain, truncSet_rosserTrunc_of_card_le hy k lower hn, rosserMainK]
 
 /-- [I71, Lemma 2] for Rosser's sieve with `k = 1`: the deficits `truncDef` of the general

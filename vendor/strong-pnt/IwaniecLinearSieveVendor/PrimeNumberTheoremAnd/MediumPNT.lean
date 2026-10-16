@@ -1,8 +1,8 @@
-import Architect
-import PrimeNumberTheoremAnd.MellinCalculus
-import PrimeNumberTheoremAnd.ZetaBounds
-import PrimeNumberTheoremAnd.ZetaConj
-import PrimeNumberTheoremAnd.SmoothExistence
+import IwaniecLinearSieveVendor.Architect
+import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.MellinCalculus
+import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.ZetaBounds
+import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.ZetaConj
+import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.SmoothExistence
 import Mathlib.Algebra.Group.Support
 import Mathlib.Analysis.MellinInversion
 import Mathlib.Analysis.Real.Pi.Bounds

@@ -21,7 +21,9 @@ theorem IwaniecLinearSieve.iwaniecBound :
 ```
 
 It depends only on the axioms `propext`, `Classical.choice` and `Quot.sound`, and contains no
-`sorry`. Build with `lake exe cache get && lake build`.
+`sorry`. Build with `lake exe cache get && lake build`; then
+`lake env lean scripts/CheckAxioms.lean` checks every declaration of the library and of the
+vendored prime number theorem against that allowlist (CI runs both).
 
 ## Sources
 
@@ -49,7 +51,8 @@ and weights, with both the lower bound (4) and the upper bound (3) (`shiftedSiev
 every interval of length `c ∏ (1 - 1/q_i)⁻¹ r² log r` contains at least `r²` integers coprime to
 `q₁ ⋯ q_r` (`iwaniec_theorem`); and the Corollary deduced from it (`iwaniec_corollary`).
 `iwaniecBound` proves the Corollary directly from the special case of Lemma 1 for intervals
-(`shiftedSieve`), and the module `IwaniecLinearSieve.Jacobsthal` imports only what it needs.
+(`shiftedSieve`), and the module `IwaniecLinearSieve.Jacobsthal` imports only what it needs (not
+§5, `EulerGamma`, `General`, or the asymptotics of `𝔐` and the Dickman function).
 
 `BLUEPRINT.md` maps each lemma to its Lean statement and records every deviation; the most
 notable are listed below.
@@ -63,8 +66,10 @@ with relative error `o(1/log x)` uniformly over all scales; this needs PNT-stren
 [PrimeNumberTheoremAnd](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd), whose
 15-file import closure is vendored in `vendor/strong-pnt` (Apache 2.0) and ported to
 Lean 4.35.0, together with its `IEANTN/Mertens.lean` (Mertens' theorems with the constant
-`e^{-γ}`); `vendor/strong-pnt/UPSTREAM.json` records the revision, file hashes and the five
-local patches.
+`e^{-γ}`); `vendor/strong-pnt/UPSTREAM.json` records the revision, file hashes and the six
+local patches. The vendored modules live under the prefix `IwaniecLinearSieveVendor`, so a
+project can depend on both this library and PrimeNumberTheoremAnd; since the declarations keep
+their upstream names, a single file should not import both.
 
 ## Layout
 

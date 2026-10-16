@@ -1,4 +1,4 @@
-import Architect
+import IwaniecLinearSieveVendor.Architect
 import Mathlib.Algebra.Lie.OfAssociative
 import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
 import Mathlib.Analysis.CStarAlgebra.Classes
@@ -7,7 +7,7 @@ import Mathlib.Data.Rat.Cast.OfScientific
 import Mathlib.Algebra.Order.Star.Real
 import Mathlib.RingTheory.SimpleRing.Principal
 import Mathlib.Analysis.Complex.BorelCaratheodory
-import PrimeNumberTheoremAnd.MediumPNT
+import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.MediumPNT
 
 open Nat Filter Topology Set Function Complex Real ComplexConjugate MeasureTheory
 

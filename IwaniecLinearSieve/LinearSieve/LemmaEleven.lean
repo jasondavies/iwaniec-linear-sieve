@@ -400,8 +400,8 @@ theorem tendsto_xi : Tendsto xi atTop atTop := by
   exact tendsto_atTop_mono' atTop hbound
     (((tendsto_rpow_atTop (by norm_num : (0 : ℝ) < 1 / 2)).comp hv).atTop_div_const (by norm_num))
 
-/-- For `y` large: `ξ(y) ≥ e^{32}`, `160 ξ² log⁴ ξ ≤ log² y` and `y^{1/ξ} ≥ 2`, so that Lemmas 11, 12
-and Corollary 3 apply up to `b = ξ(y)`. -/
+/-- For `y` large: `ξ(y) ≥ e^{32}`, `160 ξ² log⁴ ξ ≤ log² y` and `y^{1/ξ} ≥ 2`, so that
+Lemmas 11, 12 and Corollary 3 apply up to `b = ξ(y)`. -/
 theorem exists_xi_large : ∃ y₀ : ℝ, ∀ y ≥ y₀, 1 < y ∧ exp 32 ≤ xi y ∧
     xi y ^ 2 * log (xi y) ^ 4 ≤ log y ^ 2 / 160 ∧ 2 ≤ y ^ (1 / xi y) := by
   have hsmall : ∀ᶠ y in atTop, log (log (3 * y)) ^ (-(2 / 5 : ℝ)) ≤ 1 / 160 :=

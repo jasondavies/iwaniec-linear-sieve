@@ -108,7 +108,8 @@ theorem div_totient_le_loglog :
         have : C₁ * r * log r ≤ C₁' * r * r := by
           calc C₁ * r * log r ≤ C₁' * r * log r :=
                 mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hC1' (by linarith)) hlogr.le
-            _ ≤ C₁' * r * r := mul_le_mul_of_nonneg_left hlr (mul_nonneg (by linarith) (by linarith))
+            _ ≤ C₁' * r * r :=
+              mul_le_mul_of_nonneg_left hlr (mul_nonneg (by linarith) (by linarith))
         nlinarith
       -- `r ≤ log k / log 2`
       have hk2 : (2 : ℝ) ^ r ≤ k := by exact_mod_cast two_pow_card_primeFactors_le hk

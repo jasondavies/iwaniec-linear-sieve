@@ -159,7 +159,8 @@ theorem sum_mul_div_eq_mul_sum (T : Finset ℕ) (w : Finset ℕ → ℝ) (h : Fi
 
 /-- **[I78, Lemma 1], (4)** (the shifted sieve, lower bound): if `σ(B) = ∑_{C ⊆ B} w(C)` satisfies
 `σ(B) ≤ [B = ∅]` for all `B ⊆ T` (i.e. `σ_m ≤ ∑_{n ∣ m} μ(n)` for `m ∣ P`), then
-`S(𝒜, Q) ≥ X ∏_{q ∣ Q} (1 - 1/f(q)) ∑_{n ∣ P} σ_n / ∏_{p ∣ n} (g(p) - 1) - A ∑_{n ∣ P} |λ_n| B^{τ(n)}`.
+`S(𝒜, Q) ≥ X ∏_{q ∣ Q} (1 - 1/f(q)) ∑_{n ∣ P} σ_n / ∏_{p ∣ n} (g(p) - 1)
+  - A ∑_{n ∣ P} |λ_n| B^{τ(n)}`.
 -/
 theorem shiftedSieve_lower (A : Finset ι) (a : ι → ℤ) (hS : ∀ q ∈ S, q.Prime)
     (he : Set.BijOn e T S) (f g : ℕ → ℝ) (hg : ∀ p ∈ T, 1 < g p)
@@ -210,7 +211,8 @@ theorem shiftedSieve_lower (A : Finset ι) (a : ι → ℤ) (hS : ∀ q ∈ S, q
 
 /-- **[I78, Lemma 1], (3)** (the shifted sieve, upper bound): if `σ(B) = ∑_{C ⊆ B} w(C)`
 satisfies `σ(B) ≥ [B = ∅]` for all `B ⊆ T` (i.e. `σ_m ≥ ∑_{n ∣ m} μ(n)` for `m ∣ P`), then
-`S(𝒜, Q) ≤ X ∏_{q ∣ Q} (1 - 1/f(q)) ∑_{n ∣ P} σ_n / ∏_{p ∣ n} (g(p) - 1) + A ∑_{n ∣ P} |λ_n| B^{τ(n)}`.
+`S(𝒜, Q) ≤ X ∏_{q ∣ Q} (1 - 1/f(q)) ∑_{n ∣ P} σ_n / ∏_{p ∣ n} (g(p) - 1)
+  + A ∑_{n ∣ P} |λ_n| B^{τ(n)}`.
 [I78] states (3) without proof. -/
 theorem shiftedSieve_upper (A : Finset ι) (a : ι → ℤ) (hS : ∀ q ∈ S, q.Prime)
     (he : Set.BijOn e T S) (f g : ℕ → ℝ) (hg : ∀ p ∈ T, 1 < g p)

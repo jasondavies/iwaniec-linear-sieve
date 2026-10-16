@@ -20,7 +20,7 @@ prime-number input is the de la Vallée Poussin prime number theorem
 
 | Layer | Content | Lean module |
 |---|---|---|
-| PNT | `StrongPNT` (vendored) | `PrimeNumberTheoremAnd.StrongPNT` |
+| PNT | `StrongPNT` (vendored) | `IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.StrongPNT` |
 | Prime sums | `S(x) = Σ_{p≤x} 1/p = log log x + c₅ + O(exp(-√log x))`; `R(z) = Π_{p<z}(1-1/p)` with `R(z) log z → e^{-γ}`-type estimate `R(z) = c_R / log z + O(exp(-√log z))`; [I71, Lemma 13, Corollaries 1–3, Lemma 14] | `IwaniecLinearSieve.PrimeSums` |
 | Sieve combinatorics | [I71, §2]: Lemma 1 (the inequalities (2.1), (2.2)), its corollary (2.5)–(2.8), Lemma 2 (`G = S`, `D = T`), the identities (2.14), (2.15) | `IwaniecLinearSieve.Rosser` |
 | Sieve functions | [I71, §3]: `g_n`, `f`, `F`, Lemmas 3–10, `𝔐`, `𝔚`, `𝔣`, `𝔉`, `f(2) = 2` | `IwaniecLinearSieve.SieveFunctions` |

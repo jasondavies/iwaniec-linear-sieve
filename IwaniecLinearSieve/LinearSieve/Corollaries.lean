@@ -242,7 +242,8 @@ theorem growth_le_delta {y t a : ℝ} (ht : 1 ≤ t) (hta : t ≤ a) :
     _ ≤ _ := rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
 
 /-- The summand of Corollary 3: with `t = t_p ≥ 2`, `log (y/p) = L (t-1)/t`, so
-`δ(t - 1, y/p) G(t-1) / (p log² (y/p)) ≤ (1 + t² log⁵ t / L²)^{5(t-1)} G(t-1) (t²/(t-1)²) / L² / p`. -/
+`δ(t - 1, y/p) G(t-1) / (p log² (y/p))
+  ≤ (1 + t² log⁵ t / L²)^{5(t-1)} G(t-1) (t²/(t-1)²) / L² / p`. -/
 theorem cor3_summand_le {G : ℝ → ℝ} {y : ℝ} {p : ℕ} (hy : 1 < y) (hp : 1 < p)
     (ht : 2 ≤ log y / log p) (hG : 0 ≤ G (log y / log p - 1)) :
     delta (log y / log p - 1) (y / p) * G (log y / log p - 1) / (p * log (y / p) ^ 2) ≤
@@ -256,7 +257,8 @@ theorem cor3_summand_le {G : ℝ → ℝ} {y : ℝ} {p : ℕ} (hy : 1 < y) (hp :
   have hLt : log y = log p * t := by rw [htdef]; field_simp
   have ht1 : 0 < t - 1 := by linarith
   have hp0 : (0 : ℝ) < p := by positivity
-  have hb : (t - 1) ^ 2 * log (t - 1) ^ 5 / log (y / p) ^ 2 = t ^ 2 * log (t - 1) ^ 5 / log y ^ 2 := by
+  have hb : (t - 1) ^ 2 * log (t - 1) ^ 5 / log (y / p) ^ 2 =
+      t ^ 2 * log (t - 1) ^ 5 / log y ^ 2 := by
     rw [hyp, hLt]; field_simp
   have hl1 : 0 ≤ log (t - 1) := log_nonneg (by linarith)
   have hl2 : log (t - 1) ≤ log t := log_le_log ht1 (by linarith)
@@ -550,7 +552,8 @@ theorem lt_rpow_one_div_max_three {y s x : ℝ} (hy : 1 < y) (hs : 0 < s) (hx : 
 `t_p = log y / log p`, `s₀ = e^{32}`, `sMin lower ≤ s`, any `b ≥ s₀` with `y^{1/b} ≥ 2` and
 `160 b² log⁴ b ≤ log² y` (e.g. `b = ξ(y)` for large `y`, `exists_xi_large`),
 
-`∑_{p ∈ rosserPrimes lower y (y^{1/s}), p ≥ y^{1/b}} δ(t_p - 1, y/p) G(!lower)(t_p - 1) / (p log² (y/p))
+`∑_{p ∈ rosserPrimes lower y (y^{1/s}), p ≥ y^{1/b}}
+    δ(t_p - 1, y/p) G(!lower)(t_p - 1) / (p log² (y/p))
   ≤ δ(max s s₀, y) G(lower)(s) / L² · (1 + C b² pntE(y^{1/b}))`.
 
 For the upper sieve and `s < 3` the primes are those `< y^{1/3}` and `𝔉(s) = 𝔉(3) = 1`, so this

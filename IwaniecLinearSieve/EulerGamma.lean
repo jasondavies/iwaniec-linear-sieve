@@ -8,7 +8,7 @@ import IwaniecLinearSieve.EulerGamma.TheoremFour
 
 * `IwaniecLinearSieve.EulerGamma.Mertens`: Mertens' third theorem with the constant `e^{-γ}`
   (`tendsto_R_mul_log`, `R_asymp_exp`, `eq_exp_neg_eulerMascheroniConstant_of_R`), from the
-  vendored `PrimeNumberTheoremAnd.IEANTN.Mertens`.
+  vendored `IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.IEANTN.Mertens`.
 * `IwaniecLinearSieve.EulerGamma.Buchstab`: Buchstab's function `buchstab` (`ω`), its uniqueness
   (`eqOn_buchstab`), its Laplace transform (`one_add_buchstabLaplace`) and de Bruijn's limit in
   Laplace form (`eq_exp_neg_of_integrableOn_buchstab_sub`).

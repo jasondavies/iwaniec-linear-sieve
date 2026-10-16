@@ -1,11 +1,11 @@
-import Architect
+import IwaniecLinearSieveVendor.Architect
 import Mathlib.Analysis.Complex.CauchyIntegral
 import Mathlib.Analysis.Complex.Convex
 import Mathlib.Analysis.Complex.RemovableSingularity
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.Analysis.Meromorphic.NormalForm
-import PrimeNumberTheoremAnd.Rectangle
-import PrimeNumberTheoremAnd.Tactic.AdditiveCombination
+import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Rectangle
+import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Tactic.AdditiveCombination
 
 open Complex BigOperators Nat Classical Real Topology Filter
 open Set MeasureTheory intervalIntegral Asymptotics

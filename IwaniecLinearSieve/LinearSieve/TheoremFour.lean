@@ -551,7 +551,8 @@ theorem theorem4 {cR CR : ℝ} (hcR : 0 < cR) (hR : ∀ z ≥ 2, |R z * log z - 
       have hξ3 : 3 ≤ xi y := by linarith [add_one_le_exp (32 : ℝ)]
       obtain ⟨⟨hΛ, hδ⟩, hK⟩ := hye y hye'
       exact main_step IH hcR hc₇ hCR hC₁0 hC₃0 hy hs hsξ (hC₁ lower y s hy hs hsξ hξ3 hw2)
-        (src_le_of_le_xi hR hy hs hsξ hξ3 hw2) (hC₃ lower y s hy₃ hs) (hyc y hyc' lower (r + 1) s hs hsξ)
+        (src_le_of_le_xi hR hy hs hsξ hξ3 hw2) (hC₃ lower y s hy₃ hs)
+        (hyc y hyc' lower (r + 1) s hs hsξ)
         hΛ hδ hK hdeep
 
 end IwaniecLinearSieve

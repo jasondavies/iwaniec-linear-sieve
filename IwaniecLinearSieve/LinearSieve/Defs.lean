@@ -1,5 +1,5 @@
 import IwaniecLinearSieve.SieveFunctions
-import IwaniecLinearSieve.SieveMajorants
+import IwaniecLinearSieve.SieveMajorants.Lemmas
 
 /-!
 # Notation for [I71, §4]
