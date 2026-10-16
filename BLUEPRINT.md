@@ -27,6 +27,7 @@ prime-number input is the de la Vallée Poussin prime number theorem
 | Estimates | [I71, §4]: Lemmas 11–17, Theorems 4, 5 | `IwaniecLinearSieve.MainTerm`, `IwaniecLinearSieve.Remainder` |
 | Linear sieve | [I71, §5]: Theorem 1 lower bound (1.2)/(1.4), as needed by [I78, Lemma 2] | `IwaniecLinearSieve.LinearSieve` |
 | Jacobsthal | [I78]: Lemma 1 (shifted sieve), Theorem, Corollary | `IwaniecLinearSieve.Jacobsthal.ShiftedSieve`, `IwaniecLinearSieve.Jacobsthal.Reduction`, `IwaniecLinearSieve.Jacobsthal` |
+| Euler's constant | Mertens' third theorem `R(z) log z → e^{-γ}`, Buchstab's `ω(∞) = e^{-γ}`, [I71, Lemma 5] in full, Theorem 4 with `e^γ` | `IwaniecLinearSieve.EulerGamma` |
 
 ## Deviations from the papers
 
@@ -36,7 +37,8 @@ prime-number input is the de la Vallée Poussin prime number theorem
   `s = 2 + O(1/log z)`. The exact value `F(3) = 2e^γ - 3` in [I71, Lemma 5] rests on the
   Buchstab limit `ω(∞) = e^{-γ}` quoted from Jurkat–Richert. We prove `f(2) = 2` and formula
   (3.9) exactly as in [I71], and use only `F(3) ≥ 0`, which gives
-  `1 - f(s)/s ≥ 3 log(s-1)/s` on `2 ≤ s ≤ 4`. This suffices for [I78].
+  `1 - f(s)/s ≥ 3 log(s-1)/s` on `2 ≤ s ≤ 4`. This suffices for [I78]. The exact values
+  (and `ω(∞) = e^{-γ}`, `c_R = e^{-γ}`) are proved separately, in §E.
 
 ## Why PNT-strength prime sums
 
@@ -451,3 +453,72 @@ Items 1–4 are done, in `LinearSieve/Calculus.lean`, `LemmaSeven.lean`, `LemmaE
    `R z - rosserMain true y z ≤ R z (f(s)/s + O(1/L)) ≤ R z (1 - 3 log(s-1)/s + O(1/L))`,
    and `3 log(s-1)/s ≥ log C₀ / log z` once `z` is large; choose `C₀` with `log C₀` larger than
    twice the `O`-constant. Theorem 5 gives the support count `≪ y/L²`.
+
+### E. Full 1971: Euler's constant (F2)
+
+Files `IwaniecLinearSieve/EulerGamma/{Mertens,Buchstab,LemmaFive,TheoremFour}.lean`, imported by
+`IwaniecLinearSieve/EulerGamma.lean`. Nothing in §§A–D depends on them.
+
+1. **Mertens' third theorem** (`Mertens.lean`). PrimeNumberTheoremAnd's
+   `PrimeNumberTheoremAnd/IEANTN/Mertens.lean` is vendored in `vendor/strong-pnt` (two port
+   fixes: the import `Mathlib.Analysis.SpecialFunctions.Integrability.LogMeromorphic` is now
+   `…Integrability.Log`, and `integrableOn_indicator_iff` takes a `NullMeasurableSet`; recorded in
+   `UPSTREAM.json`). From `Mertens.E₃.bound''` (`∏_{p ≤ x}(1 - 1/p) ~ e^{-γ}/log x`), via
+   `R_nat_add_half : R(n + 1/2) = ∏_{p ≤ n}(1 - 1/p)`:
+   * `tendsto_R_nat_add_half_mul_log`, `tendsto_R_mul_log :
+     Tendsto (fun z => R z * log z) atTop (𝓝 (exp (-eulerMascheroniConstant)))`;
+   * `eq_exp_neg_eulerMascheroniConstant_of_R : (∀ z ≥ 2, |R z * log z - cR| ≤ C * pntE z) →
+     cR = exp (-eulerMascheroniConstant)` (the constant of `R_asymp` is `e^{-γ}`);
+   * `R_asymp_exp : ∃ C, ∀ z ≥ 2, |R z * log z - exp (-eulerMascheroniConstant)| ≤ C * pntE z`.
+2. **Buchstab's function** (`Buchstab.lean`). `buchstab u = V(u+1)/u` with
+   `V = Delay.sol (fun x => 1 / max (x - 2) 1) 1` (`V(x) = (x-1) ω(x-1)`). Facts:
+   `buchstab_of_le_two : u ≤ 2 → buchstab u = 1/u`, `continuousOn_buchstab` (on `Ioi 0`),
+   `measurable_buchstab`, `hasDerivAt_mul_buchstab : 2 < u →
+   HasDerivAt (fun u => u * buchstab u) (buchstab (u - 1)) u`, `mul_buchstab_eq_integral`
+   (`u ω(u) = 1 + ∫_2^u ω(t-1) dt`), `abs_buchstab_le : 1 ≤ u → |buchstab u| ≤ 1`, and uniqueness
+   `eqOn_buchstab : S.Countable → ContinuousOn φ (Ici 1) → (∀ u ∈ Icc 1 2, φ u = 1/u) →
+   (∀ u, 2 < u → u ∉ S → HasDerivAt (fun u => u * φ u) (φ (u - 1)) u) → EqOn φ buchstab (Ici 1)`
+   (induction on `[n, n+1]` with `integral_eq_of_hasDerivAt_off_countable_of_le`).
+   Laplace transform `buchstabLaplace s = ∫ u in Ioi 1, exp (-(s * u)) * buchstab u`:
+   * `hasDerivAt_buchstabLaplace` (`ω̂' = -∫ u e^{-su} ω`, dominated differentiation),
+     `integral_mul_exp_mul_buchstab : ∫_1^∞ u e^{-su} ω(u) du = e^{-s}(1 + ω̂(s))/s` (integration
+     by parts on `(2, ∞)` with `(uω)' = ω(u-1)`, `setIntegral_Ioi_comp_sub`);
+   * `expIntegralOne s = -γ - ∫_0^s log t e^{-t} dt - e^{-s} log s` (`= E₁(s) = ∫_s^∞ e^{-t}/t`),
+     `hasDerivAt_expIntegralOne` (`E₁' = -e^{-s}/s`), `tendsto_expIntegralOne_atTop` (`→ 0`, using
+     `eulerMascheroniConstant_eq_neg_integral_log : γ = -∫₀^∞ log t e^{-t} dt` and
+     `integrableOn_log_mul_exp_neg`), `tendsto_expIntegralOne_add_log` (`E₁(s) + log s → -γ` as
+     `s → 0⁺`);
+   * `one_add_buchstabLaplace : 0 < s → 1 + buchstabLaplace s = exp (expIntegralOne s)`
+     (`(1 + ω̂) e^{-E₁}` has derivative `0` on `(0, ∞)` and tends to `1` at `∞`);
+   * `eq_exp_neg_of_integrableOn_buchstab_sub : IntegrableOn (fun u => buchstab u - c) (Ioi 1) →
+     c = exp (-eulerMascheroniConstant)` (`s ω̂(s) → c` and `s ω̂(s) = e^{E₁(s) + log s} - s → e^{-γ}`
+     as `s → 0⁺`).
+3. **[I71, Lemma 5] in full** (`LemmaFive.lean`). `A = F(3) + 3`;
+   `WSieve s = if s ≤ 2 then 2s - A else f(s) - F(s) - (3 - s)⁺` (Iwaniec's extended `W`:
+   `f - F` on `s ≥ 3`, `sW'(s+1)` on `[1, 3]`), `wSieve s = (2s - W(s))/(s A)`.
+   * `hasDerivAt_WSieve : 2 < s → HasDerivAt WSieve (WSieve (s - 1) / (s - 1)) s` (first off
+     `{3, 4}` from `hasDerivAt_fSieve_of_lt_four`, `hasDerivAt_fSieve_of_four_lt`,
+     `hasDerivAt_FSieve`, `fSieve_eq_on_Icc`, then everywhere since `W(s) = W(x) + ∫_x^s W(t-1)/(t-1)`);
+     `hasDerivAt_fSieve_sub_FSieve : 4 ≤ s → HasDerivAt (f - F) ((f(s-1) - F(s-1))/(s-1)) s` ((3.8));
+   * `wSieve_eqOn_buchstab : EqOn wSieve buchstab (Ici 1)`, `buchstab_eq_wSieve`;
+   * `exists_abs_buchstab_sub_le : ∃ C, ∀ u ≥ 3, |buchstab u - 2/(F(3) + 3)| ≤ C e^{-u}` (from
+     `fSieve_le`, `FSieve_le`), hence by 2.:
+   * `FSieve_three_add_three : FSieve 3 + 3 = 2 * exp eulerMascheroniConstant`,
+     `FSieve_three : FSieve 3 = 2 * exp eulerMascheroniConstant - 3`;
+   * `exists_abs_buchstab_sub_exp_le : ∃ C, ∀ u ≥ 3, |buchstab u - exp (-γ)| ≤ C * exp (-u)`,
+     `tendsto_buchstab : Tendsto buchstab atTop (𝓝 (exp (-eulerMascheroniConstant)))`;
+   * `fSieve_eq_of_mem_Icc : s ∈ Icc 2 4 → fSieve s = s - 2 * exp γ * log (s - 1)`;
+   * `FSieve_eq_of_mem_Icc : s ∈ Icc 3 5 →
+     FSieve s = 2 * exp γ * (1 + ∫ x in 1..(s - 2), log x / (x + 1)) - s`. [I71] prints
+     `s - 6 + 2e^γ (1 - ∫_1^{s-2} …)`, a sign slip: `F'(s) = -f(s-1)/(s-1) =
+     -1 + 2e^γ log(s-2)/(s-1)`, and `F` decreases;
+   * Corollary `MSieve_eq_of_mem_Icc : s ∈ Icc 2 3 → MSieve s = 2 * exp γ * (1 - log (s - 1))`
+     (our `MSieve` is Iwaniec's extended `M`: `3 + F(3) - s + f(s)` on `[2, 3]`).
+4. **Theorem 4 in Iwaniec's normalisation** (`TheoremFour.lean`), from `theorem4` and
+   `R_asymp_exp`:
+
+       theorem theorem4_exp :
+           ∃ c₇ : ℝ, 0 ≤ c₇ ∧ ∀ (r : ℕ) (lower : Bool) (y s : ℝ), 1 < y → sMin lower ≤ s →
+             s ≤ xi y → exp eulerMascheroniConstant * fail lower r y (y ^ (1 / s)) ≤
+               mainMaj lower s / log y +
+                 c₇ * ((r : ℝ) / (r + 1)) * delta s y * errMaj lower s / log y ^ 2
