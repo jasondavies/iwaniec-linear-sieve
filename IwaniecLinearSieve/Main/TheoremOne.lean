@@ -9,13 +9,16 @@ Notation: `L = log y`, `z = y^{1/s}`, `ξ(y) = L / (log log 3y)^{11/5}` (`xi`),
 **Theorem 1.** Let `y > 1`, `s ≤ ξ(y)`, and assume `(*)`: `|M_d - y/d| ≤ 1` for `(d, k) = 1`.
 There is an absolute constant `c₀` such that
 
-* (1.1) `A_k(M; y^{1/s}) < y R_k(y^{1/s}) (1 + F(s)/s + c₀ δ(s, y) 𝔐(s) log log 3k / L)` for `s ≥ 3`;
-* (1.2) `A_k(M; y^{1/s}) > y R_k(y^{1/s}) (1 - f(s)/s - c₀ δ(s, y) 𝔐(s) log log 3k / L)` for `s ≥ 2`.
+* (1.1) `A_k(M; y^{1/s}) < y R_k(y^{1/s}) (1 + F(s)/s + c₀ δ(s, y) 𝔐(s) log log 3k / L)`
+  for `s ≥ 3`;
+* (1.2) `A_k(M; y^{1/s}) > y R_k(y^{1/s}) (1 - f(s)/s - c₀ δ(s, y) 𝔐(s) log log 3k / L)`
+  for `s ≥ 2`.
 
 Proof ([I71, §5]). By (2.7), (2.8) with Lemma 2 and (2.12), (2.13) (`siftedCount_le_fail`,
 `fail_le_siftedCount`, at a depth `r > π(z)`),
 
-    A ≤ y R_k(z) (1 + fail false r y z / R(z)) + #D⁺,   A ≥ y R_k(z) (1 - fail true r y z / R(z)) - #D⁻.
+    A ≤ y R_k(z) (1 + fail false r y z / R(z)) + #D⁺,
+    A ≥ y R_k(z) (1 - fail true r y z / R(z)) - #D⁻.
 
 For `y ≥ y₀` (so that `z ≥ 2`):
 
@@ -291,10 +294,12 @@ theorem lt_loglog_err {C y s : ℝ} (hC : 0 ≤ C) (hy : 1 < y) (hs : 1 ≤ s) {
 Let `y > 1`, `s ≤ ξ(y) = log y / (log log 3y)^{11/5}`, and assume `(*)`:
 `|M_d - y/d| ≤ 1` for all `d` coprime to `k`. There is an absolute constant `c₀` such that
 
-* (1.1) `A_k(M; y^{1/s}) < y R_k(y^{1/s}) (1 + F(s)/s + c₀ (1 + s² log⁵ s/log² y)^{5s} 𝔐(s) log log 3k / log y)`
+* (1.1) `A_k(M; y^{1/s}) < y R_k(y^{1/s}) (1 + F(s)/s + c₀ δ(s, y) 𝔐(s) log log 3k / log y)`
   for `s ≥ 3`;
-* (1.2) `A_k(M; y^{1/s}) > y R_k(y^{1/s}) (1 - f(s)/s - c₀ (1 + s² log⁵ s/log² y)^{5s} 𝔐(s) log log 3k / log y)`
-  for `s ≥ 2`.
+* (1.2) `A_k(M; y^{1/s}) > y R_k(y^{1/s}) (1 - f(s)/s - c₀ δ(s, y) 𝔐(s) log log 3k / log y)`
+  for `s ≥ 2`,
+
+where `δ(s, y) = (1 + s² log⁵ s / log² y)^{5s}`.
 
 [I71] assumes `s < ξ(y)`; we allow `s ≤ ξ(y)`. The factor `log log 3k` is not needed
 (`theorem1_core`). -/

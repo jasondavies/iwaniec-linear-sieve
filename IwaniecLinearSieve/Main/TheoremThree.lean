@@ -271,7 +271,8 @@ theorem loglog_sixteen_le {y : ℝ} (hy : 1 < y) :
     rwa [log_pow, Nat.cast_ofNat] at this
   have h3 : 0 < log (16 * y) := log_pos (by linarith)
   calc log (log (16 * y)) ≤ log (3 * log (3 * y)) := log_le_log h3 h2
-    _ = log 3 + log (log (3 * y)) := log_mul (by norm_num) (log_pos (by linarith : (1 : ℝ) < 3 * y)).ne'
+    _ = log 3 + log (log (3 * y)) :=
+        log_mul (by norm_num) (log_pos (by linarith : (1 : ℝ) < 3 * y)).ne'
 
 theorem log_three_le_two : log 3 ≤ 2 := by
   rw [log_le_iff_le_exp (by norm_num)]

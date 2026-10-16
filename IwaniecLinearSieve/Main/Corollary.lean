@@ -147,7 +147,8 @@ theorem exists_delta_mul_bigM_le : ∃ B : ℝ, 0 ≤ B ∧
     have hsl : 0 ≤ s * log s := by positivity
     nlinarith
   have hll : 0 ≤ log (log s) := log_nonneg hls
-  calc delta s y * bigM s ≤ exp (s * log s / 2) * (3 * exp (c₂ * s - (s * log s + s * log (log s)))) :=
+  calc delta s y * bigM s
+        ≤ exp (s * log s / 2) * (3 * exp (c₂ * s - (s * log s + s * log (log s)))) :=
         mul_le_mul hδ hM hB0 (exp_pos _).le
     _ = 3 * exp (s * (c₂ - log s / 2) - s * log (log s)) := by
         rw [mul_left_comm, ← exp_add]; ring_nf

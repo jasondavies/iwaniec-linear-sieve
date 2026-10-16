@@ -11,7 +11,8 @@ first `r` primes.
 Proof ([I71, p. 29]). The interval `M = {x, …, x + N - 1}` satisfies `(*)` with `y = N` and
 `k = 1` (`abs_card_filter_dvd_sub_le`). Take `z ≥ P_r + 1` (so that the first `r` primes are
 `< z`; [I71] takes `z = P_r`, which misses the prime `P_r` itself), `c = e₁ log log 3 + 1` with
-`e₁` from (1.4), and `N = ⌈e^c z²⌉`, so that `s = log N / log z ∈ [2 + c/log z, 2 + (c + log 2)/log z]`.
+`e₁` from (1.4), and `N = ⌈e^c z²⌉`, so that
+`s = log N / log z ∈ [2 + c/log z, 2 + (c + log 2)/log z]`.
 By `f(2) = 2` (Lemma 5) we have `1 - f(s)/s ≥ 3 log(s - 1)/s` (we do not use the value
 `f(s) = s - 2e^γ log(s - 1)`), and `log(s - 1) ≥ log(1 + c/log z) ≥ 2c/(3 log z)` once
 `log z ≥ 2c + 2`, so
