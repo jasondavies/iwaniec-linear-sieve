@@ -43,7 +43,7 @@ theorem natCast_lt_rosserTrunc_iff {y : ℝ} (hy : 0 ≤ y) (h : List ℕ) (p : 
 
 variable {k : ℕ} {lower : Bool} {y z : ℝ} {d : ℕ}
 
-theorem card_primeFactors_le_of_mem_rosserSet (hd : d ∈ rosserSet lower y z) :
+theorem card_primeFactors_le_card_primesLT (hd : d ∈ rosserSet lower y z) :
     #d.primeFactors ≤ #(primesLT z) :=
   card_le_card (primeFactors_subset_of_mem_rosserSet hd)
 
@@ -98,7 +98,7 @@ theorem truncSet_rosserTrunc_of_card_le (hy : 0 ≤ y) (k : ℕ) (lower : Bool) 
   rw [truncSet_rosserTrunc hy, List.prod_nil, Nat.cast_one, div_one]
   refine filter_congr fun d hd ↦ ?_
   simp only [and_iff_left_iff_imp]
-  exact fun _ ↦ (card_primeFactors_le_of_mem_rosserSet hd).trans hn
+  exact fun _ ↦ (card_primeFactors_le_card_primesLT hd).trans hn
 
 /-- `∑_{d ∈ D^±, (d, k) = 1} μ(d) / d`: Iwaniec's `G_{r,k}(z)` (`lower = false`) and
 `D_{r,k}(z)` (`lower = true`) for Rosser's truncation, at any depth `r` beyond `π(z)`. -/

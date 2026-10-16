@@ -17,4 +17,9 @@ import IwaniecLinearSieve.LinearSieve.TheoremFiveAux
 import IwaniecLinearSieve.LinearSieve.TheoremFiveCount
 import IwaniecLinearSieve.LinearSieve.TheoremFive
 import IwaniecLinearSieve.LinearSieve.Estimate
+import IwaniecLinearSieve.General.Defs
+import IwaniecLinearSieve.General.LemmaOne
+import IwaniecLinearSieve.General.RosserK
+import IwaniecLinearSieve.General.Totient
+import IwaniecLinearSieve.General.LemmaSixteen
 import IwaniecLinearSieve.Jacobsthal
