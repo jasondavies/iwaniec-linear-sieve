@@ -4,11 +4,14 @@ A Lean 4 / Mathlib formalisation of Iwaniec's linear sieve at the sifting limit,
 
 > H. Iwaniec, *On the error term in the linear sieve*, Acta Arith. 19 (1971), 1–30,
 
-with its application to Jacobsthal's problem,
+and of its application to Jacobsthal's problem,
 
-> **Theorem** (H. Iwaniec, *On the problem of Jacobsthal*, 1978). There is an absolute
-> constant `C` such that if `m` consecutive integers are each divisible by one of `r ≥ 2` given
-> primes, then `m ≤ C (r log r)²`.
+> H. Iwaniec, *On the problem of Jacobsthal*, Demonstratio Math. 11 (1978), 225–231,
+
+whose Corollary is
+
+> **Theorem** (Iwaniec, 1978). There is an absolute constant `C` such that if `m` consecutive
+> integers are each divisible by one of `r ≥ 2` given primes, then `m ≤ C (r log r)²`.
 
 ```lean
 theorem IwaniecLinearSieve.iwaniecBound :
@@ -24,7 +27,7 @@ It depends only on the axioms `propext`, `Classical.choice` and `Quot.sound`, an
 
 * [I78] H. Iwaniec, *On the problem of Jacobsthal*, Demonstratio Math. 11 (1978), 225–231
   ([doi:10.1515/dema-1978-0121](https://doi.org/10.1515/dema-1978-0121)): the shifted sieve
-  (Lemma 1) and the deduction of the theorem.
+  (Lemma 1), the estimates quoted from [I71] (Lemma 2), the Theorem and its Corollary.
 * [I71] H. Iwaniec, *On the error term in the linear sieve*, Acta Arith. 19 (1971), 1–30: the
   Rosser–Iwaniec linear sieve at the sifting limit, with an `O(1/log y)` error in the main term
   (Theorem 4) and support of size `O(y / log² y)` (Theorem 5).
@@ -38,8 +41,18 @@ It depends only on the axioms `propext`, `Classical.choice` and `Quot.sound`, an
 `IwaniecLinearSieve.Main`: `theorem1_full`, `corollary_upper`, `corollary_lower`, `theorem2`
 (`C₀(r) ≪ r² log² r`), `theorem3_fst`, `theorem3_snd`. [I78] uses only the lower bound of
 Theorem 1 at level `y = C₀ z²` (`linearSieveEstimate`), so `iwaniecBound` does not depend on §5 or
-on the results involving `γ`. `BLUEPRINT.md` maps each lemma to its Lean statement and records
-every deviation; the most notable are listed below.
+on the results involving `γ`.
+
+[I78] is formalised in full: Lemma 1 for arbitrary sequences, multiplicative functions `f`, `g`
+and weights, with both the lower bound (4) and the upper bound (3) (`shiftedSieve_lower`,
+`shiftedSieve_upper`); Lemma 2 (`lemma2_sum_abs_le`, `lemma2_sum_sigma_ge`); the Theorem, that
+every interval of length `c ∏ (1 - 1/q_i)⁻¹ r² log r` contains at least `r²` integers coprime to
+`q₁ ⋯ q_r` (`iwaniec_theorem`); and the Corollary deduced from it (`iwaniec_corollary`).
+`iwaniecBound` proves the Corollary directly from the special case of Lemma 1 for intervals
+(`shiftedSieve`), and the module `IwaniecLinearSieve.Jacobsthal` imports only what it needs.
+
+`BLUEPRINT.md` maps each lemma to its Lean statement and records every deviation; the most
+notable are listed below.
 
 ## Prime number theorem
 
@@ -64,7 +77,7 @@ local patches.
 | `LinearSieve` | [I71, §4]: Lemmas 7, 11, 12, Corollaries, crude bounds, Theorems 4, 5, and `linearSieveEstimate` |
 | `General` | [I71, §2] for general `k` and sequences: `A_k(M; z)`, `R_k`, Lemma 1 with arbitrary truncations and its Corollary, Lemma 2, (2.12), (2.13); `k/φ(k) ≪ log log 3k`; Lemma 16 |
 | `Main` | [I71, §1, §5]: Theorems 1–3 and the Corollary; a fundamental lemma for small `z` |
-| `Jacobsthal` | [I78]: the shifted sieve (Lemma 1), the reduction, and `iwaniecBound` |
+| `Jacobsthal` | [I78]: the shifted sieve for intervals, the reduction, and `iwaniecBound`; `Jacobsthal.LemmaOne`, `.LemmaTwo`, `.Theorem`: Lemmas 1, 2, the Theorem and the Corollary as stated |
 | `EulerGamma` | Euler's constant: `R(z) log z → e^{-γ}`, Buchstab's `ω` and `ω(∞) = e^{-γ}`, [I71, Lemma 5] in full (`F(3) = 2e^γ - 3`), Theorem 4 with `e^γ` |
 
 ## Deviations from the papers
@@ -99,3 +112,13 @@ local patches.
   `𝔐(t-1)/𝔐(t)` increases; the monotonicity used in Corollary 3 does not follow from Lemma 12;
   the slack in Theorem 4's induction must be `(log L)²/L²` rather than `1/L²`); see
   `BLUEPRINT.md`.
+* [I78, Lemma 1] prints the conditions with the inequality signs interchanged: `(+) σ_m ≤ Σ μ(n)`
+  for the upper bound (3) and `(−) σ_m ≥ Σ μ(n)` for the lower bound (4). The proof of (4), and
+  its application to Rosser's lower-bound weights, need `σ_m ≤ Σ_{n ∣ m} μ(n)`.
+* [I78, Lemma 2] quotes (6) from [I71] as an asymptotic equality, but [I71] proves only the
+  lower bound (Theorem 4 bounds the deficit from above only). We prove the lower bound
+  (`lemma2_sum_sigma_ge`), which is all the proof of the Theorem uses, and the trivial upper
+  bound `≤ 1`.
+* [I78, §3] takes `z = p_r`; the last step, `y / log² z > r²`, needs Chebyshev's bound
+  `π(z) ≪ z / log z`, and Lemma 2 needs `z` large. We reduce small `r` to `N₀ r` primes by
+  adding primes larger than `2 N₀ r`.

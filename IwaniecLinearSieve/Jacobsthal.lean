@@ -7,6 +7,10 @@ Iwaniec's application of the linear sieve: if `m` consecutive integers are each 
 of `r ≥ 2` given primes, then `m ≪ (r log r)²`. The shifted sieve ([I78, Lemma 1],
 `Jacobsthal/ShiftedSieve.lean`) transfers the Rosser weights for the first `r` primes to any `r`
 primes; `Jacobsthal/Reduction.lean` combines it with `linearSieveEstimate`.
+
+The rest of [I78] (Lemma 1 in full, Lemma 2, the Theorem, and the Corollary deduced from it) is in
+`Jacobsthal/LemmaOne.lean`, `Jacobsthal/LemmaTwo.lean` and `Jacobsthal/Theorem.lean`, which this
+module does not import.
 -/
 
 namespace IwaniecLinearSieve

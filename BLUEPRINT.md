@@ -27,7 +27,8 @@ prime-number input is the de la Vallée Poussin prime number theorem
 | Estimates | [I71, §4]: Lemmas 11–17, Theorems 4, 5 | `IwaniecLinearSieve.MainTerm`, `IwaniecLinearSieve.Remainder` |
 | Linear sieve | [I71, §5]: Theorem 1 lower bound (1.2)/(1.4), as needed by [I78, Lemma 2] | `IwaniecLinearSieve.LinearSieve` |
 | Theorems 1–3 | [I71, §1, §5]: Theorems 1–3 and the Corollary, general `k` and sequences (section E, T1) | `IwaniecLinearSieve.Main` |
-| Jacobsthal | [I78]: Lemma 1 (shifted sieve), Theorem, Corollary | `IwaniecLinearSieve.Jacobsthal.ShiftedSieve`, `IwaniecLinearSieve.Jacobsthal.Reduction`, `IwaniecLinearSieve.Jacobsthal` |
+| Jacobsthal | [I78]: Lemma 1 for intervals, the reduction, `iwaniecBound` | `IwaniecLinearSieve.Jacobsthal.ShiftedSieve`, `IwaniecLinearSieve.Jacobsthal.Reduction`, `IwaniecLinearSieve.Jacobsthal` |
+| Full 1978 | [I78]: Lemma 1 in full, Lemma 2, Theorem, Corollary (section G) | `IwaniecLinearSieve.Jacobsthal.LemmaOne`, `.LemmaTwo`, `.Theorem` |
 | Euler's constant | Mertens' third theorem `R(z) log z → e^{-γ}`, Buchstab's `ω(∞) = e^{-γ}`, [I71, Lemma 5] in full, Theorem 4 with `e^γ` | `IwaniecLinearSieve.EulerGamma` |
 
 ## Deviations from the papers
@@ -790,3 +791,64 @@ so `(e/(s log s))^s ≤ e^{-λ} ≤ 1/L` (`rpow_exp_one_div_eq`) and (1.5) appli
 (`log z ≤ λ⁶`, not covered by [I71]'s argument), the fundamental lemma applies. For bounded `y`,
 `log z < L (λ + 1)/(2λ)` (`logloglog_le`) is bounded and the claim is trivial. ([I71]'s proof
 drops the factor 2 of the hypothesis; the hypothesis as stated is what we use.)
+
+### G. Full 1978 (J78)
+
+Files `IwaniecLinearSieve/Jacobsthal/{LemmaOne,LemmaTwo,Theorem}.lean`, not imported by
+`IwaniecLinearSieve.Jacobsthal` (so `iwaniecBound` does not depend on them).
+
+**Lemma 1** (`LemmaOne.lean`). Divisors of `Q = ∏_{q ∈ S} q` and `P = ∏_{p ∈ T} p` are subsets;
+`f`, `g` are given at primes, `f(d) = ∏_{q ∈ d} f(q)`; `τ(d) = 2^{#d}`; the correspondence `l` is
+`e⁻¹` for a bijection `e : T → S`; the weights are `w : Finset ℕ → ℝ`, `σ(B) = ∑_{C ⊆ B} w(C)`.
+
+    theorem shiftedSieve_lower (A : Finset ι) (a : ι → ℤ) (hS : ∀ q ∈ S, q.Prime)
+        (he : Set.BijOn e T S) (f g : ℕ → ℝ) (hg : ∀ p ∈ T, 1 < g p)
+        (hgf : ∀ p ∈ T, g p ≤ f (e p)) {X Ac Bc : ℝ} (hX : 0 ≤ X)
+        (hR : ∀ D ⊆ S, |#{i ∈ A | ∏ D ∣ a i} - X / ∏_{q ∈ D} f q| ≤ Ac * Bc ^ (2 ^ #D))
+        (w) (hw : ∀ B ⊆ T, σ(B) ≤ if B = ∅ then 1 else 0) :
+        X * ∏_{q ∈ S} (1 - (f q)⁻¹) * ∑_{B ⊆ T} σ(B) / ∏_{p ∈ B} (g p - 1)
+          - Ac * ∑_{C ⊆ T} |w C| * Bc ^ (2 ^ #C) ≤ #{i ∈ A | ∀ q ∈ S, ¬ q ∣ a i}
+
+and `shiftedSieve_upper` (`σ(B) ≥ [B = ∅]`, the reverse inequality with `+ Ac ∑ …`). Proof as in
+[I78]: `S(𝒜, Q) ≥ ∑_{i} σ({p : e p ∣ a i}) = ∑_C w(C) |𝒜_{e(C)}|` (`sum_mul_card_eq`), (R) at
+`D = e(C)` (`abs_card_sub_le_of_R`), `∑_C w(C)/f(e(C)) = ∏ (1 - 1/f) ∑_B σ(B)/∏_B (f∘e - 1)`
+(`sum_powerset_div_prod_comp`), and `σ(B) ≤ 0`, `g ≤ f∘e` for `B ≠ ∅`
+(`sum_div_prod_sub_one_le`). Deviations: the printed signs of (+), (−) are interchanged (see
+the module docstring); `g > 1` rather than `g ≥ 1` (the bounds divide by `g(p) - 1`); `X ≥ 0`;
+(2) only at primes.
+
+**Lemma 2** (`LemmaTwo.lean`), for `2 ≤ z`, `z² ≤ y < z⁴`, `s = log y / log z ∈ [2, 4)`
+(`lemma2_range`):
+
+    theorem lemma2_sum_abs_le : ∃ K, ∀ y z, 2 ≤ z → z ^ 2 ≤ y → y < z ^ 4 →
+        ∑_{A ⊆ primesLT z} |rosserWeight y z A| ≤ K * y / log y ^ 2
+    theorem lemma2_sum_sigma_ge : ∃ C, 0 ≤ C ∧ ∀ y z, 2 ≤ z → z ^ 2 ≤ y → y < z ^ 4 →
+        2 e^γ log (s - 1) / s - C / log y ≤ ∑_{B ⊆ primesLT z} σ(B) / ∏_{p ∈ B} (p - 1)
+
+(5) is Theorem 5 at depth `π(z)` with `δ(s, y) ≤ (1 + 16 log⁵ 4)^{20}` (`delta_le_of_le_four`)
+for `y ≥ y₀`, and `#D⁻ ≤ y` below. (6): the left side is `∑_{D⁻} μ(d)/d / R(z)`
+(`sum_sigma_div_eq`) `= 1 - fail/R`; `Main.exists_fail_div_R_le` gives
+`fail/R ≤ f(s)/s + C₁ δ 𝔐(s)/L`, and `1 - f(s)/s = 2e^γ log(s-1)/s` (`fSieve_eq_of_mem_Icc`);
+for `y < Y` the left side is `≤ 3` (`two_exp_mul_log_div_le_three`) and the right side
+`≥ -Y/R(Y)` (`neg_card_le_rosserMain`). Only the lower half of (6) is proved: [I71] contains no
+lower bound for the deficit. The trivial upper half is `sum_sigma_div_le_one`.
+
+**Theorem and Corollary** (`Theorem.lean`).
+
+    theorem iwaniec_theorem : ∃ c : ℝ, 0 < c ∧ ∀ S : Finset ℕ, (∀ q ∈ S, q.Prime) → 2 ≤ #S →
+        ∀ (x : ℤ) (X : ℕ), c * (∏ q ∈ S, (1 - (q : ℝ)⁻¹))⁻¹ * ((#S : ℝ) ^ 2 * log #S) ≤ X →
+          #S ^ 2 ≤ #((range X).filter fun k : ℕ ↦ ∀ q ∈ S, ¬ (q : ℤ) ∣ x + k)
+    theorem iwaniec_corollary : (the statement of iwaniecBound)
+
+Core (`exists_card_coprime_ge_core`), [I78, §3]: for `z ≥ z₁` and `#S = π(z)`, with
+`y = C z²`, `C = exp(3(C₆/2 + 1))`, `t = log C / log z ∈ [0, 1]`, `s = 2 + t`: (6) and
+`log(1 + t) ≥ t/2` (`div_three_le_main`) give `∑ σ/∏(p - 1) ≥ t/3 - C₆/(2 log z) = 1/log z`;
+Lemma 1 with `f(d) = d`, `g(n) = n`, `A = B = 1` (condition (R) is
+`abs_card_filter_dvd_sub_le`) and (5) give `S ≥ X ∏(1 - 1/q)/log z - K₅ C z²/(4 log² z)`, which
+is `≥ 6 z²/log² z ≥ π(z)²` for `X ≥ K ∏(1 - 1/q)⁻¹ z²/log z` (Chebyshev,
+`exists_card_primesLT_le`, from Mathlib's `Chebyshev.eventually_primeCounting_le`). General `r`:
+add `N₀ r - r` primes `> 2 N₀ r` (`exists_superset_card_eq_gt`), which changes `∏ (1 - 1/q)` by a
+factor `≥ 1/2` (`prod_superset_ge`, Bernoulli) and only decreases the count; `z = p_{N₀ r} + 1`,
+`z ≤ W r log r` (`exists_nth_prime_mul_le`), `log z ≥ log r`. Corollary: for `X = m` the count is
+`0 < r²`, so `m < c ∏(1 - 1/q)⁻¹ r² log r`, and `∏_{q ∈ S} (1 - 1/q)⁻¹ ≤ R(p_r + 1)⁻¹ ≪ log r`
+(`R_le_prod_of_card_eq`, `R_lower`).

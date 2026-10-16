@@ -30,4 +30,7 @@ import IwaniecLinearSieve.Main.Corollary
 import IwaniecLinearSieve.Main.TheoremTwo
 import IwaniecLinearSieve.Main.TheoremThree
 import IwaniecLinearSieve.Jacobsthal
+import IwaniecLinearSieve.Jacobsthal.LemmaOne
+import IwaniecLinearSieve.Jacobsthal.LemmaTwo
+import IwaniecLinearSieve.Jacobsthal.Theorem
 import IwaniecLinearSieve.Main.TheoremOneFull
