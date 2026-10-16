@@ -53,7 +53,7 @@ theorem hasDerivAt_asymPsi (c : ℝ) {L : ℝ} (hL : 0 < L) :
 theorem log_le_sub_one_of_two_le {L : ℝ} (hL : 2 ≤ L) : 0 ≤ log L ∧ log L ≤ L - 1 :=
   ⟨log_nonneg (by linarith), log_le_sub_one_of_pos (by linarith)⟩
 
-theorem monotoneOn_asymPsi {c : ℝ} (hc : c ≤ 1) : MonotoneOn (asymPsi c) (Ici 2) := by
+theorem monotoneOn_asymPsi {c : ℝ} (hc : c ≤ 4) : MonotoneOn (asymPsi c) (Ici 2) := by
   refine monotoneOn_of_hasDerivWithinAt_nonneg (convex_Ici 2)
     (f' := fun L => 1 + 1 / L - (log L + c) / L ^ 2 + (2 * log L + 2 * c - 3) / L ^ 3)
     (fun L hL => ?_)
@@ -81,9 +81,9 @@ theorem two_le_log_of_eight_le {x : ℝ} (hx : 8 ≤ x) : 2 ≤ log x := by
   rw [this]
   nlinarith [exp_pos 1]
 
-/-- Mean value estimate: for `9 ≤ s`, `s - 1 ≤ x ≤ s` and `c ≤ 1`,
+/-- Mean value estimate: for `9 ≤ s`, `s - 1 ≤ x ≤ s` and `c ≤ 4`,
 `ψ_c(log(s-1)) (s - x) ≤ Φ_c(s) - Φ_c(x) ≤ ψ_c(log s) (s - x)`. -/
-theorem asymPhi_sub_mem {c : ℝ} (hc : c ≤ 1) {s x : ℝ} (hs9 : 9 ≤ s)
+theorem asymPhi_sub_mem {c : ℝ} (hc : c ≤ 4) {s x : ℝ} (hs9 : 9 ≤ s)
     (hx : s - 1 ≤ x) (hxs : x ≤ s) :
     asymPsi c (log (s - 1)) * (s - x) ≤ asymPhi c s - asymPhi c x ∧
       asymPhi c s - asymPhi c x ≤ asymPsi c (log s) * (s - x) := by
@@ -330,7 +330,7 @@ theorem coefA_mul_le_integral {s : ℝ} (hs : 9 ≤ s) :
       rw [hw₀]; linarith
     have hhx : H * exp l * exp (-(l * (x - (s - 1)))) ≤ exp (-asymPhi 1 x) := by
       rw [hH, ← exp_add, ← exp_add, exp_le_exp]
-      have := (asymPhi_sub_mem (c := 1) le_rfl hs hx.1 hx.2).1
+      have := (asymPhi_sub_mem (c := 1) (by norm_num) hs hx.1 hx.2).1
       linarith
     rw [mul_assoc]
     exact mul_le_mul hwx hhx (by positivity) (weight_mem (by linarith [hx.1])).1.le
@@ -512,5 +512,98 @@ theorem bigM_asymp : ∃ C s₀ : ℝ, ∀ s ≥ s₀,
   have k3 : 0 ≤ |log κ| := abs_nonneg _
   have k4 : 0 ≤ |log C| := abs_nonneg _
   constructor <;> nlinarith
+
+/-- [I71, p. 15]: `𝔐(s+2) ≤ exp{-s(log s + log log s - 1 + log log s/log s + O(1/log s))}`. -/
+theorem bigM_add_two_le : ∃ C s₀ : ℝ, ∀ s ≥ s₀, bigM (s + 2) ≤
+    exp (-(s * (log s + log (log s) - 1 + log (log s) / log s)) + C * s / log s) := by
+  obtain ⟨C, s₀, h⟩ := bigM_asymp
+  refine ⟨C, s₀, fun s hs => ?_⟩
+  have h1 := (abs_le.1 (h s hs)).2
+  calc bigM (s + 2) ≤ bigM s := bigM_antitone (by linarith)
+    _ = exp (log (bigM s)) := (exp_log (bigM_pos s)).symm
+    _ ≤ _ := exp_le_exp.2 (by linarith)
+
+/-- [I71, proof of Lemma 9]: `𝔐(s) < (1/(s-2)) ∫_{s-1}^s 𝔐(x) dx` for `s ≥ 3`. -/
+theorem bigM_lt_integral {s : ℝ} (hs : 3 ≤ s) :
+    bigM s < 1 / (s - 2) * ∫ x in (s - 1)..s, bigM x := by
+  have hs2 : 0 < s - 2 := by linarith
+  have hI : ∫ x in (s - 1)..s, (1 - 1 / (2 * x ^ 2)) * bigM x < ∫ x in (s - 1)..s, bigM x := by
+    refine intervalIntegral.integral_lt_integral_of_continuousOn_of_le_of_exists_lt
+      (by linarith) (continuousOn_weight_mul continuous_bigM (by linarith))
+      continuous_bigM.continuousOn (fun x hx => ?_) ⟨s, ⟨by linarith, le_rfl⟩, ?_⟩
+    · have hw := weight_mem (x := x) (by linarith [hx.1])
+      nlinarith [bigM_pos x]
+    · have : 0 < 1 / (2 * s ^ 2) := by positivity
+      nlinarith [bigM_pos s]
+  have hA : s - 2 ≤ coefA s := by
+    unfold coefA
+    rw [le_div_iff₀ (by linarith)]
+    nlinarith
+  rw [← coefA_mul_bigM hs] at hI
+  rw [one_div_mul_eq_div, lt_div_iff₀ hs2]
+  nlinarith [bigM_pos s]
+
+/-! ### Lemma 9 -/
+
+/-- [I71, Lemma 9]: `G_r(s) exp(s log s + s log log s) ≤ exp(c₂ s)` for `s ≥ 3`. -/
+theorem majG_mul_exp_le : ∃ c₂ : ℝ, ∀ (r : ℕ) (s : ℝ), 3 ≤ s →
+    majG r s * exp (s * log s + s * log (log s)) ≤ exp (c₂ * s) := by
+  obtain ⟨C, hC⟩ := bigM_le_exp_asymPhi
+  refine ⟨47 + |log C|, fun r s hs => ?_⟩
+  have hs0 : 0 < s := by linarith
+  have hG := (majG_mem r s).2
+  have hGpos := majG_pos r s
+  have hL : 1 ≤ log s := one_le_log_of_three_le hs
+  have hl0 : 0 ≤ log (log s) := log_nonneg hL
+  rcases le_total s (exp 20) with h20 | h20
+  · -- bounded range: `G_r ≤ 2 ≤ e^s` and `s log s + s log log s ≤ 40 s`
+    have hL20 : log s ≤ 20 := by rw [log_le_iff_le_exp hs0]; exact h20
+    have hl20 : log (log s) ≤ 20 := by
+      linarith [log_le_sub_one_of_pos (show 0 < log s by linarith)]
+    have h1 : majG r s ≤ exp s := by
+      linarith [majG_le_two r s, add_one_le_exp s]
+    have h2 : s * log s + s * log (log s) ≤ 40 * s := by nlinarith
+    calc majG r s * exp (s * log s + s * log (log s)) ≤ exp s * exp (40 * s) :=
+          mul_le_mul h1 (exp_le_exp.2 h2) (exp_pos _).le (exp_pos _).le
+      _ = exp (41 * s) := by rw [← exp_add]; ring_nf
+      _ ≤ exp ((47 + |log C|) * s) := exp_le_exp.2 (by nlinarith [abs_nonneg (log C)])
+  · have hM := hC s h20
+    have hCpos : 0 < C := by
+      by_contra h
+      push Not at h
+      have : C * exp (-asymPhi (-5) s) ≤ 0 := mul_nonpos_of_nonpos_of_nonneg h (exp_pos _).le
+      linarith [bigM_pos s]
+    have hphi : s * log s + s * log (log s) - 6 * s ≤ asymPhi (-5) s := by
+      unfold asymPhi
+      have : -5 ≤ (log (log s) + -5) / log s := by
+        rw [le_div_iff₀ (by linarith)]; nlinarith
+      nlinarith
+    have hC' : C ≤ exp (|log C| * s) := by
+      calc C = exp (log C) := (exp_log hCpos).symm
+        _ ≤ exp (|log C| * s) := exp_le_exp.2 (by
+          nlinarith [le_abs_self (log C), abs_nonneg (log C)])
+    calc majG r s * exp (s * log s + s * log (log s))
+        ≤ C * exp (-asymPhi (-5) s) * exp (s * log s + s * log (log s)) :=
+          mul_le_mul_of_nonneg_right (by linarith [bigM_pos s]) (exp_pos _).le
+      _ = C * exp (s * log s + s * log (log s) - asymPhi (-5) s) := by
+          rw [mul_assoc, ← exp_add]; ring_nf
+      _ ≤ exp (|log C| * s) * exp (6 * s) :=
+          mul_le_mul hC' (exp_le_exp.2 (by linarith)) (exp_pos _).le (exp_pos _).le
+      _ = exp ((6 + |log C|) * s) := by rw [← exp_add]; ring_nf
+      _ ≤ exp ((47 + |log C|) * s) := exp_le_exp.2 (by nlinarith)
+
+/-- [I71, Lemma 9], two-sided: `exp(-c₂ s) ≤ G_r(s) exp(s log s + s log log s) ≤ exp(c₂ s)`
+for `s ≥ 3`. -/
+theorem lemma9 : ∃ c₂ : ℝ, ∀ (r : ℕ) (s : ℝ), 3 ≤ s →
+    exp (-(c₂ * s)) ≤ majG r s * exp (s * log s + s * log (log s)) ∧
+      majG r s * exp (s * log s + s * log (log s)) ≤ exp (c₂ * s) := by
+  obtain ⟨c, hc⟩ := majG_ge_exp
+  obtain ⟨c₂, hc₂⟩ := majG_mul_exp_le
+  refine ⟨max c c₂, fun r s hs => ⟨?_, ?_⟩⟩
+  · have h := mul_le_mul_of_nonneg_right (hc r s hs) (exp_pos (s * log s + s * log (log s))).le
+    rw [← exp_add] at h
+    refine le_trans (exp_le_exp.2 ?_) h
+    nlinarith [le_max_left c c₂]
+  · exact (hc₂ r s hs).trans (exp_le_exp.2 (by nlinarith [le_max_right c c₂]))
 
 end IwaniecLinearSieve
