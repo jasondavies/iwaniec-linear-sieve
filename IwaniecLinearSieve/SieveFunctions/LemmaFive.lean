@@ -11,7 +11,8 @@ to `[2, 3]` by `M(s) = 3 + F(3) - s + f(s)` (`MSieve`). Then
 `f(4) + (F(3) + 3) log 3 = 4`, i.e. `f(s) = s - (F(3) + 3) log (s - 1)` on `[2, 4]`.
 
 The value `F(3) = 2e^γ - 3` is not needed; only `F(3) ≥ 0` is used for the final inequality
-`1 - f(s)/s ≥ 3 log (s - 1) / s` on `[2, 4]`.
+`1 - f(s)/s ≥ 3 log (s - 1) / s` on `[2, 4]`. The rest of Lemma 5 (`F(3) = 2e^γ - 3` via Buchstab's
+function) is in `IwaniecLinearSieve.EulerGamma.LemmaFive`.
 -/
 
 open Real Set MeasureTheory intervalIntegral Filter Topology
