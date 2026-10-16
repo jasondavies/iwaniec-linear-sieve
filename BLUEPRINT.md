@@ -494,3 +494,106 @@ Items 1–4 are done, in `LinearSieve/Calculus.lean`, `LemmaSeven.lean`, `LemmaE
    `R z - rosserMain true y z ≤ R z (f(s)/s + O(1/L)) ≤ R z (1 - 3 log(s-1)/s + O(1/L))`,
    and `3 log(s-1)/s ≥ log C₀ / log z` once `z` is large; choose `C₀` with `log C₀` larger than
    twice the `O`-constant. Theorem 5 gives the support count `≪ y/L²`.
+
+### E. Full 1971: general k (F1)
+
+Files `IwaniecLinearSieve/General/{Defs,LemmaOne,RosserK,Totient,LemmaSixteen}.lean`: the
+general-`k`, general-sequence parts of [I71, §2], the size of `k/φ(k)` used in [I71, §5], and
+[I71, Lemmas 14, 16] as stated. `M` is a `Finset ℤ`; `k : ℕ` is arbitrary (Iwaniec: `k ≥ 1`).
+
+* Notation (`Defs.lean`): `primesLTk k z` (primes `p < z`, `p ∤ k`),
+  `Rk k z = ∏_{p < z, p ∤ k} (1 - 1/p)` (`Rk_one : Rk 1 z = R z`),
+  `siftedCount k M z = #{a ∈ M | ∀ p ∈ primesLTk k z, ¬ (p : ℤ) ∣ a}` (`A_k(M; z)`),
+  `multiplesCount M d = #{a ∈ M | (d : ℤ) ∣ a}` (`|M_d|`). (2.11) for `R_k`:
+  `Rk_eq : Rk k z = 1 - ∑ p ∈ primesLTk k z, Rk k p / p`. Comparison with `R`:
+  `R_eq_Rk_mul`, `R_le_Rk`, `Rk_div_R_le_Rk_div_R : a ≤ b → Rk k a / R a ≤ Rk k b / R b`,
+  `Rk_le_mul_R : a ≤ b → Rk k a ≤ Rk k b / R b * R a` ([I71, p. 6]).
+* Lemma 1 with arbitrary truncations (`LemmaOne.lean`). `f : List ℕ → ℝ`, `f [p₁, …, pᵢ]` is
+  `fᵢ(p₁, …, pᵢ)`. `truncPrimes f k lower h z = {p ∈ primesLTk k z | lower ∨ p < f h}` and
+  `truncSet f k lower n h z` (depth `n`, history `h`): `{1}` at `n = 0`, and
+  `{1} ∪ ⋃_{p ∈ truncPrimes f k lower h z} p · truncSet f k (!lower) n (h ++ [p]) p`.
+  So `truncSet f k false (2r) [] z` is the support in (2.1) (with the extra condition
+  `p₁ < f []`; `f [] ≥ z` gives [I71] literally) and `truncSet f k true (2r-1) [] z` that in (2.2).
+  Elements are squarefree, with prime factors in `primesLTk k z`, coprime to `k`
+  (`coprime_of_mem_truncSet`).
+
+      lemma1_upper (f k r M z) : (siftedCount k M z : ℤ) ≤
+        ∑ d ∈ truncSet f k false (2 * r) [] z, μ d * (multiplesCount M d : ℤ)
+      lemma1_lower (f k) (hr : 1 ≤ r) (M z) :
+        ∑ d ∈ truncSet f k true (2 * r - 1) [] z, μ d * (multiplesCount M d : ℤ) ≤ siftedCount k M z
+
+  (parity-general forms `siftedCount_le_sum` (`Even n`), `sum_le_siftedCount` (`Odd n`), any
+  history; per integer `truncSieve_sift`, via Buchstab's identity `siftIndicatorK_eq`, i.e. (2.3)).
+  Corollary (2.5)–(2.8), with `truncMain f k lower n h z = ∑_{d ∈ truncSet} μ(d)/d` (`G`, `D`) and
+  `#truncSet` (`Σ₁`, `Σ₂`), under `(*) hM : ∀ d, d.Coprime k → |(multiplesCount M d : ℝ) - y/d| ≤ 1`:
+
+      lemma1_cor_upper (hn : Even n) h hM z :
+        siftedCount k M z ≤ y * truncMain f k false n h z + #(truncSet f k false n h z)
+      lemma1_cor_lower (hn : Odd n) h hM z :
+        y * truncMain f k true n h z - #(truncSet f k true n h z) ≤ siftedCount k M z
+
+* Lemma 2 (`LemmaOne.lean`). `truncDef f k lower n h z` is the recursive form of the sums in
+  (2.9), (2.10) (failing tuples, plus the full tuples of maximal length weighted by `R_k`), so that
+  `S_{r,k} = R_k + truncDef f k false (2r) [] z`, `T_{r,k} = R_k - truncDef f k true (2r-1) [] z`:
+  `truncMain_false_eq : truncMain f k false n h z = Rk k z + truncDef f k false n h z` and
+  `truncMain_true_eq : truncMain f k true n h z = Rk k z - truncDef f k true n h z` (every `n`).
+  `truncDef_nonneg`, `truncDef_le` (`≤ Rk k z / R z * truncDef f 1 …` at the parities of Lemma 1),
+  and (2.12), (2.13):
+
+      truncMain_false_le (hn : Even n) h z :
+        truncMain f k false n h z ≤ Rk k z / R z * truncMain f 1 false n h z
+      le_truncMain_true (hn : Odd n) h z :
+        Rk k z / R z * truncMain f 1 true n h z ≤ truncMain f k true n h z
+
+* Rosser's sieve for `k` (`RosserK.lean`). `rosserTrunc y h = (y / ∏ h)^{1/3}`;
+  `truncSet_rosserTrunc (hy : 0 ≤ y) : truncSet (rosserTrunc y) k lower n h z =
+  (rosserSet lower (y / ∏ h) z).filter (fun d ↦ d.Coprime k ∧ #d.primeFactors ≤ n)`, and for
+  `#(primesLT z) ≤ n` the filter is just `Coprime k` (`truncSet_rosserTrunc_of_card_le`). So our
+  `rosserSet` is the instance `fᵢ = (y/(p₁⋯pᵢ))^{1/3}` (with `f [] = y^{1/3}`), and the
+  `k`-supports are subsets of the `k = 1` supports.
+  `rosserMainK k lower y z = ∑_{d ∈ rosserSet lower y z, (d,k)=1} μ(d)/d` (`rosserMainK_one`),
+  `truncDef_rosserTrunc_one` (Lemma 2 for `k = 1`: `truncDef = fail`), `Rk_le_rosserMainK_false`,
+  `rosserMainK_true_le_Rk`, and for `0 ≤ y`:
+
+      rosserMainK_false_le : rosserMainK k false y z ≤ Rk k z / R z * rosserMain false y z   -- (2.12)
+      le_rosserMainK_true : Rk k z / R z * rosserMain true y z ≤ rosserMainK k true y z      -- (2.13)
+      rosserMainK_false_le_fail (hr : #(primesLT z) < r) :
+        rosserMainK k false y z ≤ Rk k z * (1 + fail false r y z / R z)
+      le_rosserMainK_true_fail (hr : #(primesLT z) < r) :
+        Rk k z * (1 - fail true r y z / R z) ≤ rosserMainK k true y z
+      rosser_cor_upper hy hM z : siftedCount k M z ≤
+        y * rosserMainK k false y z + #((rosserSet false y z).filter (·.Coprime k))     -- (2.7)
+      rosser_cor_lower hy hM z : y * rosserMainK k true y z -
+        #((rosserSet true y z).filter (·.Coprime k)) ≤ siftedCount k M z               -- (2.8)
+      siftedCount_le_fail hy hM (hr : #(primesLT z) < r) : siftedCount k M z ≤
+        y * Rk k z * (1 + fail false r y z / R z) + #(rosserSet false y z)
+      fail_le_siftedCount hy hM (hr : #(primesLT z) < r) :
+        y * Rk k z * (1 - fail true r y z / R z) - #(rosserSet true y z) ≤ siftedCount k M z
+
+  The last two are the starting point of [I71, §5] (then Theorem 4 bounds `fail`, Theorem 5 the
+  supports). (2.14), (2.15) (the expansion of `S_{r,1}`, `T_{r,1}` into the `d_{n,y}`) are not
+  stated separately: our `fail` is their recursive form.
+* `k/φ(k)` (`Totient.lean`): `natCast_div_totient_eq : k/φ(k) = (∏_{p ∣ k} (1 - 1/p))⁻¹`,
+
+      div_totient_le_loglog : ∃ C, ∀ k : ℕ, 1 ≤ k → (k : ℝ) / k.totient ≤ C * log (log (3 * k))
+      inv_Rk_le (hk : 1 ≤ k) z : 1 / Rk k z ≤ ((k : ℝ) / k.totient) / R z
+      inv_Rk_le_loglog : ∃ C, ∀ k ≥ 1, ∀ z, 1 / Rk k z ≤ C * log (log (3 * k)) / R z
+
+  (`R(p_r + 1) ≤ ∏_{p ∣ k}(1 - 1/p)` for `r = ω(k)` by `R_le_prod_of_card_eq`, `R_lower`,
+  `nth_prime_le`, `2^r ≤ k`). Note `1/R_k ≤ 1/R` already, since `R ≤ R_k`.
+* Lemma 14 is `lemma14` (`PrimeSums/Lemma13.lean`), exactly as stated with `pntE b` for
+  `exp(-√log b)`.
+* Lemma 16 (`LemmaSixteen.lean`). `d2 y s = ∑_{p₁ < y^{1/s}} ∑_{p₂ < p₁, (y/p₁)^{1/3} ≤ p₂}
+  R(p₂)/(p₁p₂)` (Iwaniec's `d_{2,y}(s)`), `d2_eq_fail (hy : 0 ≤ y) : d2 y s = fail true 2 y (y^(1/s))`,
+  `d2_eq_sum` (only `p₁ ≥ y^{1/4}` contribute, inner sum `= R(y₁^{1/3}) - R(p₁)` by telescoping),
+  `integral_lemma16 : s ∈ [2,4] → ∫ t in s..4, (3t/(t-1) - t)/L/t = g 2 s / L`;
+
+      theorem lemma16 {cR CR : ℝ} (hcR : 0 < cR) (hR : ∀ z ≥ 2, |R z * log z - cR| ≤ CR * pntE z) :
+          ∃ c₆ : ℝ, ∀ y s : ℝ, 1 < y → 2 ≤ s →
+            cR⁻¹ * d2 y s < g 2 s / log y + c₆ * pntE (y ^ (1 / (6 : ℝ)))
+
+  and `lemma16_fail` (the same for `fail true 2 y (y^(1/s))`). `e^{-γ}` is the hypothesis constant
+  `cR` (as in `theorem4`), and `exp(-√(log y / 6))` is `pntE (y^{1/6})`. The proof uses the
+  telescoping identity `TheoremFour.sum_R_div_eq` for the inner sum instead of Lemma 14, then
+  Lemma 13 (`lemma13_param`) for the outer sum; Lemma 14 only bounds `∑ 1/(p₁ log p₁)` in the
+  error. For `s ≥ 4` both sides are trivial (`d2 = 0`).
