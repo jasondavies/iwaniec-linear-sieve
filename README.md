@@ -1,12 +1,17 @@
-# Iwaniec's bound for Jacobsthal's problem
+# Iwaniec's linear sieve
 
-A Lean 4 / Mathlib formalisation of
+A Lean 4 / Mathlib formalisation of Iwaniec's linear sieve at the sifting limit,
 
-> **Theorem** (H. Iwaniec, 1978). There is an absolute constant `C` such that if `m` consecutive
-> integers are each divisible by one of `r ≥ 2` given primes, then `m ≤ C (r log r)²`.
+> H. Iwaniec, *On the error term in the linear sieve*, Acta Arith. 19 (1971), 1–30,
+
+with its application to Jacobsthal's problem,
+
+> **Theorem** (H. Iwaniec, *On the problem of Jacobsthal*, 1978). There is an absolute
+> constant `C` such that if `m` consecutive integers are each divisible by one of `r ≥ 2` given
+> primes, then `m ≤ C (r log r)²`.
 
 ```lean
-theorem IwaniecJacobsthal.iwaniecBound :
+theorem IwaniecLinearSieve.iwaniecBound :
     ∃ C : ℝ, ∀ S : Finset ℕ, (∀ p ∈ S, p.Prime) → 2 ≤ S.card →
       ∀ (x : ℤ) (m : ℕ), (∀ k < m, ∃ p ∈ S, (p : ℤ) ∣ x + k) →
         (m : ℝ) ≤ C * ((S.card : ℝ) * Real.log S.card) ^ 2
@@ -27,7 +32,11 @@ It depends only on the axioms `propext`, `Classical.choice` and `Quot.sound`, an
   the same argument.
 
 The proof follows [I71] lemma by lemma (with `k = 1`); `BLUEPRINT.md` maps each lemma to its
-Lean statement and records every deviation.
+Lean statement and records every deviation. From [I71] we formalise §§2–4 in full: Rosser's
+sieve, the functions of §3, Theorem 4 (main term with error `O(1/log y)`) and Theorem 5 (support
+of size `O(y/log² y)`). Theorems 1–3, which package these for general sequences and `k`, are
+formalised only in the case [I78] needs: the lower bound of Theorem 1 at level `y = C₀ z²`
+(`linearSieveEstimate`).
 
 ## Prime number theorem
 
@@ -46,10 +55,10 @@ local patches.
 |---|---|
 | `PrimeSums` | `Σ 1/p`, `∏ (1 - 1/p)` with PNT errors; [I71, Lemmas 13, 14]; `p_r ≪ r log r` |
 | `Rosser` | Rosser's sieve: supports `D^±`, sieve property, deficits, support recursions ([I71, §2]) |
-| `ShiftedSieve`, `Jacobsthal`, `Main` | [I78, Lemma 1] and the reduction to `LinearSieveEstimate` |
 | `SieveFunctions` | `g_n`, `f`, `F`, `f(2) = 2` ([I71, §3, Lemmas 3–5]) |
 | `SieveMajorants` | `𝔐`, `𝔚`, `𝔣`, `𝔉` ([I71, §3, Lemmas 6, 8–10]) |
-| `LinearSieve` | [I71, §4]: Lemmas 7, 11, 12, Corollaries, crude bounds, Theorems 4, 5, and the estimate |
+| `LinearSieve` | [I71, §4]: Lemmas 7, 11, 12, Corollaries, crude bounds, Theorems 4, 5, and `linearSieveEstimate` |
+| `Jacobsthal` | [I78]: the shifted sieve (Lemma 1), the reduction, and `iwaniecBound` |
 
 ## Deviations from the papers
 

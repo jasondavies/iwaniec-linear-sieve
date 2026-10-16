@@ -21,12 +21,12 @@ prime-number input is the de la Vallée Poussin prime number theorem
 | Layer | Content | Lean module |
 |---|---|---|
 | PNT | `StrongPNT` (vendored) | `PrimeNumberTheoremAnd.StrongPNT` |
-| Prime sums | `S(x) = Σ_{p≤x} 1/p = log log x + c₅ + O(exp(-√log x))`; `R(z) = Π_{p<z}(1-1/p)` with `R(z) log z → e^{-γ}`-type estimate `R(z) = c_R / log z + O(exp(-√log z))`; [I71, Lemma 13, Corollaries 1–3, Lemma 14] | `IwaniecJacobsthal.PrimeSums` |
-| Sieve combinatorics | [I71, §2]: Lemma 1 (the inequalities (2.1), (2.2)), its corollary (2.5)–(2.8), Lemma 2 (`G = S`, `D = T`), the identities (2.14), (2.15) | `IwaniecJacobsthal.Rosser` |
-| Sieve functions | [I71, §3]: `g_n`, `f`, `F`, Lemmas 3–10, `𝔐`, `𝔚`, `𝔣`, `𝔉`, `f(2) = 2` | `IwaniecJacobsthal.SieveFunctions` |
-| Estimates | [I71, §4]: Lemmas 11–17, Theorems 4, 5 | `IwaniecJacobsthal.MainTerm`, `IwaniecJacobsthal.Remainder` |
-| Linear sieve | [I71, §5]: Theorem 1 lower bound (1.2)/(1.4), as needed by [I78, Lemma 2] | `IwaniecJacobsthal.LinearSieve` |
-| Jacobsthal | [I78]: Lemma 1 (shifted sieve), Theorem, Corollary | `IwaniecJacobsthal.ShiftedSieve`, `IwaniecJacobsthal.Jacobsthal` |
+| Prime sums | `S(x) = Σ_{p≤x} 1/p = log log x + c₅ + O(exp(-√log x))`; `R(z) = Π_{p<z}(1-1/p)` with `R(z) log z → e^{-γ}`-type estimate `R(z) = c_R / log z + O(exp(-√log z))`; [I71, Lemma 13, Corollaries 1–3, Lemma 14] | `IwaniecLinearSieve.PrimeSums` |
+| Sieve combinatorics | [I71, §2]: Lemma 1 (the inequalities (2.1), (2.2)), its corollary (2.5)–(2.8), Lemma 2 (`G = S`, `D = T`), the identities (2.14), (2.15) | `IwaniecLinearSieve.Rosser` |
+| Sieve functions | [I71, §3]: `g_n`, `f`, `F`, Lemmas 3–10, `𝔐`, `𝔚`, `𝔣`, `𝔉`, `f(2) = 2` | `IwaniecLinearSieve.SieveFunctions` |
+| Estimates | [I71, §4]: Lemmas 11–17, Theorems 4, 5 | `IwaniecLinearSieve.MainTerm`, `IwaniecLinearSieve.Remainder` |
+| Linear sieve | [I71, §5]: Theorem 1 lower bound (1.2)/(1.4), as needed by [I78, Lemma 2] | `IwaniecLinearSieve.LinearSieve` |
+| Jacobsthal | [I78]: Lemma 1 (shifted sieve), Theorem, Corollary | `IwaniecLinearSieve.Jacobsthal.ShiftedSieve`, `IwaniecLinearSieve.Jacobsthal.Reduction`, `IwaniecLinearSieve.Jacobsthal` |
 
 ## Deviations from the papers
 
@@ -50,12 +50,12 @@ Mertens' second theorem is PNT-strength. [I71] uses `exp(-√log x)` errors.
 
 ## Module specifications
 
-Conventions: everything lives in `namespace IwaniecJacobsthal`; `primesLT`, `primorialLT`, `R`
-are in `IwaniecJacobsthal/Basic.lean`. Statements below are targets; names and exact forms may
+Conventions: everything lives in `namespace IwaniecLinearSieve`; `primesLT`, `primorialLT`, `R`
+are in `IwaniecLinearSieve/Basic.lean`. Statements below are targets; names and exact forms may
 be adjusted when that makes them easier to use, provided the mathematical content is kept and
 this file is updated. No `sorry`; only the axioms `propext`, `Classical.choice`, `Quot.sound`.
 
-### A. `IwaniecJacobsthal/PrimeSums.lean` — prime sums from `StrongPNT`
+### A. `IwaniecLinearSieve/PrimeSums.lean` — prime sums from `StrongPNT`
 
 Iwaniec uses "the well known formula" `S(x) = Σ_{p≤x} 1/p = log log x + c₅ + O(exp(-√log x))`
 and `R(z) = e^{-γ}/log z + O(exp(-√log z))`. The PNT gives these with `exp(-κ √log x)` for some
@@ -92,7 +92,7 @@ Files: `PrimeSums/Error.lean` (`pntE`, `theta_asymp`), `Mertens.lean` (`S_asymp`
 summation against `θ`), `Product.lean` (`R`), `SummationByParts.lean` (abstract discrete
 summation by parts), `Lemma13.lean` (Lemmas 13, 14), `NthPrime.lean`.
 
-### B. `IwaniecJacobsthal/Rosser.lean`, `ShiftedSieve.lean`, `Jacobsthal.lean` (done)
+### B. `IwaniecLinearSieve/Rosser.lean`, `Jacobsthal/ShiftedSieve.lean`, `Jacobsthal/Reduction.lean` (done)
 
 Rosser's β = 2 linear sieve [I71, §2] in recursive form. With `lower = true` for `D⁻` (conditions
 at even indices) and `false` for `D⁺` (odd indices), `rosserPrimes lower y z` is the set of primes
@@ -129,7 +129,7 @@ at even indices) and `false` for `D⁺` (odd indices), `rosserPrimes lower y z` 
   `card_filter_rosserSet_zero` (`= 1` for `n = 0`) and `card_filter_rosserSet_succ`
   (`#{d ∈ D : ω(d) ≤ n+1} = 1 + ∑_{p ∈ rosserPrimes} #{d ∈ rosserSet (!lower) (y/p) p : ω(d) ≤ n}`).
 
-`ShiftedSieve.lean`: [I78, Lemma 1] for intervals (`shiftedSieve`): for primes `S` with
+`Jacobsthal/ShiftedSieve.lean`: [I78, Lemma 1] for intervals (`shiftedSieve`): for primes `S` with
 `#S = #(primesLT z)`, any `y`, `x : ℤ`, `X : ℕ`,
 
     X * ∏_{q ∈ S} (1 - q⁻¹) * (rosserMain true y z / R z) - #(rosserSet true y z)
@@ -141,7 +141,7 @@ numbers are handled as sets of primes; the algebra is `sum_powerset_div_prod` (M
 `∑_A w(A)/∏_A g = ∏(1 - 1/g) ∑_B σ(B)/∏_B (g-1)`) and `prod_mul_sum_div_le_sum`. Also
 `R_le_prod_of_card_eq : R z ≤ ∏_{q ∈ S} (1 - q⁻¹)`.
 
-`Jacobsthal.lean`: the final assembly `iwaniecBound_of_estimates`: from
+`Jacobsthal/Reduction.lean`: the final assembly `iwaniecBound_of_estimates`: from
 
     LinearSieveEstimate : ∃ C₀ c K z₀ : ℝ, 0 < c ∧ ∀ z ≥ z₀,
       R z - rosserMain true (C₀ * z^2) z ≤ R z * (1 - c / log z) ∧
@@ -163,7 +163,7 @@ without a separate argument: `S` (with `#S = r`) is enlarged to `N = N₀ r` pri
 first `N` primes, `card_primesLT_nth_prime_add_one`, and `z ≥ z₁`); then
 `p_N ≪ N log N ≪_{N₀} r log r`.
 
-### C1. `IwaniecJacobsthal/SieveFunctions.lean` — [I71, §3] `g_n`, `f`, `F` (done)
+### C1. `IwaniecLinearSieve/SieveFunctions.lean` — [I71, §3] `g_n`, `f`, `F` (done)
 
 Files: `SieveFunctions/Defs.lean` (`g`), `Bounds.lean` (Lemmas 3, 4), `Series.lean` (`f`, `F`,
 Corollary to Lemma 4), `LemmaFive.lean` (`M`, `f(2) = 2`); `SieveFunctions.lean` imports all four.
@@ -218,9 +218,9 @@ Corollary to Lemma 4), `LemmaFive.lean` (`M`, `f(2) = 2`); `SieveFunctions.lean`
   `|lemma5Q b| ≤ C b² e^{-b}` for `b ≥ 4`, so `lemma5Q_three : lemma5Q 3 = 0`;
   `integral_MSieve_two_three` evaluates `∫_2^3 M` explicitly.
 
-### C2. `IwaniecJacobsthal/SieveMajorants.lean` — [I71, §3] `𝔐`, `𝔚`, `𝔣`, `𝔉` (done)
+### C2. `IwaniecLinearSieve/SieveMajorants.lean` — [I71, §3] `𝔐`, `𝔚`, `𝔣`, `𝔉` (done)
 
-Files `IwaniecJacobsthal/SieveMajorants/{Delay,Defs,Properties,Majorants,Lemmas}.lean`.
+Files `IwaniecLinearSieve/SieveMajorants/{Delay,Defs,Properties,Majorants,Lemmas}.lean`.
 
 * `Delay.sol k y₀`: continuous solution of `y = y₀` on `(-∞, 3]`, `y' = k(s) y(s-1)` for `s > 3`;
   `pos_of_first_crossing` (first-crossing principle used for all comparison arguments).
@@ -257,7 +257,7 @@ Files `IwaniecJacobsthal/SieveMajorants/{Delay,Defs,Properties,Majorants,Lemmas}
 
 ### D. [I71, §4–5]: from the sieve functions to `LinearSieveEstimate`
 
-Files: `IwaniecJacobsthal/LinearSieve/*.lean`. Notation: `L = log y`,
+Files: `IwaniecLinearSieve/LinearSieve/*.lean`. Notation: `L = log y`,
 `ξ(y) = L / (log log (3y))^{11/5}`, `δ(s, y) = (1 + s² (log s)⁵ / L²)^{5s}`, `z = y^{1/s}`,
 `t_p = L / log p` (so the inner level `(y/p, p)` has parameter `t_p - 1`). Main-term
 majorants `M true = fSieve`, `M false s = FSieve s + max (3 - s) 0` (`= MSieve s - fSieve s`);
@@ -366,7 +366,7 @@ Items 1–4 are done, in `LinearSieve/Calculus.lean`, `LemmaSeven.lean`, `LemmaE
    `#{d ∈ D | ω(d) ≤ r - 1 + j} = #{d ∈ D | ω(d) ≤ r - 1}`, which gives [I71]'s
    `A_{m+1} = A_{m-1}`).
 7. **Theorem 4** (main terms; done, `LinearSieve/TheoremFour.lean`, helpers in
-   `TheoremFourAux.lean`, `TheoremFourAsymp.lean`, namespace `IwaniecJacobsthal.TheoremFour`).
+   `TheoremFourAux.lean`, `TheoremFourAsymp.lean`, namespace `IwaniecLinearSieve.TheoremFour`).
 
        theorem theorem4 {cR CR : ℝ} (hcR : 0 < cR)
            (hR : ∀ z ≥ 2, |R z * log z - cR| ≤ CR * pntE z) :
@@ -399,7 +399,7 @@ Items 1–4 are done, in `LinearSieve/Calculus.lean`, `LemmaSeven.lean`, `LemmaE
    `log w = ℓ^{11/5}`, `pntE w = exp(-κ ℓ^{11/10})`; `crude_alg`, `eventually_crude_hyp`).
    Note: `(3 + (-1)^r)/2 ≤ s` in [I71] is our `sMin lower ≤ s`; no boundary adjustment was needed.
 8. **Theorem 5** (support counts; done, `LinearSieve/TheoremFive{Aux,Count,}.lean`, helpers in
-   `namespace IwaniecJacobsthal.TheoremFive`):
+   `namespace IwaniecLinearSieve.TheoremFive`):
 
        theorem5 : ∃ c₇ : ℝ, 0 ≤ c₇ ∧ ∀ (r : ℕ) (lower : Bool) (y s : ℝ), 1 < y →
          sMin lower ≤ s → s ≤ xi y →
@@ -444,8 +444,8 @@ Items 1–4 are done, in `LinearSieve/Calculus.lean`, `LemmaSeven.lean`, `LemmaE
    128)}`, using `ξ²λ⁵/L² = λ^{3/5}`). All "large `y`" facts come from `eventually_scalar`
    (`λ, log λ, λ^{1/5} ≥ c`, `λ - 1 ≤ log L ≤ λ`, `24λ ≤ ξ`, `16λ² ≤ L`, `λ/2 ≤ log(ξ/2)`,
    `4 log λ + c ≤ log ξ ≤ λ`), proved from `log x = o(x)`.
-9. **`LinearSieveEstimate`** (done, `LinearSieve/Estimate.lean`: `linearSieveEstimate`, with
-   `C₀ = exp (2 c₇ (1 + 9 log⁵ 3)^{15} + 5)`, `c = 1`; and `iwaniecBound`). With `y = C₀ z²`, `s = 2 + log C₀ / log z ∈ [2, 2.5]`: take `r` large
+9. **`LinearSieveEstimate`** (done; defined and proved in `LinearSieve/Estimate.lean` as `linearSieveEstimate`, with
+   `C₀ = exp (2 c₇ (1 + 9 log⁵ 3)^{15} + 5)`, `c = 1`; `iwaniecBound` is in `Jacobsthal.lean`). With `y = C₀ z²`, `s = 2 + log C₀ / log z ∈ [2, 2.5]`: take `r` large
    (`fail_eq_of_card_lt`), then use Theorem 4, `R_asymp` (`R z = cR s/L · (1 + O(pntE))`) and
    `one_sub_fSieve_div_ge`. This gives
    `R z - rosserMain true y z ≤ R z (f(s)/s + O(1/L)) ≤ R z (1 - 3 log(s-1)/s + O(1/L))`,

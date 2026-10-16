@@ -1,6 +1,6 @@
 name = "iwaniec_linear_sieve"
 version = "0.1.0"
-defaultTargets = ["IwaniecJacobsthal"]
+defaultTargets = ["IwaniecLinearSieve"]
 
 [leanOptions]
 autoImplicit = false
@@ -15,4 +15,4 @@ name = "strong_pnt"
 path = "vendor/strong-pnt"
 
 [[lean_lib]]
-name = "IwaniecJacobsthal"
+name = "IwaniecLinearSieve"
