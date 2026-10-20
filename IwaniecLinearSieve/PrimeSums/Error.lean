@@ -1,5 +1,9 @@
-import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.StrongPNT
-import IwaniecLinearSieve.Basic
+module
+
+public import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.StrongPNT
+public import IwaniecLinearSieve.Basic
+
+@[expose] public section
 
 /-!
 # The de la Vallée Poussin error term

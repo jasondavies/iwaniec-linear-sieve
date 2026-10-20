@@ -1,12 +1,17 @@
-import IwaniecLinearSieveVendor.Architect
-import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.MellinCalculus
-import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.ZetaBounds
-import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.ZetaConj
-import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.SmoothExistence
-import Mathlib.Algebra.Group.Support
-import Mathlib.Analysis.MellinInversion
-import Mathlib.Analysis.Real.Pi.Bounds
-import Mathlib.NumberTheory.Chebyshev
+module
+
+public import IwaniecLinearSieveVendor.Architect
+public import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.MellinCalculus
+public import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.ZetaBounds
+public import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.ZetaConj
+public import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.SmoothExistence
+public import Mathlib.Algebra.Group.Support
+public import Mathlib.Analysis.MellinInversion
+public import Mathlib.Analysis.Real.Pi.Bounds
+public import Mathlib.NumberTheory.Chebyshev
+public import Mathlib.Algebra.Order.Interval.Set.Group
+
+@[expose] public section
 
 set_option lang.lemmaCmd true
 
@@ -2294,8 +2299,7 @@ lemma I2GenBound {SmoothingF : ℝ → ℝ}
           C' * X / (ε * T) * |1 + (Real.log X)⁻¹ - σ₁| := by
         refine intervalIntegral.norm_integral_le_of_norm_le_const ?_
         convert this using 3
-        apply uIoc_of_le
-        exact interval_length_nonneg
+        rw [uIoc_of_le interval_length_nonneg]
       _ ≤ C' * X / (ε * T) * 2 := by
         apply mul_le_mul_of_nonneg_left
         · rw[abs_of_nonneg (sub_nonneg.mpr interval_length_nonneg)]

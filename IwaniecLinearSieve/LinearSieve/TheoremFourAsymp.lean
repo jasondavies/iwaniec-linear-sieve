@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.LinearSieve.TheoremFourAux
+module
+
+public import IwaniecLinearSieve.LinearSieve.TheoremFourAux
+
+@[expose] public section
 
 /-!
 # Real-analysis facts for large `y` in [I71, Theorem 4]

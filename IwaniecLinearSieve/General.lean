@@ -1,8 +1,12 @@
-import IwaniecLinearSieve.General.Defs
-import IwaniecLinearSieve.General.LemmaOne
-import IwaniecLinearSieve.General.RosserK
-import IwaniecLinearSieve.General.Totient
-import IwaniecLinearSieve.General.LemmaSixteen
+module
+
+public import IwaniecLinearSieve.General.Defs
+public import IwaniecLinearSieve.General.LemmaOne
+public import IwaniecLinearSieve.General.RosserK
+public import IwaniecLinearSieve.General.Totient
+public import IwaniecLinearSieve.General.LemmaSixteen
+
+@[expose] public section
 
 /-!
 # [I71, §2] for general `k` and sequences

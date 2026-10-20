@@ -1,6 +1,6 @@
 name = "iwaniec_linear_sieve"
 version = "0.1.0"
-defaultTargets = ["IwaniecLinearSieve"]
+defaultTargets = ["IwaniecLinearSieve", "Challenge", "Solution"]
 
 [leanOptions]
 autoImplicit = false
@@ -16,3 +16,11 @@ path = "vendor/strong-pnt"
 
 [[lean_lib]]
 name = "IwaniecLinearSieve"
+
+[[lean_lib]]
+name = "Challenge"
+roots = ["Challenge"]
+
+[[lean_lib]]
+name = "Solution"
+roots = ["Solution"]

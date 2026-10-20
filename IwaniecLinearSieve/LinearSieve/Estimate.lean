@@ -1,5 +1,9 @@
-import IwaniecLinearSieve.LinearSieve.TheoremFour
-import IwaniecLinearSieve.LinearSieve.TheoremFive
+module
+
+public import IwaniecLinearSieve.LinearSieve.TheoremFour
+public import IwaniecLinearSieve.LinearSieve.TheoremFive
+
+@[expose] public section
 
 /-!
 # The linear sieve at level `C₀ z²` ([I71, Theorems 4–5]; [I78, Lemma 2])

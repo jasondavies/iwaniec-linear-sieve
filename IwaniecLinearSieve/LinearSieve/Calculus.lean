@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.LinearSieve.Defs
+module
+
+public import IwaniecLinearSieve.LinearSieve.Defs
+
+@[expose] public section
 
 /-!
 # Calculus identities for the majorants of [I71, §4]

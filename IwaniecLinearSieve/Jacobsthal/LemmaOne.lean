@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.Jacobsthal.ShiftedSieve
+module
+
+public import IwaniecLinearSieve.Jacobsthal.ShiftedSieve
+
+@[expose] public section
 
 /-!
 # [I78, Lemma 1] (the shifted sieve) in full

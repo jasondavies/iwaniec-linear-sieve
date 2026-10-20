@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.LinearSieve.TheoremFiveCount
+module
+
+public import IwaniecLinearSieve.LinearSieve.TheoremFiveCount
+
+@[expose] public section
 
 /-!
 # [I71, Theorem 5]: the size of the support of the Rosser weights

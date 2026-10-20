@@ -1,5 +1,9 @@
-import IwaniecLinearSieve.EulerGamma.Buchstab
-import IwaniecLinearSieve.SieveFunctions.LemmaFive
+module
+
+public import IwaniecLinearSieve.EulerGamma.Buchstab
+public import IwaniecLinearSieve.SieveFunctions.LemmaFive
+
+@[expose] public section
 
 /-!
 # [I71, Lemma 5]: `F(3) = 2e^γ - 3`, and `ω(u) → e^{-γ}`

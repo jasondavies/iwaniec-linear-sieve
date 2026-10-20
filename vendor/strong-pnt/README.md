@@ -12,7 +12,8 @@ besides Mathlib), for instance
       (fun x ↦ exp (-eulerMascheroniConstant) / log x)
 
 from [PrimeNumberTheoremAnd](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd) (Apache 2.0,
-see `LICENSE`), ported from Lean 4.34.0 to Lean 4.35.0 / Mathlib v4.35.0.
+see `LICENSE`), ported from Lean 4.34.0 to Lean 4.35.0 / Mathlib v4.35.0 and to the Lean module
+system.
 
 All files live under the module prefix `IwaniecLinearSieveVendor` (upstream module `M` is
 `IwaniecLinearSieveVendor.M`), so this copy can sit in the same Lake workspace as
@@ -26,4 +27,5 @@ copy and PrimeNumberTheoremAnd.
   Mathlib v4.34.0's `Mathlib/Tactic/LinearCombinationPrime.lean` (Apache 2.0), removed from Mathlib
   in v4.35.0.
 * `UPSTREAM.json` records the upstream revisions and path of every file, the SHA-256 of every
-  upstream and local file, and the six local patches.
+  upstream and local file, the mechanical rewrite to the Lean module system, and the local
+  patches to seven files.

@@ -1,4 +1,8 @@
-import Lean
+module
+
+public meta import Lean
+
+public meta section
 
 /-!
 # No-op stand-in for LeanArchitect

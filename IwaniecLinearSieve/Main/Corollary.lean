@@ -1,5 +1,9 @@
-import IwaniecLinearSieve.Main.TheoremOne
-import IwaniecLinearSieve.Main.Fundamental
+module
+
+public import IwaniecLinearSieve.Main.TheoremOne
+public import IwaniecLinearSieve.Main.Fundamental
+
+@[expose] public section
 
 /-!
 # The Corollary to [I71, Theorem 1]

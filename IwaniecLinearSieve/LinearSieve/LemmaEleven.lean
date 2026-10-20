@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.LinearSieve.LemmaSeven
+module
+
+public import IwaniecLinearSieve.LinearSieve.LemmaSeven
+
+@[expose] public section
 
 /-!
 # [I71, Lemmas 11 and 12]

@@ -1,0 +1,17 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": [
+    "IwaniecLinearSieve.iwaniecBound",
+    "IwaniecLinearSieve.iwaniec_theorem",
+    "IwaniecLinearSieve.theorem1_full",
+    "IwaniecLinearSieve.corollary_upper",
+    "IwaniecLinearSieve.corollary_lower",
+    "IwaniecLinearSieve.theorem2",
+    "IwaniecLinearSieve.theorem3_fst",
+    "IwaniecLinearSieve.theorem3_snd"
+  ],
+  "definition_names": [],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}

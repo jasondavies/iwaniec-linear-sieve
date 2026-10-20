@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.PrimeSums.Error
+module
+
+public import IwaniecLinearSieve.PrimeSums.Error
+
+@[expose] public section
 
 /-!
 # Mertens' second theorem with the de la Vallée Poussin error term

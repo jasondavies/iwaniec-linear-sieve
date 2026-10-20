@@ -1,8 +1,12 @@
-import IwaniecLinearSieveVendor.Architect
-import Batteries.Tactic.Lemma
-import Mathlib.Geometry.Manifold.PartitionOfUnity
-import Mathlib.Tactic.Bound
-import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Mathlib.Algebra.Notation.Support
+module
+
+public import IwaniecLinearSieveVendor.Architect
+public import Batteries.Tactic.Lemma
+public import Mathlib.Geometry.Manifold.PartitionOfUnity
+public import Mathlib.Tactic.Bound
+public import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Mathlib.Algebra.Notation.Support
+
+@[expose] public section
 
 set_option lang.lemmaCmd true
 

@@ -1,5 +1,9 @@
-import IwaniecLinearSieve.PrimeSums.Mertens
-import IwaniecLinearSieve.PrimeSums.SummationByParts
+module
+
+public import IwaniecLinearSieve.PrimeSums.Mertens
+public import IwaniecLinearSieve.PrimeSums.SummationByParts
+
+@[expose] public section
 
 /-!
 # [I71, Lemma 13] and [I71, Lemma 14]

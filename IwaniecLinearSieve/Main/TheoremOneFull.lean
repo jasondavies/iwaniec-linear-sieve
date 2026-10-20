@@ -1,6 +1,10 @@
-import IwaniecLinearSieve.Main.TheoremOne
-import IwaniecLinearSieve.EulerGamma
-import IwaniecLinearSieve.SieveMajorants
+module
+
+public import IwaniecLinearSieve.Main.TheoremOne
+public import IwaniecLinearSieve.EulerGamma
+public import IwaniecLinearSieve.SieveMajorants
+
+@[expose] public section
 
 /-!
 # [I71, Theorem 1] with the properties of `f`, `F`, `𝔐`

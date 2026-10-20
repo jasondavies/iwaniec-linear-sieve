@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.General.LemmaOne
+module
+
+public import IwaniecLinearSieve.General.LemmaOne
+
+@[expose] public section
 
 /-!
 # Rosser's sieve for general `k` ([I71, §2])

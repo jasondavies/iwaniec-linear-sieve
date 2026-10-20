@@ -1,6 +1,10 @@
-import IwaniecLinearSieve.Jacobsthal.LemmaOne
-import IwaniecLinearSieve.Jacobsthal.LemmaTwo
-import IwaniecLinearSieve.Jacobsthal.Reduction
+module
+
+public import IwaniecLinearSieve.Jacobsthal.LemmaOne
+public import IwaniecLinearSieve.Jacobsthal.LemmaTwo
+public import IwaniecLinearSieve.Jacobsthal.Reduction
+
+@[expose] public section
 
 /-!
 # [I78, Theorem] and [I78, Corollary]

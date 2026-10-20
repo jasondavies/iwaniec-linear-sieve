@@ -1,5 +1,9 @@
-import IwaniecLinearSieve.SieveFunctions
-import IwaniecLinearSieve.SieveMajorants.Lemmas
+module
+
+public import IwaniecLinearSieve.SieveFunctions
+public import IwaniecLinearSieve.SieveMajorants.Lemmas
+
+@[expose] public section
 
 /-!
 # Notation for [I71, §4]

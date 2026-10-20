@@ -1,5 +1,9 @@
-import IwaniecLinearSieve.General.RosserK
-import IwaniecLinearSieve.LinearSieve.TheoremFourAux
+module
+
+public import IwaniecLinearSieve.General.RosserK
+public import IwaniecLinearSieve.LinearSieve.TheoremFourAux
+
+@[expose] public section
 
 /-!
 # [I71, Lemmas 14 and 16]

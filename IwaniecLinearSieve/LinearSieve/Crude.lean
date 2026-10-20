@@ -1,5 +1,9 @@
-import IwaniecLinearSieve.PrimeSums
-import IwaniecLinearSieve.LinearSieve.Depth
+module
+
+public import IwaniecLinearSieve.PrimeSums
+public import IwaniecLinearSieve.LinearSieve.Depth
+
+@[expose] public section
 
 /-!
 # The crude bound for deep terms ([I71, pp. 24, 27])

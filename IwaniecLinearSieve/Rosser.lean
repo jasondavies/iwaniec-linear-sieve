@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.Basic
+module
+
+public import IwaniecLinearSieve.Basic
+
+@[expose] public section
 
 /-!
 # Rosser's linear sieve, combinatorial part ([I71, §2], `k = 1`)

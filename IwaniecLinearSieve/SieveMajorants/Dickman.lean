@@ -1,10 +1,14 @@
-import IwaniecLinearSieve.SieveMajorants.Asymptotic
+module
+
+public import IwaniecLinearSieve.SieveMajorants.Asymptotic
+
+@[expose] public section
 
 /-!
 # The Dickman function and its comparison with `𝔐` ([I71, proof of Lemma 9])
 
 The Dickman function `ϱ`: `ϱ = 1` on `(-∞, 1]`, `u ϱ'(u) = -ϱ(u - 1)` for `u > 1`. We build it
-with the delay-equation solver of `Delay.lean` (shifted by `2`), and prove:
+with the delay-equation solver `Delay.sol` (shifted by `2`), and prove:
 
 * `dickman_integral_identity`: `u ϱ(u) = ∫_{u-1}^u ϱ` for `u ≥ 1`;
 * `dickman_pos`, `dickman_antitone`, `dickman_le_one`;

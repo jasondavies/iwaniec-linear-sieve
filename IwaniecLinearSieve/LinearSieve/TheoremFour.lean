@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.LinearSieve.TheoremFourAsymp
+module
+
+public import IwaniecLinearSieve.LinearSieve.TheoremFourAsymp
+
+@[expose] public section
 
 /-!
 # [I71, Theorem 4]

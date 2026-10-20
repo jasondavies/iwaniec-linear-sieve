@@ -1,5 +1,9 @@
-import IwaniecLinearSieve.LinearSieve.TheoremFiveAux
-import IwaniecLinearSieve.LinearSieve.Crude
+module
+
+public import IwaniecLinearSieve.LinearSieve.TheoremFiveAux
+public import IwaniecLinearSieve.LinearSieve.Crude
+
+@[expose] public section
 
 /-!
 # Counting lemmas for [I71, Theorem 5]
@@ -316,9 +320,10 @@ theorem exp_le_delta_errMaj {cG : ℝ} (hcG : 0 ≤ cG)
       · nlinarith
       · have : log s ≤ log ξ := log_le_log (by linarith) hsξ
         nlinarith
+    have hξc : ξ * (2 * c₁) ≤ ξ * a := mul_le_mul_of_nonneg_left (by linarith) (by linarith)
     calc exp (-(ξ * log ξ) + 3 / 2 * ξ * a)
         ≤ exp (s * (3 * a - 5 * log 128) + (-(s * log s) - s * a - cG * s)) :=
-          exp_le_exp.2 (by nlinarith)
+          exp_le_exp.2 (by rw [hc₁] at hsq hξc; linarith)
       _ = exp (s * (3 * a - 5 * log 128)) * exp (-(s * log s) - s * a - cG * s) := exp_add _ _
       _ ≤ delta s y * errMaj lower s := by
           gcongr

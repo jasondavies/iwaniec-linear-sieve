@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.LinearSieve.Corollaries
+module
+
+public import IwaniecLinearSieve.LinearSieve.Corollaries
+
+@[expose] public section
 
 /-!
 # Real-variable estimates for [I71, Theorem 5]

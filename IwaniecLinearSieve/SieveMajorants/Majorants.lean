@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.SieveMajorants.Properties
+module
+
+public import IwaniecLinearSieve.SieveMajorants.Properties
+
+@[expose] public section
 
 /-!
 # The functions `𝔣`, `𝔉`, `G_r` ([I71, §3])

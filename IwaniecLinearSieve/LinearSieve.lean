@@ -1,17 +1,21 @@
-import IwaniecLinearSieve.LinearSieve.Defs
-import IwaniecLinearSieve.LinearSieve.Depth
-import IwaniecLinearSieve.LinearSieve.Crude
-import IwaniecLinearSieve.LinearSieve.Calculus
-import IwaniecLinearSieve.LinearSieve.LemmaSeven
-import IwaniecLinearSieve.LinearSieve.LemmaEleven
-import IwaniecLinearSieve.LinearSieve.Corollaries
-import IwaniecLinearSieve.LinearSieve.TheoremFourAux
-import IwaniecLinearSieve.LinearSieve.TheoremFourAsymp
-import IwaniecLinearSieve.LinearSieve.TheoremFour
-import IwaniecLinearSieve.LinearSieve.TheoremFiveAux
-import IwaniecLinearSieve.LinearSieve.TheoremFiveCount
-import IwaniecLinearSieve.LinearSieve.TheoremFive
-import IwaniecLinearSieve.LinearSieve.Estimate
+module
+
+public import IwaniecLinearSieve.LinearSieve.Defs
+public import IwaniecLinearSieve.LinearSieve.Depth
+public import IwaniecLinearSieve.LinearSieve.Crude
+public import IwaniecLinearSieve.LinearSieve.Calculus
+public import IwaniecLinearSieve.LinearSieve.LemmaSeven
+public import IwaniecLinearSieve.LinearSieve.LemmaEleven
+public import IwaniecLinearSieve.LinearSieve.Corollaries
+public import IwaniecLinearSieve.LinearSieve.TheoremFourAux
+public import IwaniecLinearSieve.LinearSieve.TheoremFourAsymp
+public import IwaniecLinearSieve.LinearSieve.TheoremFour
+public import IwaniecLinearSieve.LinearSieve.TheoremFiveAux
+public import IwaniecLinearSieve.LinearSieve.TheoremFiveCount
+public import IwaniecLinearSieve.LinearSieve.TheoremFive
+public import IwaniecLinearSieve.LinearSieve.Estimate
+
+@[expose] public section
 
 /-!
 # The linear sieve at the sifting limit ([I71, §4])

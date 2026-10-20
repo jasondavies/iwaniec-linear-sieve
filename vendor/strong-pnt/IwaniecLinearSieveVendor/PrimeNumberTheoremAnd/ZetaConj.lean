@@ -1,7 +1,11 @@
-import IwaniecLinearSieveVendor.Architect
-import Mathlib.Analysis.Calculus.Deriv.Star
-import Mathlib.Analysis.Normed.Module.Connected
-import Mathlib.NumberTheory.Harmonic.ZetaAsymp
+module
+
+public import IwaniecLinearSieveVendor.Architect
+public import Mathlib.Analysis.Calculus.Deriv.Star
+public import Mathlib.Analysis.Normed.Module.Connected
+public import Mathlib.NumberTheory.Harmonic.ZetaAsymp
+
+@[expose] public section
 
 open scoped Complex ComplexConjugate
 

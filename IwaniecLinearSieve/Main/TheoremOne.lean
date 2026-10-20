@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.Main.Basic
+module
+
+public import IwaniecLinearSieve.Main.Basic
+
+@[expose] public section
 
 /-!
 # [I71, Theorem 1]

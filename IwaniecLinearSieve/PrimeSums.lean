@@ -1,9 +1,13 @@
-import IwaniecLinearSieve.PrimeSums.Error
-import IwaniecLinearSieve.PrimeSums.Mertens
-import IwaniecLinearSieve.PrimeSums.Product
-import IwaniecLinearSieve.PrimeSums.SummationByParts
-import IwaniecLinearSieve.PrimeSums.Lemma13
-import IwaniecLinearSieve.PrimeSums.NthPrime
+module
+
+public import IwaniecLinearSieve.PrimeSums.Error
+public import IwaniecLinearSieve.PrimeSums.Mertens
+public import IwaniecLinearSieve.PrimeSums.Product
+public import IwaniecLinearSieve.PrimeSums.SummationByParts
+public import IwaniecLinearSieve.PrimeSums.Lemma13
+public import IwaniecLinearSieve.PrimeSums.NthPrime
+
+@[expose] public section
 
 /-!
 # Prime sums with de la Vallée Poussin error terms, from `StrongPNT`

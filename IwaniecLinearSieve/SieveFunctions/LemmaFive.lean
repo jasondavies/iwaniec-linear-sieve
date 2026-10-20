@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.SieveFunctions.Series
+module
+
+public import IwaniecLinearSieve.SieveFunctions.Series
+
+@[expose] public section
 
 /-!
 # `f(2) = 2` ([I71, Lemma 5], the part we need)

@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.Jacobsthal.Reduction
+module
+
+public import IwaniecLinearSieve.Jacobsthal.Reduction
+
+@[expose] public section
 
 /-!
 # Jacobsthal's problem ([I78])

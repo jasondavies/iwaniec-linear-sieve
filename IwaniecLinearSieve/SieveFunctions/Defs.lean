@@ -1,9 +1,14 @@
-import IwaniecLinearSieve.Basic
+module
+
+public import IwaniecLinearSieve.Basic
+
+@[expose] public section
 
 /-!
 # The functions `g_n` of [I71, §3]
 
-We define Iwaniec's functions `g_n` (`n ≥ 2`) of [I71, (3.1)–(3.3)] on all of `ℝ`:
+Iwaniec's functions `g_n` (`n ≥ 2`) of [I71, (3.1)–(3.3)], defined on all of `ℝ` in
+`IwaniecLinearSieve.Definitions`, are:
 
 * `g 2 s = 3 log (3 / (s - 1)) + s - 4` for `2 ≤ s ≤ 4` and `g 2 s = 0` for `s ≥ 4`;
 * `g (2n+1) s = ∫_s^∞ g (2n) (t-1) / (t-1) dt` for `s ≥ 3` and `g (2n+1) s = g (2n+1) 3` for
@@ -18,25 +23,6 @@ on `s ≤ 2`, the odd functions on `s ≤ 3`), and `g 0 = g 1 = 0`. With these c
 open Real Set MeasureTheory intervalIntegral
 
 namespace IwaniecLinearSieve
-
-/-- The formula `3 log (3 / (s - 1)) + s - 4` for `g₂` on `[2, 4]`. -/
-noncomputable def gTwoFormula (s : ℝ) : ℝ := 3 * log (3 / (s - 1)) + s - 4
-
-/-- Left end of the domain of `g i` in [I71]: `2` for even `i`, `3` for odd `i`. -/
-noncomputable def gLower (i : ℕ) : ℝ := if Even i then 2 else 3
-
-/-- The kernel `t ↦ h (t - 1) / (t - 1)`, with the denominator replaced by `max (t - 1) 1` so that
-it is continuous on `ℝ` whenever `h` is. It agrees with `h (t - 1) / (t - 1)` for `t ≥ 2`. -/
-noncomputable def shiftKernel (h : ℝ → ℝ) (t : ℝ) : ℝ := h (t - 1) / max (t - 1) 1
-
-/-- Iwaniec's functions `g_n` of [I71, (3.1)–(3.3)], extended to all of `ℝ` (see the module
-docstring). The upper limit `n + 5 = (n + 3) + 2` of the integral can replace `∞` because
-`g (n + 2) s = 0` for `s ≥ n + 4`. -/
-noncomputable def g : ℕ → ℝ → ℝ
-  | 0, _ => 0
-  | 1, _ => 0
-  | 2, s => gTwoFormula (max 2 (min s 4))
-  | n + 3, s => ∫ t in max s (gLower (n + 3))..((n : ℝ) + 5), shiftKernel (g (n + 2)) t
 
 theorem g_zero (s : ℝ) : g 0 s = 0 := rfl
 

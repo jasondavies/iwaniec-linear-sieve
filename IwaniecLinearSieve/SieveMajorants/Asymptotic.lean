@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.SieveMajorants.Lemmas
+module
+
+public import IwaniecLinearSieve.SieveMajorants.Lemmas
+
+@[expose] public section
 
 /-!
 # The asymptotics of `𝔐` ([I71, Theorem 1 and Lemma 9])

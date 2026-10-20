@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.Main.Basic
+module
+
+public import IwaniecLinearSieve.Main.Basic
+
+@[expose] public section
 
 /-!
 # The fundamental lemma for small `z`

@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.PrimeSums.Error
+module
+
+public import IwaniecLinearSieve.PrimeSums.Error
+
+@[expose] public section
 
 /-!
 # The `r`-th prime is `O(r log r)`

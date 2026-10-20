@@ -1,7 +1,11 @@
-import IwaniecLinearSieve.EulerGamma.Mertens
-import IwaniecLinearSieve.EulerGamma.Buchstab
-import IwaniecLinearSieve.EulerGamma.LemmaFive
-import IwaniecLinearSieve.EulerGamma.TheoremFour
+module
+
+public import IwaniecLinearSieve.EulerGamma.Mertens
+public import IwaniecLinearSieve.EulerGamma.Buchstab
+public import IwaniecLinearSieve.EulerGamma.LemmaFive
+public import IwaniecLinearSieve.EulerGamma.TheoremFour
+
+@[expose] public section
 
 /-!
 # Euler's constant in [I71]

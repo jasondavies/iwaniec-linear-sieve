@@ -1,9 +1,13 @@
-import IwaniecLinearSieve.General.RosserK
-import IwaniecLinearSieve.General.Totient
-import IwaniecLinearSieve.LinearSieve.TheoremFour
-import IwaniecLinearSieve.LinearSieve.TheoremFive
-import IwaniecLinearSieve.LinearSieve.LemmaSeven
-import IwaniecLinearSieve.SieveMajorants.Asymptotic
+module
+
+public import IwaniecLinearSieve.General.RosserK
+public import IwaniecLinearSieve.General.Totient
+public import IwaniecLinearSieve.LinearSieve.TheoremFour
+public import IwaniecLinearSieve.LinearSieve.TheoremFive
+public import IwaniecLinearSieve.LinearSieve.LemmaSeven
+public import IwaniecLinearSieve.SieveMajorants.Asymptotic
+
+@[expose] public section
 
 /-!
 # Preliminaries for [I71, §5]

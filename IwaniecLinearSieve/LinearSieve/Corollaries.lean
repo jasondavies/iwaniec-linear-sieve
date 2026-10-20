@@ -1,6 +1,10 @@
-import IwaniecLinearSieve.LinearSieve.LemmaEleven
-import IwaniecLinearSieve.Rosser
-import IwaniecLinearSieve.PrimeSums
+module
+
+public import IwaniecLinearSieve.LinearSieve.LemmaEleven
+public import IwaniecLinearSieve.Rosser
+public import IwaniecLinearSieve.PrimeSums
+
+@[expose] public section
 
 /-!
 # [I71, Corollaries 1 and 3 to Lemma 13]

@@ -1,6 +1,10 @@
-import IwaniecLinearSieve.Jacobsthal.ShiftedSieve
-import IwaniecLinearSieve.Main.TheoremOne
-import IwaniecLinearSieve.EulerGamma.LemmaFive
+module
+
+public import IwaniecLinearSieve.Jacobsthal.ShiftedSieve
+public import IwaniecLinearSieve.Main.TheoremOne
+public import IwaniecLinearSieve.EulerGamma.LemmaFive
+
+@[expose] public section
 
 /-!
 # [I78, Lemma 2]

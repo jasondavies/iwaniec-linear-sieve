@@ -1,5 +1,9 @@
-import IwaniecLinearSieve.EulerGamma.Mertens
-import IwaniecLinearSieve.LinearSieve.TheoremFour
+module
+
+public import IwaniecLinearSieve.EulerGamma.Mertens
+public import IwaniecLinearSieve.LinearSieve.TheoremFour
+
+@[expose] public section
 
 /-!
 # [I71, Theorem 4] in Iwaniec's normalisation

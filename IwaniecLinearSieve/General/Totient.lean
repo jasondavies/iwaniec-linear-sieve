@@ -1,7 +1,11 @@
-import IwaniecLinearSieve.General.Defs
-import IwaniecLinearSieve.PrimeSums.NthPrime
-import IwaniecLinearSieve.Jacobsthal.ShiftedSieve
-import IwaniecLinearSieve.Jacobsthal.Reduction
+module
+
+public import IwaniecLinearSieve.General.Defs
+public import IwaniecLinearSieve.PrimeSums.NthPrime
+public import IwaniecLinearSieve.Jacobsthal.ShiftedSieve
+public import IwaniecLinearSieve.Jacobsthal.Reduction
+
+@[expose] public section
 
 /-!
 # `k / φ(k) ≪ log log 3k` ([I71, §5])

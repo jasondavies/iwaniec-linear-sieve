@@ -1,10 +1,14 @@
-import IwaniecLinearSieve.Main.Basic
-import IwaniecLinearSieve.Main.TheoremOne
-import IwaniecLinearSieve.Main.Fundamental
-import IwaniecLinearSieve.Main.Corollary
-import IwaniecLinearSieve.Main.TheoremTwo
-import IwaniecLinearSieve.Main.TheoremThree
-import IwaniecLinearSieve.Main.TheoremOneFull
+module
+
+public import IwaniecLinearSieve.Main.Basic
+public import IwaniecLinearSieve.Main.TheoremOne
+public import IwaniecLinearSieve.Main.Fundamental
+public import IwaniecLinearSieve.Main.Corollary
+public import IwaniecLinearSieve.Main.TheoremTwo
+public import IwaniecLinearSieve.Main.TheoremThree
+public import IwaniecLinearSieve.Main.TheoremOneFull
+
+@[expose] public section
 
 /-!
 # The main results of [I71] (§1, §5)

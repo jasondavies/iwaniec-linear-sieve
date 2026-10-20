@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.Rosser
+module
+
+public import IwaniecLinearSieve.Rosser
+
+@[expose] public section
 
 /-!
 # Iwaniec's shifted sieve ([I78, Lemma 1])

@@ -1,5 +1,9 @@
-import IwaniecLinearSieve.Rosser
-import IwaniecLinearSieve.PrimeSums.Product
+module
+
+public import IwaniecLinearSieve.Rosser
+public import IwaniecLinearSieve.PrimeSums.Product
+
+@[expose] public section
 
 /-!
 # Notation with `k` ([I71, §1])
@@ -20,20 +24,6 @@ We also prove [I71, (2.11)] for `R_k` (`Rk_eq`) and the comparison of `R_k` with
 open Finset
 
 namespace IwaniecLinearSieve
-
-/-- The primes `p < z` with `p ∤ k`. -/
-noncomputable def primesLTk (k : ℕ) (z : ℝ) : Finset ℕ := (primesLT z).filter fun p ↦ ¬ p ∣ k
-
-/-- Iwaniec's `R_k(z) = ∏_{p < z, p ∤ k} (1 - 1/p)`. -/
-noncomputable def Rk (k : ℕ) (z : ℝ) : ℝ := ∏ p ∈ primesLTk k z, (1 - (p : ℝ)⁻¹)
-
-/-- Iwaniec's `A_k(M; z)`: the number of terms of `M` not divisible by any prime `p < z`
-with `p ∤ k`. -/
-noncomputable def siftedCount (k : ℕ) (M : Multiset ℤ) (z : ℝ) : ℕ :=
-  M.countP fun a ↦ ∀ p ∈ primesLTk k z, ¬ (p : ℤ) ∣ a
-
-/-- Iwaniec's `|M_d|`: the number of terms of `M` divisible by `d`. -/
-def multiplesCount (M : Multiset ℤ) (d : ℕ) : ℕ := M.countP fun a ↦ (d : ℤ) ∣ a
 
 variable {k : ℕ} {z : ℝ} {p : ℕ}
 

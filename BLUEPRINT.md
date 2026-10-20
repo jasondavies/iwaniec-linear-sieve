@@ -56,8 +56,11 @@ Mertens' second theorem is PNT-strength. [I71] uses `exp(-√log x)` errors.
 
 ## Module specifications
 
-Conventions: everything lives in `namespace IwaniecLinearSieve`; `primesLT`, `primorialLT`, `R`
-are in `IwaniecLinearSieve/Basic.lean`. Statements below are targets; names and exact forms may
+Conventions: everything lives in `namespace IwaniecLinearSieve`; `primorialLT`, `R` are in
+`IwaniecLinearSieve/Basic.lean`. The definitions used by the statements in `Challenge.lean`
+(`primesLT`, `primesLTk`, `Rk`, `siftedCount`, `multiplesCount`, `g`, `fSieve`, `FSieve`,
+`Delay.sol`, `bigM` and their helpers) are in `IwaniecLinearSieve/Definitions.lean`, which
+`Challenge.lean` repeats verbatim. Statements below are targets; names and exact forms may
 be adjusted when that makes them easier to use, provided the mathematical content is kept and
 this file is updated. No `sorry`; only the axioms `propext`, `Classical.choice`, `Quot.sound`.
 
@@ -171,8 +174,10 @@ first `N` primes, `card_primesLT_nth_prime_add_one`, and `z ≥ z₁`); then
 
 ### C1. `IwaniecLinearSieve/SieveFunctions.lean` — [I71, §3] `g_n`, `f`, `F` (done)
 
-Files: `SieveFunctions/Defs.lean` (`g`), `Bounds.lean` (Lemmas 3, 4), `Series.lean` (`f`, `F`,
-Corollary to Lemma 4), `LemmaFive.lean` (`M`, `f(2) = 2`); `SieveFunctions.lean` imports all four.
+Files: `SieveFunctions/Defs.lean` (basic facts about `g`), `Bounds.lean` (Lemmas 3, 4),
+`Series.lean` (`f`, `F`, Corollary to Lemma 4), `LemmaFive.lean` (`M`, `f(2) = 2`);
+`SieveFunctions.lean` imports all four. `g`, `f` and `F` themselves are defined in
+`Definitions.lean`.
 
 * `g : ℕ → ℝ → ℝ` is defined on all of `ℝ` by clamping: `g 0 = g 1 = 0`;
   `g 2 s = gTwoFormula (max 2 (min s 4))` with `gTwoFormula s = 3 log(3/(s-1)) + s - 4`;

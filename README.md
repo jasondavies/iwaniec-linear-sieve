@@ -60,6 +60,31 @@ every interval of length `c ∏ (1 - 1/q_i)⁻¹ r² log r` contains at least `r
 `BLUEPRINT.md` maps each lemma to its Lean statement and records every deviation; the most
 notable are listed below.
 
+## Palomar statement surface
+
+The repository is laid out for the [Palomar registry](https://palomar-registry.org/)
+([submission form](https://submit.palomar-registry.org/)).
+[`Challenge.lean`](Challenge.lean) is a Mathlib-only statement file to audit: it states the
+Theorem and Corollary of [I78] and Theorems 1–3 and the Corollary of [I71], each with `sorry`,
+together with the definitions they use. Those definitions are also the library's own, in
+[`IwaniecLinearSieve/Definitions.lean`](IwaniecLinearSieve/Definitions.lean), which the Challenge
+repeats verbatim. [`Solution.lean`](Solution.lean) imports the library, where every statement is
+proved under the same name; [`comparator.json`](comparator.json) lists them, and
+[`formalization.yaml`](formalization.yaml) records provenance, scope and deviations.
+
+`lake comparator` checks that every listed theorem has the same statement in both modules, that
+the definitions they use are identical constants, and that the proofs use only `propext`,
+`Classical.choice` and `Quot.sound`. It needs `bwrap` (bubblewrap) on Linux:
+
+```sh
+python3 scripts/check-lean-sources.py   # module headers and file sizes
+./scripts/verify-comparator.sh          # Lean, nanoda and con-ron kernels
+ruby scripts/validate-formalization.rb  # metadata
+```
+
+Every source file, including the vendored prime number theorem, uses the Lean module system,
+as Palomar requires.
+
 ## Prime number theorem
 
 At the sifting limit the main term is only of size `1/log z`, so the prime sums must be known
@@ -69,10 +94,11 @@ with relative error `o(1/log x)` uniformly over all scales; this needs PNT-stren
 [PrimeNumberTheoremAnd](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd), whose
 15-file import closure is vendored in `vendor/strong-pnt` (Apache 2.0) and ported to
 Lean 4.35.0, together with its `IEANTN/Mertens.lean` (Mertens' theorems with the constant
-`e^{-γ}`); `vendor/strong-pnt/UPSTREAM.json` records the revision, file hashes and the six
-local patches. The vendored modules live under the prefix `IwaniecLinearSieveVendor`, so a
-project can depend on both this library and PrimeNumberTheoremAnd; since the declarations keep
-their upstream names, a single file should not import both.
+`e^{-γ}`), and to the Lean module system; `vendor/strong-pnt/UPSTREAM.json` records the
+revision, file hashes, the module-system rewrite and the local patches to seven files. The
+vendored modules live under the prefix `IwaniecLinearSieveVendor`, so a project can depend on
+both this library and PrimeNumberTheoremAnd; since the declarations keep their upstream names, a
+single file should not import both.
 
 ## Layout
 

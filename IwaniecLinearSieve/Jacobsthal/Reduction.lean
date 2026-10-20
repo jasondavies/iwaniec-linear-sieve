@@ -1,5 +1,9 @@
-import IwaniecLinearSieve.Jacobsthal.ShiftedSieve
-import IwaniecLinearSieve.LinearSieve.Estimate
+module
+
+public import IwaniecLinearSieve.Jacobsthal.ShiftedSieve
+public import IwaniecLinearSieve.LinearSieve.Estimate
+
+@[expose] public section
 
 /-!
 # Reduction of Jacobsthal's problem to the linear sieve ([I78, §3])

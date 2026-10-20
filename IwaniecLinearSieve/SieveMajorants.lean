@@ -1,10 +1,14 @@
-import IwaniecLinearSieve.SieveMajorants.Delay
-import IwaniecLinearSieve.SieveMajorants.Defs
-import IwaniecLinearSieve.SieveMajorants.Properties
-import IwaniecLinearSieve.SieveMajorants.Majorants
-import IwaniecLinearSieve.SieveMajorants.Lemmas
-import IwaniecLinearSieve.SieveMajorants.Asymptotic
-import IwaniecLinearSieve.SieveMajorants.Dickman
+module
+
+public import IwaniecLinearSieve.SieveMajorants.Delay
+public import IwaniecLinearSieve.SieveMajorants.Defs
+public import IwaniecLinearSieve.SieveMajorants.Properties
+public import IwaniecLinearSieve.SieveMajorants.Majorants
+public import IwaniecLinearSieve.SieveMajorants.Lemmas
+public import IwaniecLinearSieve.SieveMajorants.Asymptotic
+public import IwaniecLinearSieve.SieveMajorants.Dickman
+
+@[expose] public section
 
 /-!
 # [I71, §3]: the functions `𝔐`, `𝔚`, `𝔣`, `𝔉`, `G_r`

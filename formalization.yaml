@@ -1,0 +1,225 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Iwaniec's linear sieve at the sifting limit and Jacobsthal's problem"
+  description: >-
+    A Lean 4 formalization of H. Iwaniec, "On the error term in the linear
+    sieve" (Acta Arith. 19, 1971) and "On the problem of Jacobsthal"
+    (Demonstratio Math. 11, 1978). The headline result is Iwaniec's bound for
+    Jacobsthal's problem: if m consecutive integers are each divisible by one
+    of r ≥ 2 given primes, then m ≤ C (r log r)² for an absolute constant C.
+    More strongly, every interval of length c ∏ (1 − 1/q)⁻¹ r² log r contains
+    at least r² integers coprime to r given primes. Both the Theorem and the
+    Corollary of the 1978 paper are proved, together with its Lemma 1 (the
+    shifted sieve, both bounds) and Lemma 2. The 1971 paper is formalized in
+    full: the Rosser–Iwaniec linear sieve at the sifting limit with general
+    modulus k and arbitrary finite sequences (§2); the sieve functions f, F
+    and the majorants 𝔐, 𝔚 defined by delay-differential equations,
+    including F(3) = 2e^γ − 3 and the asymptotics of 𝔐 (§3); the main term
+    with error O(1/log y) and support of size O(y / log² y) (§4, Theorems 4
+    and 5); and Theorem 1 with its Corollary, Theorem 2 (C₀(r) ≪ r² log² r)
+    and Theorem 3 (§5). The prime number theorem with de la Vallée Poussin
+    error term and Mertens' theorems come from a vendored copy of
+    PrimeNumberTheoremAnd.
+  authors:
+    - "Jason Davies"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Jason Davies"
+
+classification:
+  arxiv: ["math.NT"]
+  msc2020: ["11N35", "11N36", "11N05", "11N25"]
+
+sources:
+  - title: "On the error term in the linear sieve"
+    authors:
+      - "Henryk Iwaniec"
+    id: "doi:10.4064/aa-19-1-1-30"
+    type: "paper"
+    location: "Acta Arithmetica 19 (1971), 1–30"
+    relationship: formalizes
+    note: >-
+      Formalized in full (§§2–5, Lemmas 1–17, Theorems 1–5 and the
+      Corollary); see fidelity.divergences for corrections and filled gaps.
+    license: "unknown"
+    author_endorsement: not-contacted
+  - title: "On the problem of Jacobsthal"
+    authors:
+      - "Henryk Iwaniec"
+    id: "doi:10.1515/dema-1978-0121"
+    type: "paper"
+    location: "Demonstratio Mathematica 11 (1978), 225–231"
+    relationship: formalizes
+    note: "Lemma 1 (both bounds), Lemma 2, the Theorem and the Corollary are formalized."
+    license: "unknown"
+    author_endorsement: not-contacted
+  - title: "Opera de Cribro"
+    authors:
+      - "John Friedlander"
+      - "Henryk Iwaniec"
+    id: "doi:10.1090/coll/057"
+    type: "book"
+    location: "AMS Colloquium Publications 57 (2010), §12.4–12.6"
+    relationship: background
+    note: "The modern form of the same argument, used as a guide."
+    license: "unknown"
+
+related_formalizations:
+  - id: "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd"
+    relationship: builds-on
+    note: >-
+      The import closure of StrongPNT (the prime number theorem with de la
+      Vallée Poussin error term) and IEANTN/Mertens.lean are vendored from
+      revision c39a751132c88b6e8080b74c74023fd95b3d8be0 under the module prefix
+      IwaniecLinearSieveVendor, ported to Lean 4.35.0 and the module system;
+      vendor/strong-pnt/UPSTREAM.json records file hashes and every local
+      patch.
+
+status:
+  scope: >-
+    Formalized: all of [I71] (§2 for general k and finite multisets; §3 with
+    the functions g_n, f, F, 𝔐, 𝔚, Lemmas 3–10, Lemma 5 in full and the
+    asymptotics of 𝔐 and of the Dickman function; §4 with Lemmas 11–17 and
+    Theorems 4 and 5; §5 with Theorem 1, its Corollary, Theorems 2 and 3) and
+    all of [I78] (Lemma 1 with both bounds for arbitrary sequences,
+    multiplicative functions and weights; Lemma 2; the Theorem; the
+    Corollary). The compared statements in Challenge.lean are the Theorem and
+    Corollary of [I78] and Theorems 1–3 and the Corollary of [I71]; the
+    lemmas and Theorems 4 and 5 are proved in the library. Results that
+    [I71] quotes from elsewhere (Buchstab's limit ω(∞) = e^{-γ}, de Bruijn's
+    asymptotics of the Dickman function) are proved, not assumed. The prime
+    number theorem with error term exp(−c √log x) is used from the vendored
+    PrimeNumberTheoremAnd copy, which is itself fully proved.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: []
+  main_results:
+    - "Iwaniec's bound for Jacobsthal's problem: m ≤ C (r log r)² ([I78, Corollary])"
+    - "[I78, Theorem]: r² integers coprime to r primes in every interval of length c ∏ (1 − 1/q)⁻¹ r² log r"
+    - "[I71, Theorem 1]: the linear sieve at the sifting limit with error O(log log 3k / log y)"
+    - "[I71, Theorems 2, 3] and the Corollary (1.3), (1.4)"
+
+automation:
+  methods:
+    - method: agent
+      models: ["gpt-6-astra"]
+      tool_setup: >-
+        The Lean development (definitions, statements and proofs, including
+        the port of the vendored PrimeNumberTheoremAnd files to Lean 4.35.0)
+        was written entirely by GPT-6-Astra; the human author chose the
+        papers and directed the work.
+    - method: agent
+      models: ["claude-opus-5-5"]
+      framework: "Claude Code"
+      tool_setup: >-
+        Palomar packaging only: ported every source file, including the
+        vendored PrimeNumberTheoremAnd copy, to the Lean module system (adding
+        three Mathlib imports and one rewrite in the vendored files and
+        recording them in UPSTREAM.json); gave one `nlinarith` step in
+        LinearSieve/TheoremFiveCount.lean an explicit linear proof after it
+        timed out under the module system; moved the definitions used by the
+        advertised statements into IwaniecLinearSieve/Definitions.lean so that
+        Comparator sees identical constants; switched the axiom audit to
+        collectAxioms with `import all`; and wrote Challenge.lean,
+        Solution.lean, comparator.json and this file. No mathematical content
+        was changed.
+  notes: >-
+    All Lean code in this repository, apart from the vendored
+    PrimeNumberTheoremAnd files written by its contributors, was produced by
+    AI agents. The human author selected the sources and directed the agents.
+    The results are checked mechanically by Lean's kernel, an axiom audit and
+    lake comparator, which run in CI.
+
+fidelity:
+  divergences: >-
+    The core estimates (Theorems 4 and 5 of [I71]) are for k = 1, as in
+    Iwaniec's proof; general k and sequences enter through §2 and §5. The
+    error exp(−√log x) of [I71] is exp(−κ √log x) for a fixed κ > 0 from the
+    prime number theorem. The main chain works with the limit cR of
+    R(z) log z in place of e^{-γ} (it cancels); cR = e^{-γ} is proved
+    separately. [I71, Lemma 5] prints F(s) = s − 6 + 2e^γ (1 − ∫_1^{s−2}
+    log x/(x+1) dx) on [3, 5]; the correct formula, which is proved and
+    stated in Challenge.lean, is F(s) = 2e^γ (1 + ∫_1^{s−2} log x/(x+1) dx) −
+    s. [I71] deduces the asymptotics of 𝔐 from those of the Dickman function
+    quoted from Hua; here the asymptotics of 𝔐 are proved directly by
+    comparison with explicit sub- and supersolutions, and de Bruijn's
+    asymptotics of the Dickman function are deduced from them. In [I71, §5]
+    the error terms need no log log 3k, but Theorem 1 and the Corollary are
+    stated with it as printed. Theorem 1 holds for s ≤ log y / (log log
+    3y)^{11/5}. The Corollary and (1.6) also need z ≤ y^{1/ξ(y)}, which [I71]
+    does not treat; a fundamental lemma is proved for that range. (1.3) is
+    stated for 2 ≤ z ≤ y with F(s) + (3 − s)⁺ (our F is constant below 3),
+    (1.4) for all z ≥ 2, (1.5) for s ≥ 2. Theorem 2 sifts by z > P_r rather
+    than z = P_r. Small gaps in [I71] are filled: Lemma 10 assumes without
+    proof that 𝔐(t−1)/𝔐(t) increases; the monotonicity used in Corollary 3
+    does not follow from Lemma 12; the slack in Theorem 4's induction must be
+    (log L)²/L² rather than 1/L². [I78, Lemma 1] prints its sign conditions
+    interchanged; the proof needs σ_m ≤ Σ_{n | m} μ(n) for the lower bound.
+    [I78, Lemma 2] quotes (6) from [I71] as an asymptotic equality, but [I71]
+    proves only the lower bound, which is what is proved and all the Theorem
+    uses. [I78, §3] takes z = p_r; the last step needs Chebyshev's bound and
+    Lemma 2 needs z large, so small r is reduced to N₀ r primes. The
+    functions f, F, 𝔐 are defined on all of ℝ by clamping outside the ranges
+    of [I71]: f is constant (= 2) for s ≤ 2, F (= F(3)) for s ≤ 3, and 𝔐 (= 3)
+    for s ≤ 2. BLUEPRINT.md records every deviation in detail.
+
+review:
+  status: "self-assessed"
+  reviewers: []
+  notes: >-
+    Self-assessed by the author; there has been no independent human review.
+    Mechanical checks: lake build, an axiom audit of every project and
+    vendored declaration including private ones (only propext,
+    Classical.choice and Quot.sound), and lake comparator with the Lean,
+    nanoda and con-ron kernels.
+
+alignment:
+  namespace: "IwaniecLinearSieve"
+  statements:
+    - source: "[I78], Corollary"
+      lean: "IwaniecLinearSieve.iwaniecBound"
+      module: "Challenge"
+      status: "proved"
+      note: "If m consecutive integers are each divisible by one of r ≥ 2 given primes, then m ≤ C (r log r)²."
+    - source: "[I78], Theorem"
+      lean: "IwaniecLinearSieve.iwaniec_theorem"
+      module: "Challenge"
+      status: "proved"
+      note: "Every X ≥ c ∏ (1 − 1/q)⁻¹ r² log r consecutive integers contain at least r² integers coprime to the r given primes."
+    - source: "[I71], Theorem 1 with Lemma 5 and the asymptotics of 𝔐"
+      lean: "IwaniecLinearSieve.theorem1_full"
+      module: "Challenge"
+      status: "proved"
+      note: "Bounds (1.1), (1.2); f on [2, 4]; F on [3, 5] with the corrected sign; log 𝔐(s) to O(s / log s)."
+    - source: "[I71], Corollary (1.3)"
+      lean: "IwaniecLinearSieve.corollary_upper"
+      module: "Challenge"
+      status: "adapted"
+      note: "For 2 ≤ z ≤ y, with F(s) + (3 − s)⁺ in place of F(s); the two agree for s ≥ 3."
+    - source: "[I71], Corollary (1.4)"
+      lean: "IwaniecLinearSieve.corollary_lower"
+      module: "Challenge"
+      status: "proved"
+      note: "For all y > 1 and z ≥ 2."
+    - source: "[I71], Theorem 2"
+      lean: "IwaniecLinearSieve.theorem2"
+      module: "Challenge"
+      status: "proved"
+      note: "C₀(r) ≪ r² log² r for the first r primes."
+    - source: "[I71], Theorem 3 (1.5)"
+      lean: "IwaniecLinearSieve.theorem3_fst"
+      module: "Challenge"
+      status: "proved"
+      note: "For 2 ≤ s < log y / (log log 3y)⁶."
+    - source: "[I71], Theorem 3 (1.6)"
+      lean: "IwaniecLinearSieve.theorem3_snd"
+      module: "Challenge"
+      status: "proved"
+      note: "For z ≥ 2 with log z < log y log log log 16y / (2 log log 3y)."
+
+acknowledgements: >-
+  Built on Lean 4 and Mathlib. The prime number theorem with error term and
+  Mertens' theorems are from PrimeNumberTheoremAnd (Apache 2.0) and its
+  contributors.

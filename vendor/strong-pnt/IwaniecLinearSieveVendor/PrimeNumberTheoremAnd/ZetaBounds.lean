@@ -1,14 +1,19 @@
-import IwaniecLinearSieveVendor.Architect
-import Batteries.Tactic.Lemma
-import Mathlib.MeasureTheory.Function.Floor
-import Mathlib.MeasureTheory.Order.Group.Lattice
-import Mathlib.NumberTheory.Harmonic.Bounds
-import Mathlib.NumberTheory.LSeries.Nonvanishing
-import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Auxiliary
-import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Fourier
-import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Mathlib.Analysis.SpecialFunctions.Log.Basic
-import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.ResidueCalcOnRectangles
-import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.EulerMaclaurin
+module
+
+public import IwaniecLinearSieveVendor.Architect
+public import Batteries.Tactic.Lemma
+public import Mathlib.MeasureTheory.Function.Floor
+public import Mathlib.MeasureTheory.Order.Group.Lattice
+public import Mathlib.NumberTheory.Harmonic.Bounds
+public import Mathlib.NumberTheory.LSeries.Nonvanishing
+public import Mathlib.Analysis.PSeriesComplex
+public import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Auxiliary
+public import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Fourier
+public import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Mathlib.Analysis.SpecialFunctions.Log.Basic
+public import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.ResidueCalcOnRectangles
+public import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.EulerMaclaurin
+
+@[expose] public section
 
 set_option lang.lemmaCmd true
 

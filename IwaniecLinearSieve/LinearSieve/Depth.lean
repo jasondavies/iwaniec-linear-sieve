@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.Rosser
+module
+
+public import IwaniecLinearSieve.Rosser
+
+@[expose] public section
 
 /-!
 # Depth stabilisation of Rosser's sieve ([I71, pp. 23, 26])

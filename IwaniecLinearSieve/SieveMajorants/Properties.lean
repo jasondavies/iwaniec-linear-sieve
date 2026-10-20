@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.SieveMajorants.Defs
+module
+
+public import IwaniecLinearSieve.SieveMajorants.Defs
+
+@[expose] public section
 
 /-!
 # Basic properties of `𝔐`, `𝔚` ([I71, §3])

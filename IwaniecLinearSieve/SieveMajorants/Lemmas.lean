@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.SieveMajorants.Majorants
+module
+
+public import IwaniecLinearSieve.SieveMajorants.Majorants
+
+@[expose] public section
 
 /-!
 # [I71, Lemmas 8, 9 (lower bound), 10]

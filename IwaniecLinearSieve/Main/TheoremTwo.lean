@@ -1,6 +1,10 @@
-import IwaniecLinearSieve.Main.Corollary
-import IwaniecLinearSieve.PrimeSums.NthPrime
-import IwaniecLinearSieve.Jacobsthal.ShiftedSieve
+module
+
+public import IwaniecLinearSieve.Main.Corollary
+public import IwaniecLinearSieve.PrimeSums.NthPrime
+public import IwaniecLinearSieve.Jacobsthal.ShiftedSieve
+
+@[expose] public section
 
 /-!
 # [I71, Theorem 2]: `C₀(r) ≪ r² log² r`

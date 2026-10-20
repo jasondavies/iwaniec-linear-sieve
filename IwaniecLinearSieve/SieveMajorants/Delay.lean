@@ -1,9 +1,15 @@
-import Mathlib
+module
+
+public import Mathlib
+public import IwaniecLinearSieve.Definitions
+
+@[expose] public section
 
 /-!
 # Linear delay equations with unit delay
 
-For continuous `k y₀ : ℝ → ℝ` we construct the continuous function `y = Delay.sol k y₀` with
+For continuous `k y₀ : ℝ → ℝ`, `y = Delay.sol k y₀` (defined in `IwaniecLinearSieve.Definitions`)
+is the continuous function with
 
 * `y s = y₀ s` for `s ≤ 3`,
 * `y s = y₀ 3 + ∫ x in 3..s, k x * y (x - 1)` for `s ≥ 3`,
@@ -19,18 +25,6 @@ open Set Filter Topology MeasureTheory
 namespace IwaniecLinearSieve
 
 namespace Delay
-
-/-- One Picard-type step: `y₀` up to `3`, then integrate `k x * y (x - 1)` from `3`. -/
-noncomputable def step (k y₀ y : ℝ → ℝ) (s : ℝ) : ℝ :=
-  y₀ (min s 3) + ∫ x in (3 : ℝ)..max s 3, k x * y (x - 1)
-
-/-- The iterates of `step`; the `n`-th one is correct on `(-∞, n + 3]`. -/
-noncomputable def iter (k y₀ : ℝ → ℝ) : ℕ → ℝ → ℝ
-  | 0 => y₀
-  | n + 1 => step k y₀ (iter k y₀ n)
-
-/-- The solution of the delay equation. -/
-noncomputable def sol (k y₀ : ℝ → ℝ) (s : ℝ) : ℝ := iter k y₀ ⌈s⌉₊ s
 
 variable {k y₀ : ℝ → ℝ}
 

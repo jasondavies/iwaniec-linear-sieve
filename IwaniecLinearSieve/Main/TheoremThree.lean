@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.Main.Corollary
+module
+
+public import IwaniecLinearSieve.Main.Corollary
+
+@[expose] public section
 
 /-!
 # [I71, Theorem 3]

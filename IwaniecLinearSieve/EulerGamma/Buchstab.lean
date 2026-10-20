@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.SieveMajorants.Delay
+module
+
+public import IwaniecLinearSieve.SieveMajorants.Delay
+
+@[expose] public section
 
 /-!
 # Buchstab's function

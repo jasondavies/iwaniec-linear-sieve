@@ -1,7 +1,11 @@
-import IwaniecLinearSieve.SieveFunctions.Defs
-import IwaniecLinearSieve.SieveFunctions.Bounds
-import IwaniecLinearSieve.SieveFunctions.Series
-import IwaniecLinearSieve.SieveFunctions.LemmaFive
+module
+
+public import IwaniecLinearSieve.SieveFunctions.Defs
+public import IwaniecLinearSieve.SieveFunctions.Bounds
+public import IwaniecLinearSieve.SieveFunctions.Series
+public import IwaniecLinearSieve.SieveFunctions.LemmaFive
+
+@[expose] public section
 
 /-!
 # The sieve functions of [I71, §3]

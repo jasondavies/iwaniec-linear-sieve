@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.LinearSieve.Calculus
+module
+
+public import IwaniecLinearSieve.LinearSieve.Calculus
+
+@[expose] public section
 
 /-!
 # [I71, Lemma 7]: `f_r(s) < M(s) < 4 𝔐(s)` for `s ≥ 2`

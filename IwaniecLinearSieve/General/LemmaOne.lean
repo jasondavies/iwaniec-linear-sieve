@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.General.Defs
+module
+
+public import IwaniecLinearSieve.General.Defs
+
+@[expose] public section
 
 /-!
 # The general principles of sieve ([I71, §2], Lemmas 1, 2, (2.5)–(2.8), (2.12), (2.13))

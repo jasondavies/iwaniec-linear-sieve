@@ -1,4 +1,9 @@
-import Mathlib
+module
+
+public import Mathlib
+public import IwaniecLinearSieve.Definitions
+
+@[expose] public section
 
 /-!
 # Shared notation
@@ -10,9 +15,6 @@ Iwaniec works with primes below a real bound `z`. For `p : ℕ` and `z : ℝ` we
 open Real
 
 namespace IwaniecLinearSieve
-
-/-- The primes `p < z`. -/
-noncomputable def primesLT (z : ℝ) : Finset ℕ := Nat.primesBelow ⌈z⌉₊
 
 /-- `P(z) = ∏_{p < z} p`. -/
 noncomputable def primorialLT (z : ℝ) : ℕ := ∏ p ∈ primesLT z, p

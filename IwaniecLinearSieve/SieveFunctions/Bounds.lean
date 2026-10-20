@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.SieveFunctions.Defs
+module
+
+public import IwaniecLinearSieve.SieveFunctions.Defs
+
+@[expose] public section
 
 /-!
 # Lemmas 3 and 4 of [I71, §3]

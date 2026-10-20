@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.PrimeSums.Mertens
+module
+
+public import IwaniecLinearSieve.PrimeSums.Mertens
+
+@[expose] public section
 
 /-!
 # Mertens' product theorem with the de la Vallée Poussin error term

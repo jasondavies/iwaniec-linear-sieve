@@ -1,9 +1,14 @@
-import IwaniecLinearSieve.SieveFunctions.Bounds
+module
+
+public import IwaniecLinearSieve.SieveFunctions.Bounds
+
+@[expose] public section
 
 /-!
 # The functions `f` and `F` of [I71, §3]
 
-`f(s) = Σ_{i ≥ 1} g_{2i}(s)` (`fSieve`) and `F(s) = Σ_{i ≥ 1} g_{2i+1}(s)` (`FSieve`), the
+`f(s) = Σ_{i ≥ 1} g_{2i}(s)` (`fSieve`) and `F(s) = Σ_{i ≥ 1} g_{2i+1}(s)` (`FSieve`), defined in
+`IwaniecLinearSieve.Definitions`. This module proves the
 Corollary to Lemma 4 of [I71]: convergence (with geometric majorants), continuity, positivity,
 `f, F = O(s e^{-s})`, and the integral equations (3.6), (3.7).
 
@@ -14,12 +19,6 @@ for all real `s`; `f` is constant on `s ≤ 2` and `F` on `s ≤ 3`.
 open Real Set MeasureTheory intervalIntegral Filter Topology
 
 namespace IwaniecLinearSieve
-
-/-- Iwaniec's `f(s) = Σ_{i ≥ 1} g_{2i}(s)`. -/
-noncomputable def fSieve (s : ℝ) : ℝ := ∑' n : ℕ, g (2 * n + 2) s
-
-/-- Iwaniec's `F(s) = Σ_{i ≥ 1} g_{2i+1}(s)`. -/
-noncomputable def FSieve (s : ℝ) : ℝ := ∑' n : ℕ, g (2 * n + 3) s
 
 /-- `f_r = f` for even `r` and `F` for odd `r` ([I71], before Lemma 7). -/
 noncomputable def fr (r : ℕ) (s : ℝ) : ℝ := if Even r then fSieve s else FSieve s

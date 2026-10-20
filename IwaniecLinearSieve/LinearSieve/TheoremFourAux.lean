@@ -1,5 +1,9 @@
-import IwaniecLinearSieve.LinearSieve.Corollaries
-import IwaniecLinearSieve.LinearSieve.Crude
+module
+
+public import IwaniecLinearSieve.LinearSieve.Corollaries
+public import IwaniecLinearSieve.LinearSieve.Crude
+
+@[expose] public section
 
 /-!
 # Auxiliary facts for [I71, Theorem 4]

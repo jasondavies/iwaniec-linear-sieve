@@ -1,4 +1,8 @@
-import IwaniecLinearSieve.SieveMajorants.Delay
+module
+
+public import IwaniecLinearSieve.SieveMajorants.Delay
+
+@[expose] public section
 
 /-!
 # Iwaniec's functions `𝔐`, `𝔚` ([I71, §3, Definition])
@@ -6,7 +10,7 @@ import IwaniecLinearSieve.SieveMajorants.Delay
 * `𝔚(s) = 1/(s-1) - log(s-1)` on `[2, 3]`, `𝔚'(s) = s/(s-1)² 𝔚(s-1)` for `s > 3`;
 * `𝔐(s) = 2 + 1/(s-1) - log(s-1)` on `[2, 3]`, `𝔐'(s) = -s/(s-1)² 𝔐(s-1)` for `s > 3`.
 
-Both are defined on all of `ℝ` and are continuous; to the left of `2` they are constant
+Both are defined on all of `ℝ` (`𝔐` in `IwaniecLinearSieve.Definitions`) and are continuous; to the left of `2` they are constant
 (`𝔚 = 1`, `𝔐 = 3`). We prove the integral equations (3.11) and (3.12) of [I71].
 -/
 
@@ -14,17 +18,8 @@ open Real Set Filter Topology MeasureTheory
 
 namespace IwaniecLinearSieve
 
-/-- The kernel `x / (x - 1)²` of the delay equations, frozen to the left of `3`. -/
-noncomputable def delayKer (x : ℝ) : ℝ := max x 3 / (max x 3 - 1) ^ 2
-
-/-- Initial values of `𝔚` on `[2, 3]` (constant to the left of `2`). -/
-noncomputable def initW (s : ℝ) : ℝ := 1 / (max s 2 - 1) - log (max s 2 - 1)
-
 /-- Iwaniec's `𝔚` [I71, §3, Definition]. -/
 noncomputable def bigW : ℝ → ℝ := Delay.sol delayKer initW
-
-/-- Iwaniec's `𝔐` [I71, §3, Definition]. -/
-noncomputable def bigM : ℝ → ℝ := Delay.sol (fun x => -delayKer x) (fun s => 2 + initW s)
 
 theorem delayKer_of_ge {x : ℝ} (hx : 3 ≤ x) : delayKer x = x / (x - 1) ^ 2 := by
   simp [delayKer, max_eq_left hx]
