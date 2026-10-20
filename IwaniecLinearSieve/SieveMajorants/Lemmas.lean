@@ -117,6 +117,45 @@ theorem log_four_lt : log 4 < 1.3863 := by
   push_cast
   linarith
 
+/-- The numerical comparison in the main range of Lemma 10. With `q² = t - 1`, the
+logarithmic bound makes the integrated exponential estimate smaller than `2t/(t-1)²`. -/
+theorem log_mul_ratio_lt {t q L : ℝ} (ht0 : 0 < t) (hq1 : 1 < q)
+    (hq2 : q ^ 2 = t - 1) (hL : 1 < L) (hLt : log t ≤ L + 1 / (t - 1)) :
+    log t * (t / ((t - 1) ^ 2 - 1 / 2) * ((1 - q⁻¹) / (L / 2))) <
+      2 * (t / (t - 1) ^ 2) := by
+  have hq0 : 0 < q := by linarith only [hq1]
+  have hq4 : 0 < q ^ 4 - 1 / 2 := by
+    linarith only [one_lt_pow₀ hq1 (by decide : 4 ≠ 0)]
+  have hL0 : 0 < L := by linarith only [hL]
+  have hD : 0 < L * q * (q ^ 4 - 1 / 2) := by positivity
+  have hy : (t - 1) ^ 2 = q ^ 4 := by rw [← hq2]; ring
+  have e1 : log t * (t / ((t - 1) ^ 2 - 1 / 2) * ((1 - q⁻¹) / (L / 2))) =
+      t * (2 * (log t * (q - 1)) / (L * q * (q ^ 4 - 1 / 2))) := by
+    rw [hy]
+    field_simp
+  have e2 : 2 * (t / (t - 1) ^ 2) = t * (2 / q ^ 4) := by
+    rw [hy]; ring
+  rw [e1, e2]
+  refine mul_lt_mul_of_pos_left ?_ ht0
+  rw [div_lt_div_iff₀ hD (by positivity)]
+  -- `log t (q-1) q⁴ < L q (q⁴ - 1/2)` using `log t ≤ L + 1/q²`
+  have hLt' : log t ≤ L + 1 / q ^ 2 := by rwa [hq2]
+  have h1 := mul_le_mul_of_nonneg_right hLt'
+    (show 0 ≤ (q - 1) * q ^ 4 by have : 0 ≤ q - 1 := by linarith
+                                 positivity)
+  have h2 : (L + 1 / q ^ 2) * ((q - 1) * q ^ 4) = L * (q - 1) * q ^ 4 + (q - 1) * q ^ 2 := by
+    field_simp
+  have h3 : L * (q - 1) * q ^ 4 + (q - 1) * q ^ 2 < L * q * (q ^ 4 - 1 / 2) := by
+    have hA : 0 < q ^ 4 - q / 2 := by
+      have hcube := mul_lt_mul_of_pos_right (one_lt_pow₀ hq1 (by decide : 3 ≠ 0)) hq0
+      nlinarith only [hcube, hq0]
+    have hB' : 0 < q ^ 2 * q * (q - 1) + q * (q - 1 / 2) := by
+      have : 0 < q - 1 := by linarith
+      have : 0 < q - 1 / 2 := by linarith
+      positivity
+    nlinarith [mul_lt_mul_of_pos_right hL hA]
+  nlinarith
+
 /-- The inequality behind [I71, Lemma 10]: `log t · 𝔐(t) < 2 t/(t-1)² · 𝔐(t-1)` for
 `t ≥ 2`. -/
 theorem log_mul_bigM_lt {t : ℝ} (ht : 2 ≤ t) :
@@ -230,37 +269,7 @@ theorem log_mul_bigM_lt {t : ℝ} (ht : 2 ≤ t) :
     rw [div_mul_eq_mul_div, le_div_iff₀ hr]
     rw [div_le_iff₀ ht0] at hint
     linarith
-  have hq0 : 0 < q := by linarith
-  have hq' : 0 ≤ 1 - q⁻¹ := by rw [sub_nonneg]; exact inv_le_one_of_one_le₀ hq1.le
-  -- reduce to a polynomial inequality in `q`
-  have hq4 : 0 < q ^ 4 - 1 / 2 := by nlinarith
-  have hD : 0 < L₁ * q * (q ^ 4 - 1 / 2) := by positivity
-  have key : log t * (t / ((t - 1) ^ 2 - 1 / 2) * ((1 - q⁻¹) / l)) < 2 * (t / (t - 1) ^ 2) := by
-    have hy : (t - 1) ^ 2 = q ^ 4 := by rw [← hq2]; ring
-    have e1 : log t * (t / ((t - 1) ^ 2 - 1 / 2) * ((1 - q⁻¹) / l)) =
-        t * (2 * (log t * (q - 1)) / (L₁ * q * (q ^ 4 - 1 / 2))) := by
-      rw [hl, hy]
-      field_simp
-    have e2 : 2 * (t / (t - 1) ^ 2) = t * (2 / q ^ 4) := by
-      rw [hy]; ring
-    rw [e1, e2]
-    refine mul_lt_mul_of_pos_left ?_ ht0
-    rw [div_lt_div_iff₀ hD (by positivity)]
-    -- `log t (q-1) q⁴ < L₁ q (q⁴ - 1/2)` using `log t ≤ L₁ + 1/q²`
-    have hLt' : log t ≤ L₁ + 1 / q ^ 2 := by rwa [hq2]
-    have h1 := mul_le_mul_of_nonneg_right hLt'
-      (show 0 ≤ (q - 1) * q ^ 4 by have : 0 ≤ q - 1 := by linarith
-                                   positivity)
-    have h2 : (L₁ + 1 / q ^ 2) * ((q - 1) * q ^ 4) = L₁ * (q - 1) * q ^ 4 + (q - 1) * q ^ 2 := by
-      field_simp
-    have h3 : L₁ * (q - 1) * q ^ 4 + (q - 1) * q ^ 2 < L₁ * q * (q ^ 4 - 1 / 2) := by
-      have hA : 0 < q ^ 4 - q / 2 := by nlinarith
-      have hB' : 0 < q ^ 2 * q * (q - 1) + q * (q - 1 / 2) := by
-        have : 0 < q - 1 := by linarith
-        have : 0 < q - 1 / 2 := by linarith
-        positivity
-      nlinarith [mul_lt_mul_of_pos_right hL₁1 hA]
-    nlinarith
+  have key := log_mul_ratio_lt ht0 hq1 hq2 hL₁1 hLt
   calc log t * bigM t ≤ log t * (t / ((t - 1) ^ 2 - 1 / 2) * (bigM (t - 1) * ((1 - q⁻¹) / l))) :=
         mul_le_mul_of_nonneg_left hMt hlog0
     _ = log t * (t / ((t - 1) ^ 2 - 1 / 2) * ((1 - q⁻¹) / l)) * bigM (t - 1) := by ring

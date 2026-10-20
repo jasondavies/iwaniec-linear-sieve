@@ -21,7 +21,8 @@ By `f(2) = 2` (Lemma 5) we have `1 - f(s)/s ≥ 3 log(s - 1)/s` (we do not use t
 `f(s) = s - 2e^γ log(s - 1)`), and `log(s - 1) ≥ log(1 + c/log z) ≥ 2c/(3 log z)` once
 `log z ≥ 2c + 2`, so
 `1 - f(s)/s - e₁ log log 3 / log N ≥ (2c - e₁ log log 3)/log N > 0`.
-Hence (1.4) gives `A_1(M; z) > 0`: some element of `M` is coprime to the first `r` primes.
+Hence (1.4) gives `A_1(M; z) > 0` (`exists_siftedCount_interval_pos`):
+some element of `M` is coprime to the first `r` primes.
 So a covered run has length `m < N ≤ e^c z² + 1`, and with `z = max(P_r + 1, e^{2c+2})` and
 `P_r ≪ r log r` (`nth_prime_le`) this is `≪ r² log² r`.
 -/
@@ -49,6 +50,76 @@ theorem abs_multiplesCount_interval_sub_le (x : ℤ) (N d : ℕ) :
     exact_mod_cast this
   · exact abs_card_filter_dvd_sub_le x N hd
 
+/-- For a suitable constant `c`, every interval of length `⌈e^c z²⌉` contains an integer
+with no prime divisor below `z`, once `log z ≥ 2c + 2`. This is the sieve step in Theorem 2. -/
+theorem exists_siftedCount_interval_pos : ∃ c : ℝ, 1 ≤ c ∧
+    ∀ z : ℝ, 2 ≤ z → 2 * c + 2 ≤ log z → ∀ x : ℤ,
+      0 < siftedCount 1 ((range ⌈exp c * z ^ 2⌉₊).val.map fun k : ℕ ↦ x + k) z := by
+  obtain ⟨e₁, he₁, h14⟩ := corollary_lower
+  have ha := loglog_three_pos
+  set c := e₁ * log (log 3) + 1 with hc
+  have hc1 : 1 ≤ c := by have := mul_nonneg he₁ ha.le; linarith
+  refine ⟨c, hc1, fun z hz hlz x ↦ ?_⟩
+  set ℓ := log z
+  have hℓ : 0 < ℓ := by linarith
+  -- the length `N` and the density `y = N`
+  set N := ⌈exp c * z ^ 2⌉₊
+  set y : ℝ := (N : ℝ) with hydef
+  have hyN1 : exp c * z ^ 2 ≤ y := Nat.le_ceil _
+  have hyN2 : y < exp c * z ^ 2 + 1 := Nat.ceil_lt_add_one (by positivity)
+  have hez : 4 ≤ exp c * z ^ 2 := by
+    have := one_le_exp (by linarith : (0 : ℝ) ≤ c)
+    nlinarith
+  have hy1 : 1 < y := by linarith
+  set M := (range N).val.map fun k : ℕ ↦ x + k
+  have hM : ∀ d : ℕ, Squarefree d → d.Coprime 1 →
+      |(multiplesCount M d : ℝ) - y / d| ≤ 1 :=
+    fun d _ _ ↦ abs_multiplesCount_interval_sub_le x N d
+  have h := h14 1 le_rfl M y z hy1 hM hz
+  rw [Nat.cast_one, mul_one, Rk_one] at h
+  -- the bracket is nonnegative
+  set L := log y
+  have hL1 : c + 2 * ℓ ≤ L := by
+    have := log_le_log (by positivity) hyN1
+    rwa [log_mul (exp_pos c).ne' (by positivity), log_exp, log_pow, Nat.cast_two] at this
+  have hL2 : L ≤ log 2 + c + 2 * ℓ := by
+    have h2 : y ≤ 2 * (exp c * z ^ 2) := by linarith
+    have := log_le_log (by linarith) h2
+    rwa [log_mul two_ne_zero (by positivity), log_mul (exp_pos c).ne' (by positivity),
+      log_exp, log_pow, Nat.cast_two, ← add_assoc] at this
+  have hL0 : 0 < L := by linarith
+  set s := L / ℓ with hs
+  have hsℓ : s * ℓ = L := by rw [hs]; field_simp
+  have hs2 : 2 + c / ℓ ≤ s := by
+    rw [hs, le_div_iff₀ hℓ, add_mul, div_mul_cancel₀ _ hℓ.ne']; linarith
+  have hcℓ0 : 0 ≤ c / ℓ := by positivity
+  have hs4 : s ≤ 4 := by
+    rw [hs, div_le_iff₀ hℓ]; linarith [log_two_lt_d9]
+  have hs0 : 0 < s := by linarith
+  have hf := one_sub_fSieve_div_ge s ⟨by linarith, hs4⟩
+  have hlog : 2 * c / (3 * ℓ) ≤ log (s - 1) := by
+    have h1 : c / ℓ / (1 + c / ℓ) ≤ log (1 + c / ℓ) := div_one_add_le_log_one_add hcℓ0
+    have h2 : log (1 + c / ℓ) ≤ log (s - 1) := log_le_log (by positivity) (by linarith)
+    have h3 : 2 * c / (3 * ℓ) ≤ c / ℓ / (1 + c / ℓ) := by
+      rw [div_div, div_le_div_iff₀ (by positivity) (by positivity)]
+      have : (ℓ * (1 + c / ℓ)) = ℓ + c := by field_simp
+      rw [this]
+      nlinarith
+    linarith
+  have hpos : e₁ * log (log 3) / L ≤ 1 - fSieve s / s := by
+    have h3 : 2 * c / L ≤ 3 * log (s - 1) / s := by
+      rw [← hsℓ, div_le_div_iff₀ (by positivity) hs0]
+      have : 3 * (2 * c / (3 * ℓ)) * (s * ℓ) = 2 * c * s := by field_simp
+      nlinarith
+    have h4 : e₁ * log (log 3) / L ≤ 2 * c / L :=
+      div_le_div_of_nonneg_right (by linarith [mul_nonneg he₁ ha.le]) hL0.le
+    linarith
+  have hRz := R_pos z
+  have : 0 ≤ y * R z * (1 - fSieve s / s - e₁ * log (log 3) / L) :=
+    mul_nonneg (by positivity) (by linarith)
+  have hpositive : (0 : ℝ) < siftedCount 1 M z := lt_of_le_of_lt this h
+  exact_mod_cast hpositive
+
 end Main
 
 open Main
@@ -59,11 +130,8 @@ open Main
 theorem theorem2 : ∃ C : ℝ, ∀ r : ℕ, 2 ≤ r → ∀ (x : ℤ) (m : ℕ),
     (∀ k < m, ∃ i < r, (Nat.nth Nat.Prime i : ℤ) ∣ x + k) →
       (m : ℝ) ≤ C * r ^ 2 * log r ^ 2 := by
-  obtain ⟨e₁, he₁, h14⟩ := corollary_lower
+  obtain ⟨c, hc1, hinterval⟩ := exists_siftedCount_interval_pos
   obtain ⟨Cp, hCp⟩ := nth_prime_le
-  have ha := loglog_three_pos
-  set c := e₁ * log (log 3) + 1 with hc
-  have hc1 : 1 ≤ c := by have := mul_nonneg he₁ ha.le; linarith
   set z₁ := exp (2 * c + 2)
   have hz₁ : 3 ≤ z₁ := by have := add_one_le_exp (2 * c + 2); linarith
   set K := |Cp| + (1 + z₁) / (2 * log 2)
@@ -77,24 +145,14 @@ theorem theorem2 : ∃ C : ℝ, ∀ r : ℕ, 2 ≤ r → ∀ (x : ℤ) (m : ℕ)
   have hz : 2 ≤ z := le_trans (by linarith) (le_max_right _ _)
   have hlz : 2 * c + 2 ≤ log z := by
     rw [le_log_iff_exp_le (by linarith)]; exact le_max_right _ _
-  set ℓ := log z
-  have hℓ : 0 < ℓ := by linarith
-  -- the length `N` and the density `y = N`
   set N := ⌈exp c * z ^ 2⌉₊
   set y : ℝ := (N : ℝ) with hydef
-  have hyN1 : exp c * z ^ 2 ≤ y := Nat.le_ceil _
   have hyN2 : y < exp c * z ^ 2 + 1 := Nat.ceil_lt_add_one (by positivity)
-  have hez : 4 ≤ exp c * z ^ 2 := by
-    have := one_le_exp (by linarith : (0 : ℝ) ≤ c)
-    nlinarith
-  have hy1 : 1 < y := by linarith
   -- `m < N`
   have hmN : m < N := by
     by_contra hmN
     rw [not_lt] at hmN
     set M := (range N).val.map fun k : ℕ ↦ x + k
-    have hM : ∀ d : ℕ, Squarefree d → d.Coprime 1 → |(multiplesCount M d : ℝ) - y / d| ≤ 1 :=
-      fun d _ _ ↦ abs_multiplesCount_interval_sub_le x N d
     have hA : siftedCount 1 M z = 0 := by
       rw [siftedCount, Multiset.countP_eq_zero]
       intro a ha
@@ -108,49 +166,9 @@ theorem theorem2 : ∃ C : ℝ, ∀ r : ℕ, 2 ≤ r → ∀ (x : ℤ) (m : ℕ)
         Nat.nth_monotone Nat.infinite_setOfPred_prime (by omega)
       have : (Nat.nth Nat.Prime i : ℝ) ≤ P := by rw [hPdef]; exact_mod_cast this
       linarith [le_max_left (P + 1) z₁]
-    have h := h14 1 le_rfl M y z hy1 hM hz
-    rw [hA, Nat.cast_zero, Nat.cast_one, mul_one, Rk_one] at h
-    -- the bracket is nonnegative
-    set L := log y
-    have hL1 : c + 2 * ℓ ≤ L := by
-      have := log_le_log (by positivity) hyN1
-      rwa [log_mul (exp_pos c).ne' (by positivity), log_exp, log_pow, Nat.cast_two] at this
-    have hL2 : L ≤ log 2 + c + 2 * ℓ := by
-      have h2 : y ≤ 2 * (exp c * z ^ 2) := by linarith
-      have := log_le_log (by linarith) h2
-      rwa [log_mul two_ne_zero (by positivity), log_mul (exp_pos c).ne' (by positivity),
-        log_exp, log_pow, Nat.cast_two, ← add_assoc] at this
-    have hL0 : 0 < L := by linarith
-    set s := L / ℓ with hs
-    have hsℓ : s * ℓ = L := by rw [hs]; field_simp
-    have hs2 : 2 + c / ℓ ≤ s := by
-      rw [hs, le_div_iff₀ hℓ, add_mul, div_mul_cancel₀ _ hℓ.ne']; linarith
-    have hcℓ0 : 0 ≤ c / ℓ := by positivity
-    have hs4 : s ≤ 4 := by
-      rw [hs, div_le_iff₀ hℓ]; linarith [log_two_lt_d9]
-    have hs0 : 0 < s := by linarith
-    have hf := one_sub_fSieve_div_ge s ⟨by linarith, hs4⟩
-    have hlog : 2 * c / (3 * ℓ) ≤ log (s - 1) := by
-      have h1 : c / ℓ / (1 + c / ℓ) ≤ log (1 + c / ℓ) := div_one_add_le_log_one_add hcℓ0
-      have h2 : log (1 + c / ℓ) ≤ log (s - 1) := log_le_log (by positivity) (by linarith)
-      have h3 : 2 * c / (3 * ℓ) ≤ c / ℓ / (1 + c / ℓ) := by
-        rw [div_div, div_le_div_iff₀ (by positivity) (by positivity)]
-        have : (ℓ * (1 + c / ℓ)) = ℓ + c := by field_simp
-        rw [this]
-        nlinarith
-      linarith
-    have hpos : e₁ * log (log 3) / L ≤ 1 - fSieve s / s := by
-      have h3 : 2 * c / L ≤ 3 * log (s - 1) / s := by
-        rw [← hsℓ, div_le_div_iff₀ (by positivity) hs0]
-        have : 3 * (2 * c / (3 * ℓ)) * (s * ℓ) = 2 * c * s := by field_simp
-        nlinarith
-      have h4 : e₁ * log (log 3) / L ≤ 2 * c / L :=
-        div_le_div_of_nonneg_right (by linarith [mul_nonneg he₁ ha.le]) hL0.le
-      linarith
-    have hRz := R_pos z
-    have : 0 ≤ y * R z * (1 - fSieve s / s - e₁ * log (log 3) / L) :=
-      mul_nonneg (by positivity) (by linarith)
-    linarith
+    have hpositive := hinterval z hz hlz x
+    change 0 < siftedCount 1 M z at hpositive
+    omega
   -- the bound
   have hmN' : (m : ℝ) < exp c * z ^ 2 + 1 :=
     lt_of_lt_of_le (by rw [hydef]; exact_mod_cast hmN) hyN2.le

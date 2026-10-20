@@ -333,13 +333,13 @@ theorem exists_bound : ∃ c₇ : ℝ, 1 ≤ c₇ ∧ ∀ r, Bound c₇ r := by
   obtain ⟨y₃, hslack⟩ := exists_slack C hC0
   obtain ⟨y₄, hdepth⟩ := exists_card_filter_rosserSet_add_eq
   obtain ⟨y₅, hxi⟩ := exists_xi_large
-  set c₈ := max (max y₁ y₂) (max (max y₃ y₄) (max y₅ 3)) with hc₈
-  have hy₁ : y₁ ≤ c₈ := (le_max_left _ _).trans (le_max_left _ _)
-  have hy₂ : y₂ ≤ c₈ := (le_max_right _ _).trans (le_max_left _ _)
-  have hy₃ : y₃ ≤ c₈ := ((le_max_left _ _).trans (le_max_left _ _)).trans (le_max_right _ _)
-  have hy₄ : y₄ ≤ c₈ := ((le_max_right _ _).trans (le_max_left _ _)).trans (le_max_right _ _)
-  have hy₅ : y₅ ≤ c₈ := ((le_max_left _ _).trans (le_max_right _ _)).trans (le_max_right _ _)
-  have h3 : 3 ≤ c₈ := ((le_max_right _ _).trans (le_max_right _ _)).trans (le_max_right _ _)
+  -- Choose one threshold beyond which all five estimates apply.
+  have hlarge := (eventually_ge_atTop (3 : ℝ)).and
+    ((eventually_atTop.2 ⟨y₁, hsmall⟩).and
+      ((eventually_atTop.2 ⟨y₂, fun y hy lower s hs ↦ hcor lower y s hy hs⟩).and
+        ((eventually_atTop.2 ⟨y₃, hslack⟩).and
+          ((eventually_atTop.2 ⟨y₄, hdepth⟩).and (eventually_atTop.2 ⟨y₅, hxi⟩)))))
+  obtain ⟨c₈, hlarge⟩ := eventually_atTop.1 hlarge
   set c₇ := max 1 (2 * log c₈ ^ 2 / min (errMaj true (log c₈ / log (log 3) ^ (11 / 5 : ℝ)))
     (errMaj false (log c₈ / log (log 3) ^ (11 / 5 : ℝ)))) with hc₇
   have hc₇1 : 1 ≤ c₇ := le_max_left _ _
@@ -349,10 +349,11 @@ theorem exists_bound : ∃ c₇ : ℝ, 1 ≤ c₇ ∧ ∀ r, Bound c₇ r := by
     intro lower y s hy hs hsξ
     rcases lt_or_ge y c₈ with hyc | hyc
     · exact small_le (le_max_right _ _) 0 lower hy hyc hs hsξ
+    obtain ⟨hy3, hsmall, -, -, -, -⟩ := hlarge y hyc
     have hL1 : 1 ≤ log y := by
-      have := log_le_log (by norm_num) (h3.trans hyc)
+      have := log_le_log (by norm_num) hy3
       linarith [one_lt_log_three]
-    have h := hsmall y (hy₁.trans hyc) lower s hs hsξ
+    have h := hsmall lower s hs hsξ
     rw [card_filter_rosserSet_zero]
     have hN : (0 : ℝ) ≤ #(rosserSet lower y (y ^ (1 / (xi y - 1)))) := Nat.cast_nonneg _
     have hQ : 0 ≤ delta s y * errMaj lower s * y := by
@@ -377,9 +378,10 @@ theorem exists_bound : ∃ c₇ : ℝ, 1 ≤ c₇ ∧ ∀ r, Bound c₇ r := by
     intro lower y s hy hs hsξ
     rcases lt_or_ge y c₈ with hyc | hyc
     · exact small_le (le_max_right _ _) (r + 1) lower hy hyc hs hsξ
+    obtain ⟨-, hsmall, hcor, hslack, hdepth, hxi⟩ := hlarge y hyc
     by_cases hdeep : 2 * log y / log (log y) < ((r + 1 : ℕ) : ℝ) + 2
     · -- the depth has stabilised
-      have h := hdepth y (hy₄.trans hyc) lower (r + 1) (y ^ (1 / s)) hdeep 1
+      have h := hdepth lower (r + 1) (y ^ (1 / s)) hdeep 1
       simp only [Nat.add_sub_cancel] at h
       rw [h]
       refine (ih lower y s hy hs hsξ).trans ?_
@@ -397,12 +399,12 @@ theorem exists_bound : ∃ c₇ : ℝ, 1 ≤ c₇ ∧ ∀ r, Bound c₇ r := by
             (delta s y * errMaj lower s * y / log y ^ 2) := by gcongr
         _ = _ := by ring
     · -- the main case
-      obtain ⟨-, hξ32, -, -⟩ := hxi y (hy₅.trans hyc)
-      obtain ⟨hsl, hℓ⟩ := hslack y (hy₃.trans hyc)
+      obtain ⟨-, hξ32, -, -⟩ := hxi
+      obtain ⟨hsl, hℓ⟩ := hslack
       have hmain : (r : ℝ) + 3 ≤ 2 * log y / log (log y) := by
         push_cast at hdeep; linarith
-      exact step_main hc₇1 ih hy hs hξ32 (hsmall y (hy₁.trans hyc) lower s hs hsξ)
-        (hcor lower y s (hy₂.trans hyc) hs) hC0 hsl hℓ hmain
+      exact step_main hc₇1 ih hy hs hξ32 (hsmall lower s hs hsξ)
+        (hcor lower s hs) hC0 hsl hℓ hmain
 
 end IwaniecLinearSieve.TheoremFive
 

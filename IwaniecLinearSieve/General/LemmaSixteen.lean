@@ -24,6 +24,10 @@ The proof follows [I71]: only `p₁ ≥ y^{1/4}` contribute, the inner sum is
 `R(y₁^{1/3}) - R(p₁)` exactly (`d2_eq_sum`, by telescoping instead of Lemma 14), and the outer
 sum is evaluated by Lemma 13 (`lemma13_param`), using
 `∫_s^4 (3/(t-1) - 1) dt = g₂(s)` (`integral_lemma16`).
+
+The estimates are separated into the bounded case (`d2_le_sixty_four`), the main term
+(`exists_lemma16_main_term_bound`), and the pointwise remainder (`lemma16_remainder_le`).
+The final proof sums the remainders and chooses one constant for both ranges of `y`.
 -/
 
 open Real Finset
@@ -139,13 +143,187 @@ theorem integral_lemma16 {s L : ℝ} (hs : s ∈ Set.Icc (2 : ℝ) 4) :
   norm_num
   ring
 
+/-- For bounded `y`, there are at most eight choices for each prime in `d₂`. -/
+theorem d2_le_sixty_four {y s : ℝ} (hy : 1 < y) (hy64 : y < 64) (hs : 2 ≤ s) :
+    d2 y s ≤ 64 := by
+  have hy0 : 0 < y := by linarith only [hy]
+  set L := log y
+  have hL : 0 < L := log_pos hy
+  have hs0 : 0 < s := by linarith only [hs]
+  have hlog64 : log (64 : ℝ) = 6 * log 2 := by
+    rw [show (64 : ℝ) = 2 ^ 6 by norm_num, log_pow]; norm_num
+  have hlogz : log (y ^ (1 / s)) = L / s := log_rpow_one_div hy0 s
+  have hLs : L / s ≤ L / 2 := div_le_div_of_nonneg_left hL.le two_pos hs
+  have hL64 : L < 6 * log 2 := hlog64 ▸ log_lt_log hy0 hy64
+  have hz8 : y ^ (1 / s) ≤ 8 := by
+    rw [← log_le_log_iff (rpow_pos_of_pos hy0 _) (by norm_num), hlogz,
+      show (8 : ℝ) = 2 ^ 3 by norm_num, log_pow]
+    push_cast
+    linarith
+  have hcard : #(primesLT (y ^ (1 / s))) ≤ 8 := by
+    refine (card_le_card (primesLT_mono hz8)).trans ?_
+    rw [primesLT, Nat.primesBelow, show ⌈(8 : ℝ)⌉₊ = 8 by norm_num]
+    exact (card_filter_le _ _).trans (card_range 8).le
+  have : d2 y s ≤ ∑ p₁ ∈ primesLT (y ^ (1 / s)), (8 : ℝ) := by
+    refine sum_le_sum fun p₁ hp₁ ↦ ?_
+    have hsub : (primesLT p₁).filter (fun p₂ : ℕ ↦ (y / p₁) ^ ((1 : ℝ) / 3) ≤ p₂) ⊆
+        primesLT (y ^ (1 / s)) :=
+      (filter_subset _ _).trans (primesLT_natCast_subset hp₁)
+    calc ∑ p₂ ∈ (primesLT p₁).filter (fun p₂ : ℕ ↦ (y / p₁) ^ ((1 : ℝ) / 3) ≤ p₂),
+          R p₂ / (p₁ * p₂)
+        ≤ ∑ p₂ ∈ (primesLT p₁).filter (fun p₂ : ℕ ↦ (y / p₁) ^ ((1 : ℝ) / 3) ≤ p₂),
+          (1 : ℝ) := by
+          refine sum_le_sum fun p₂ hp₂ ↦ ?_
+          have h1 : (1 : ℝ) ≤ p₁ := by exact_mod_cast (prime_of_mem_primesLT hp₁).one_le
+          have h2 : (1 : ℝ) ≤ p₂ := by
+            exact_mod_cast (prime_of_mem_primesLT (mem_filter.1 hp₂).1).one_le
+          rw [div_le_one (by positivity)]
+          nlinarith [R_le_one (p₂ : ℝ)]
+      _ ≤ 8 := by
+          rw [sum_const, nsmul_one]
+          exact_mod_cast (card_le_card hsub).trans hcard
+  refine this.trans ?_
+  rw [sum_const, nsmul_eq_mul]
+  have : (#(primesLT (y ^ (1 / s))) : ℝ) ≤ 8 := by exact_mod_cast hcard
+  nlinarith
+
+/-- The function to which Lemma 13 is applied in Lemma 16. -/
+noncomputable def lemma16Integrand (y t : ℝ) : ℝ := (3 * t / (t - 1) - t) / log y
+
+/-- Lemma 13 evaluates the main term of Lemma 16 uniformly on `2 ≤ s ≤ 4`. -/
+theorem exists_lemma16_main_term_bound : ∃ C₁₃ : ℝ, 0 ≤ C₁₃ ∧
+    ∀ y s : ℝ, 64 ≤ y → s ∈ Set.Icc (2 : ℝ) 4 →
+      ∑ p ∈ (primesLT (y ^ (1 / s))).filter (fun p : ℕ ↦ y ^ (1 / (4 : ℝ)) ≤ p),
+        lemma16Integrand y (log y / log p) / p ≤
+          g 2 s / log y + 6 * C₁₃ * pntE (y ^ (1 / (6 : ℝ))) := by
+  obtain ⟨C₁₃, hC₁₃, h13⟩ := lemma13_param
+  refine ⟨C₁₃, hC₁₃, fun y s hy64 hsI ↦ ?_⟩
+  have hy : 1 < y := by linarith only [hy64]
+  have hy0 : 0 < y := by linarith only [hy]
+  have hs : 2 ≤ s := hsI.1
+  have hs4 : s ≤ 4 := hsI.2
+  have hs0 : 0 < s := by linarith only [hs]
+  set L := log y
+  set E := pntE (y ^ (1 / (6 : ℝ)))
+  set B := y ^ (1 / (4 : ℝ))
+  set S := (primesLT (y ^ (1 / s))).filter (fun p : ℕ ↦ B ≤ p)
+  set F := lemma16Integrand y
+  have hL : 0 < L := log_pos hy
+  have hE : 0 < E := pntE_pos _
+  have hlog2 := log_two_gt_d9
+  have hlog64 : log (64 : ℝ) = 6 * log 2 := by
+    rw [show (64 : ℝ) = 2 ^ 6 by norm_num, log_pow]; norm_num
+  have hL64 : 6 * log 2 ≤ L := hlog64 ▸ log_le_log (by norm_num) hy64
+  have hlog6 : log (y ^ (1 / (6 : ℝ))) = L / 6 := log_rpow_one_div hy0 6
+  have hlog4 : log B = L / 4 := log_rpow_one_div hy0 4
+  have hB2 : 2 ≤ B := by
+    rw [← log_le_log_iff (by norm_num) (rpow_pos_of_pos hy0 _), hlog4]; linarith
+  have hSsub1 : ∀ p ∈ S, p.Prime ∧ y ^ (1 / (4 : ℝ)) ≤ p ∧ (p : ℝ) ≤ y ^ (1 / s) := fun p hp ↦
+    ⟨prime_of_mem_primesLT (mem_filter.1 hp).1, (mem_filter.1 hp).2,
+      (lt_of_mem_primesLT (mem_filter.1 hp).1).le⟩
+  have hSsub2 : ∀ p : ℕ, p.Prime → y ^ (1 / (4 : ℝ)) < p → (p : ℝ) < y ^ (1 / s) → p ∈ S :=
+    fun p hp h1 h2 ↦ mem_filter.2 ⟨mem_primesLT.2 ⟨hp, h2⟩, h1.le⟩
+  have hFanti : AntitoneOn F (Set.Icc s 4) := by
+    intro u hu v hv huv
+    have hu1 : 0 < u - 1 := by linarith [hu.1]
+    have hv1 : 0 < v - 1 := by linarith [hv.1]
+    simp only [F, lemma16Integrand]
+    refine div_le_div_of_nonneg_right ?_ hL.le
+    have : 3 * v / (v - 1) ≤ 3 * u / (u - 1) := by
+      rw [div_le_div_iff₀ hv1 hu1]; nlinarith
+    linarith
+  have hF0 : ∀ t ∈ Set.Icc s 4, 0 ≤ F t := by
+    intro t ht
+    have ht1 : 0 < t - 1 := by linarith [ht.1]
+    simp only [F, lemma16Integrand]
+    refine div_nonneg ?_ hL.le
+    rw [sub_nonneg, le_div_iff₀ ht1]
+    nlinarith [ht.2]
+  have hFs : F s ≤ 6 := by
+    have hs1 : 0 < s - 1 := by linarith
+    simp only [F, lemma16Integrand]
+    rw [div_le_iff₀ hL]
+    have : 3 * s / (s - 1) ≤ 6 := by rw [div_le_iff₀ hs1]; linarith
+    nlinarith
+  have h13' := h13 F y s 4 S hy hs0 hs4 hB2 hFanti hF0 hSsub1 hSsub2
+  have hintegral : ∫ t in s..4, F t / t = g 2 s / L := integral_lemma16 hsI
+  rw [hintegral] at h13'
+  have hEB : pntE B ≤ E := pntE_le_of_log_le (by rw [hlog6, hlog4]; linarith)
+  have h1 := (abs_le.1 h13').2
+  have h2 : C₁₃ * F s * pntE B ≤ 6 * C₁₃ * E := by
+    calc C₁₃ * F s * pntE B ≤ C₁₃ * 6 * E :=
+          mul_le_mul (mul_le_mul_of_nonneg_left hFs hC₁₃) hEB (pntE_pos _).le (by positivity)
+      _ = 6 * C₁₃ * E := by ring
+  linarith
+
+/-- Replacing the two Euler products by their main terms costs at most
+`4 CR pntE(y^{1/6}) / (p log p)` for each prime in the range of Lemma 16. -/
+theorem lemma16_remainder_le {cR CR y : ℝ} (hCR : 0 ≤ CR)
+    (hR : ∀ z ≥ 2, |R z * log z - cR| ≤ CR * pntE z) (hy64 : 64 ≤ y) {p : ℕ}
+    (hp2 : 2 ≤ (p : ℝ)) (hlp1 : log y / 4 ≤ log p) (hlp2 : log p ≤ log y / 2) :
+    |(R ((y / p) ^ ((1 : ℝ) / 3)) - R p) / p -
+      cR * (lemma16Integrand y (log y / log p) / p)| ≤
+        4 * CR * pntE (y ^ (1 / (6 : ℝ))) * (1 / (p * log p)) := by
+  have hy : 1 < y := by linarith only [hy64]
+  have hy0 : 0 < y := by linarith only [hy]
+  set L := log y
+  set E := pntE (y ^ (1 / (6 : ℝ)))
+  set F := lemma16Integrand y
+  have hL : 0 < L := log_pos hy
+  have hE : 0 < E := pntE_pos _
+  have hlog64 : log (64 : ℝ) = 6 * log 2 := by
+    rw [show (64 : ℝ) = 2 ^ 6 by norm_num, log_pow]; norm_num
+  have hL64 : 6 * log 2 ≤ L := hlog64 ▸ log_le_log (by norm_num) hy64
+  have hlog6 : log (y ^ (1 / (6 : ℝ))) = L / 6 := log_rpow_one_div hy0 6
+  have hp0 : (0 : ℝ) < p := by linarith
+  have hlp : 0 < log (p : ℝ) := by linarith
+  set B₁ := (y / p) ^ ((1 : ℝ) / 3)
+  have hB₁0 : 0 < B₁ := rpow_pos_of_pos (div_pos hy0 hp0) _
+  have hlB₁ : log B₁ = (L - log p) / 3 := by
+    rw [log_rpow_one_div (div_pos hy0 hp0), log_div hy0.ne' hp0.ne']
+  have hB₁2 : 2 ≤ B₁ := by
+    rw [← log_le_log_iff (by norm_num) hB₁0, hlB₁]; linarith
+  have hlB₁0 : 0 < log B₁ := by rw [hlB₁]; linarith
+  have hF : cR * F (L / log p) = cR / log B₁ - cR / log p := by
+    change cR * ((3 * (L / log p) / (L / log p - 1) - L / log p) / L) = _
+    rw [hlB₁]
+    have h1 : L - log p ≠ 0 := by linarith
+    have h2 : L / log p - 1 ≠ 0 := by
+      rw [div_sub_one hlp.ne']; exact div_ne_zero h1 hlp.ne'
+    field_simp
+  have e1 := abs_R_sub_le hR hB₁2
+  have e2 := abs_R_sub_le hR hp2
+  have hE1 : pntE B₁ ≤ E := pntE_le_of_log_le (by rw [hlog6, hlB₁]; linarith)
+  have hE2 : pntE p ≤ E := pntE_le_of_log_le (by rw [hlog6]; linarith)
+  have e1' : CR * pntE B₁ / log B₁ ≤ 3 * CR * E / log p := by
+    rw [div_le_div_iff₀ hlB₁0 hlp, hlB₁]
+    have h1 : CR * pntE B₁ ≤ CR * E := mul_le_mul_of_nonneg_left hE1 hCR
+    have h2 : 0 ≤ CR * E := mul_nonneg hCR hE.le
+    calc CR * pntE B₁ * log p ≤ CR * E * log p := mul_le_mul_of_nonneg_right h1 hlp.le
+      _ ≤ CR * E * (L - log p) := mul_le_mul_of_nonneg_left (by linarith) h2
+      _ = 3 * CR * E * ((L - log p) / 3) := by ring
+  have e2' : CR * pntE p / log p ≤ CR * E / log p :=
+    div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_left hE2 hCR) hlp.le
+  have heq : (R B₁ - R p) / p - cR * (F (L / log p) / p) =
+      ((R B₁ - cR / log B₁) - (R p - cR / log p)) / p := by
+    rw [← mul_div_assoc, hF]; ring
+  have habs : |R B₁ - cR / log B₁ - (R p - cR / log p)| ≤ 4 * CR * E / log p := by
+    refine (abs_sub _ _).trans ?_
+    have : 4 * CR * E / log p = 3 * CR * E / log p + CR * E / log p := by ring
+    rw [this]
+    exact add_le_add (e1.trans e1') (e2.trans e2')
+  rw [heq, abs_div, abs_of_pos hp0]
+  calc |R B₁ - cR / log B₁ - (R p - cR / log p)| / p ≤ 4 * CR * E / log p / p :=
+        div_le_div_of_nonneg_right habs hp0.le
+    _ = 4 * CR * E * (1 / (p * log p)) := by field_simp
+
 /-- [I71, Lemma 16]: for `y > 1` and `s ≥ 2`,
 `cR⁻¹ d_{2,y}(s) < g₂(s) / log y + c₆ pntE(y^{1/6})`, where `cR` (Iwaniec's `e^{-γ}`) is the
 constant of `R(z) log z → cR`. -/
 theorem lemma16 {cR CR : ℝ} (hcR : 0 < cR) (hR : ∀ z ≥ 2, |R z * log z - cR| ≤ CR * pntE z) :
     ∃ c₆ : ℝ, ∀ y s : ℝ, 1 < y → 2 ≤ s →
       cR⁻¹ * d2 y s < g 2 s / log y + c₆ * pntE (y ^ (1 / (6 : ℝ))) := by
-  obtain ⟨C₁₃, hC₁₃, h13⟩ := lemma13_param
+  obtain ⟨C₁₃, hC₁₃, hmainTerm⟩ := exists_lemma16_main_term_bound
   obtain ⟨C₁₄, h14⟩ := lemma14_of_subset
   have hCR : 0 ≤ CR := by
     have h := (abs_nonneg _).trans (hR 2 le_rfl)
@@ -180,38 +358,7 @@ theorem lemma16 {cR CR : ℝ} (hcR : 0 < cR) (hR : ∀ z ≥ 2, |R z * log z - c
   rcases lt_or_ge y 64 with hy64 | hy64
   · -- small `y`: `d₂ ≤ 64` and `pntE(y^{1/6}) ≥ pntE 2`
     have hL64 : L < 6 * log 2 := hlog64 ▸ log_lt_log hy0 hy64
-    have hz8 : y ^ (1 / s) ≤ 8 := by
-      rw [← log_le_log_iff (rpow_pos_of_pos hy0 _) (by norm_num), hlogz,
-        show (8 : ℝ) = 2 ^ 3 by norm_num, log_pow]
-      push_cast
-      linarith
-    have hcard : #(primesLT (y ^ (1 / s))) ≤ 8 := by
-      refine (card_le_card (primesLT_mono hz8)).trans ?_
-      rw [primesLT, Nat.primesBelow, show ⌈(8 : ℝ)⌉₊ = 8 by norm_num]
-      exact (card_filter_le _ _).trans (card_range 8).le
-    have hd2 : d2 y s ≤ 64 := by
-      have : d2 y s ≤ ∑ p₁ ∈ primesLT (y ^ (1 / s)), (8 : ℝ) := by
-        refine sum_le_sum fun p₁ hp₁ ↦ ?_
-        have hsub : (primesLT p₁).filter (fun p₂ : ℕ ↦ (y / p₁) ^ ((1 : ℝ) / 3) ≤ p₂) ⊆
-            primesLT (y ^ (1 / s)) :=
-          (filter_subset _ _).trans (primesLT_natCast_subset hp₁)
-        calc ∑ p₂ ∈ (primesLT p₁).filter (fun p₂ : ℕ ↦ (y / p₁) ^ ((1 : ℝ) / 3) ≤ p₂),
-              R p₂ / (p₁ * p₂)
-            ≤ ∑ p₂ ∈ (primesLT p₁).filter (fun p₂ : ℕ ↦ (y / p₁) ^ ((1 : ℝ) / 3) ≤ p₂),
-              (1 : ℝ) := by
-              refine sum_le_sum fun p₂ hp₂ ↦ ?_
-              have h1 : (1 : ℝ) ≤ p₁ := by exact_mod_cast (prime_of_mem_primesLT hp₁).one_le
-              have h2 : (1 : ℝ) ≤ p₂ := by
-                exact_mod_cast (prime_of_mem_primesLT (mem_filter.1 hp₂).1).one_le
-              rw [div_le_one (by positivity)]
-              nlinarith [R_le_one (p₂ : ℝ)]
-          _ ≤ 8 := by
-              rw [sum_const, nsmul_one]
-              exact_mod_cast (card_le_card hsub).trans hcard
-      refine this.trans ?_
-      rw [sum_const, nsmul_eq_mul]
-      have : (#(primesLT (y ^ (1 / s))) : ℝ) ≤ 8 := by exact_mod_cast hcard
-      nlinarith
+    have hd2 := d2_le_sixty_four hy hy64 hs
     have hE2' : pntE 2 ≤ E := pntE_le_of_log_le (by rw [hlog6]; linarith)
     calc cR⁻¹ * d2 y s ≤ cR⁻¹ * 64 := mul_le_mul_of_nonneg_left hd2 (inv_pos.2 hcR).le
       _ < (64 / cR + 1) / pntE 2 * pntE 2 := by
@@ -226,17 +373,6 @@ theorem lemma16 {cR CR : ℝ} (hcR : 0 < cR) (hR : ∀ z ≥ 2, |R z * log z - c
   set S := (primesLT z).filter (fun p : ℕ ↦ B ≤ p)
   have hB2 : 2 ≤ B := by
     rw [← log_le_log_iff (by norm_num) (rpow_pos_of_pos hy0 _), hlog4]; linarith
-  -- facts for `p ∈ S`
-  have hSfacts : ∀ p ∈ S, p.Prime ∧ 2 ≤ (p : ℝ) ∧ L / 4 ≤ log p ∧ log p ≤ L / 2 := by
-    intro p hp
-    obtain ⟨hpz, hpB⟩ := mem_filter.1 hp
-    have hpp := prime_of_mem_primesLT hpz
-    have hp0 : (0 : ℝ) < p := by exact_mod_cast hpp.pos
-    refine ⟨hpp, by exact_mod_cast hpp.two_le, ?_, ?_⟩
-    · rw [← hlog4]; exact log_le_log (rpow_pos_of_pos hy0 _) hpB
-    · have := log_lt_log hp0 (lt_of_mem_primesLT hpz)
-      rw [hlogz] at this
-      linarith
   rcases lt_or_ge 4 s with hs4 | hs4
   · -- `s > 4`: no `p₁` contributes
     have hS : S = ∅ := by
@@ -251,92 +387,32 @@ theorem lemma16 {cR CR : ℝ} (hcR : 0 < cR) (hR : ∀ z ≥ 2, |R z * log z - c
     rw [hS, sum_empty, mul_zero]
     positivity
   have hsI : s ∈ Set.Icc (2 : ℝ) 4 := ⟨hs, hs4⟩
-  -- the main term, by Lemma 13
-  set F : ℝ → ℝ := fun t ↦ (3 * t / (t - 1) - t) / L
+  -- facts for `p ∈ S`
+  have hSfacts : ∀ p ∈ S, p.Prime ∧ 2 ≤ (p : ℝ) ∧ L / 4 ≤ log p ∧ log p ≤ L / 2 := by
+    intro p hp
+    obtain ⟨hpz, hpB⟩ := mem_filter.1 hp
+    have hpp := prime_of_mem_primesLT hpz
+    have hp0 : (0 : ℝ) < p := by exact_mod_cast hpp.pos
+    refine ⟨hpp, by exact_mod_cast hpp.two_le, ?_, ?_⟩
+    · rw [← hlog4]; exact log_le_log (rpow_pos_of_pos hy0 _) hpB
+    · have := log_lt_log hp0 (lt_of_mem_primesLT hpz)
+      rw [hlogz] at this
+      linarith
+  -- Lemma 13 evaluates the main term; the remaining work sums the remainders.
+  set F := lemma16Integrand y
   have hSsub1 : ∀ p ∈ S, p.Prime ∧ y ^ (1 / (4 : ℝ)) ≤ p ∧ (p : ℝ) ≤ y ^ (1 / s) := fun p hp ↦
     ⟨prime_of_mem_primesLT (mem_filter.1 hp).1, (mem_filter.1 hp).2,
       (lt_of_mem_primesLT (mem_filter.1 hp).1).le⟩
   have hSsub2 : ∀ p : ℕ, p.Prime → y ^ (1 / (4 : ℝ)) < p → (p : ℝ) < y ^ (1 / s) → p ∈ S :=
     fun p hp h1 h2 ↦ mem_filter.2 ⟨mem_primesLT.2 ⟨hp, h2⟩, h1.le⟩
-  have hFanti : AntitoneOn F (Set.Icc s 4) := by
-    intro u hu v hv huv
-    have hu1 : 0 < u - 1 := by linarith [hu.1]
-    have hv1 : 0 < v - 1 := by linarith [hv.1]
-    simp only [F]
-    refine div_le_div_of_nonneg_right ?_ hL.le
-    have : 3 * v / (v - 1) ≤ 3 * u / (u - 1) := by
-      rw [div_le_div_iff₀ hv1 hu1]; nlinarith
-    linarith
-  have hF0 : ∀ t ∈ Set.Icc s 4, 0 ≤ F t := by
-    intro t ht
-    have ht1 : 0 < t - 1 := by linarith [ht.1]
-    simp only [F]
-    refine div_nonneg ?_ hL.le
-    rw [sub_nonneg, le_div_iff₀ ht1]
-    nlinarith [ht.2]
-  have hFs : F s ≤ 6 := by
-    have hs1 : 0 < s - 1 := by linarith
-    simp only [F]
-    rw [div_le_iff₀ hL]
-    have : 3 * s / (s - 1) ≤ 6 := by rw [div_le_iff₀ hs1]; linarith
-    nlinarith
-  have h13' := h13 F y s 4 S hy hs0 hs4 hB2 hFanti hF0 hSsub1 hSsub2
-  rw [integral_lemma16 hsI] at h13'
-  have hEB : pntE B ≤ E := pntE_le_of_log_le (by rw [hlog6, hlog4]; linarith)
-  have hmain : cR * ∑ p ∈ S, F (L / log p) / p ≤ cR * (g 2 s / L + 6 * C₁₃ * E) := by
-    refine mul_le_mul_of_nonneg_left ?_ hcR.le
-    have h1 := (abs_le.1 h13').2
-    have h2 : C₁₃ * F s * pntE B ≤ 6 * C₁₃ * E := by
-      calc C₁₃ * F s * pntE B ≤ C₁₃ * 6 * E :=
-            mul_le_mul (mul_le_mul_of_nonneg_left hFs hC₁₃) hEB (pntE_pos _).le (by positivity)
-        _ = 6 * C₁₃ * E := by ring
-    linarith
+  have hmain : cR * ∑ p ∈ S, F (L / log p) / p ≤ cR * (g 2 s / L + 6 * C₁₃ * E) :=
+    mul_le_mul_of_nonneg_left (hmainTerm y s hy64 hsI) hcR.le
   -- the error terms
-  have hterm : ∀ p ∈ S, |(R ((y / p) ^ ((1 : ℝ) / 3)) - R p) / p - cR * (F (L / log p) / p)| ≤
-      4 * CR * E * (1 / (p * log p)) := by
+  have hterm : ∀ p ∈ S, |(R ((y / p) ^ ((1 : ℝ) / 3)) - R p) / p -
+      cR * (F (L / log p) / p)| ≤ 4 * CR * E * (1 / (p * log p)) := by
     intro p hp
-    obtain ⟨hpp, hp2, hlp1, hlp2⟩ := hSfacts p hp
-    have hp0 : (0 : ℝ) < p := by linarith
-    have hlp : 0 < log (p : ℝ) := by linarith
-    set B₁ := (y / p) ^ ((1 : ℝ) / 3)
-    have hB₁0 : 0 < B₁ := rpow_pos_of_pos (div_pos hy0 hp0) _
-    have hlB₁ : log B₁ = (L - log p) / 3 := by
-      rw [log_rpow_one_div (div_pos hy0 hp0), log_div hy0.ne' hp0.ne']
-    have hB₁2 : 2 ≤ B₁ := by
-      rw [← log_le_log_iff (by norm_num) hB₁0, hlB₁]; linarith
-    have hlB₁0 : 0 < log B₁ := by rw [hlB₁]; linarith
-    have hF : cR * F (L / log p) = cR / log B₁ - cR / log p := by
-      simp only [F]
-      rw [hlB₁]
-      have h1 : L - log p ≠ 0 := by linarith
-      have h2 : L / log p - 1 ≠ 0 := by
-        rw [div_sub_one hlp.ne']; exact div_ne_zero h1 hlp.ne'
-      field_simp
-    have e1 := abs_R_sub_le hR hB₁2
-    have e2 := abs_R_sub_le hR hp2
-    have hE1 : pntE B₁ ≤ E := pntE_le_of_log_le (by rw [hlog6, hlB₁]; linarith)
-    have hE2 : pntE p ≤ E := pntE_le_of_log_le (by rw [hlog6]; linarith)
-    have e1' : CR * pntE B₁ / log B₁ ≤ 3 * CR * E / log p := by
-      rw [div_le_div_iff₀ hlB₁0 hlp, hlB₁]
-      have h1 : CR * pntE B₁ ≤ CR * E := mul_le_mul_of_nonneg_left hE1 hCR
-      have h2 : 0 ≤ CR * E := mul_nonneg hCR hE.le
-      calc CR * pntE B₁ * log p ≤ CR * E * log p := mul_le_mul_of_nonneg_right h1 hlp.le
-        _ ≤ CR * E * (L - log p) := mul_le_mul_of_nonneg_left (by linarith) h2
-        _ = 3 * CR * E * ((L - log p) / 3) := by ring
-    have e2' : CR * pntE p / log p ≤ CR * E / log p :=
-      div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_left hE2 hCR) hlp.le
-    have heq : (R B₁ - R p) / p - cR * (F (L / log p) / p) =
-        ((R B₁ - cR / log B₁) - (R p - cR / log p)) / p := by
-      rw [← mul_div_assoc, hF]; ring
-    have habs : |R B₁ - cR / log B₁ - (R p - cR / log p)| ≤ 4 * CR * E / log p := by
-      refine (abs_sub _ _).trans ?_
-      have : 4 * CR * E / log p = 3 * CR * E / log p + CR * E / log p := by ring
-      rw [this]
-      exact add_le_add (e1.trans e1') (e2.trans e2')
-    rw [heq, abs_div, abs_of_pos hp0]
-    calc |R B₁ - cR / log B₁ - (R p - cR / log p)| / p ≤ 4 * CR * E / log p / p :=
-          div_le_div_of_nonneg_right habs hp0.le
-      _ = 4 * CR * E * (1 / (p * log p)) := by field_simp
+    obtain ⟨-, hp2, hlp1, hlp2⟩ := hSfacts p hp
+    exact lemma16_remainder_le hCR hR hy64 hp2 hlp1 hlp2
   have h14' := h14 z B S hB2 (rpow_le_rpow_of_exponent_le hy.le
     (one_div_le_one_div_of_le hs0 hs4)) hSsub1 hSsub2
   have hsum14 : ∑ p ∈ S, 1 / ((p : ℝ) * log p) ≤ 2 + |C₁₄| := by

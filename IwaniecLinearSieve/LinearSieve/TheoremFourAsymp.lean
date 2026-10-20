@@ -185,38 +185,59 @@ theorem mul_log_sub_le {ξ : ℝ} (hξ : 2 < ξ) :
   nlinarith
 
 /-- The exponent comparison for [I71, (4.4), (4.9)], after bounding the logarithms. -/
-theorem crude_half_exponent_le {c ℓ L ξ X : ℝ} (hℓ : 2 ≤ ℓ) (hξ : 8 * ℓ ≤ ξ)
-    (hL : log L ≤ ℓ) (hX0 : 0 ≤ log X) (hX : log X ≤ log ℓ / 4)
-    (hu : log (ξ / 2) ≤ log (ξ - 2)) (hv : ℓ / 2 ≤ log (ξ / 2))
-    (hw : log (log (ξ / 2)) ≤ log ℓ) (hc : 2 + c / 2 + 3 / 4 * log ℓ ≤ ℓ / 8) :
+theorem crude_half_exponent_le {c ℓ L ξ X : ℝ} (hℓ_large : 2 ≤ ℓ) (hxi_large : 8 * ℓ ≤ ξ)
+    (hlogL_upper : log L ≤ ℓ) (hlogX_nonneg : 0 ≤ log X) (hlogX_upper : log X ≤ log ℓ / 4)
+    (hlog_shift_lower : log (ξ / 2) ≤ log (ξ - 2)) (hlog_half_lower : ℓ / 2 ≤ log (ξ / 2))
+    (hloglog_half_upper : log (log (ξ / 2)) ≤ log ℓ)
+    (herror_budget : 2 + c / 2 + 3 / 4 * log ℓ ≤ ℓ / 8) :
     log 2 + (-((ξ - 2) * log (ξ - 2)) + (ξ - 2) * log X + (ξ - 2)) + 4 * log L ≤
       -(ξ / 2 * log (ξ / 2)) - ξ / 2 * log (log (ξ / 2)) - c * (ξ / 2) := by
-  have hξ0 : 0 ≤ ξ := by linarith only [hℓ, hξ]
-  have hu' := mul_le_mul_of_nonneg_left hu (by linarith only [hℓ, hξ] : 0 ≤ ξ - 2)
-  have hX' := mul_le_mul_of_nonneg_left hX hξ0
-  have hv' := mul_le_mul_of_nonneg_left hv (by linarith only [hℓ, hξ] : 0 ≤ ξ / 2 - 2)
-  have hw' := mul_le_mul_of_nonneg_left hw (by linarith only [hξ0] : 0 ≤ ξ / 2)
-  have hc' := mul_le_mul_of_nonneg_left hc hξ0
-  have hgap : ξ / 4 * (ℓ / 2) ≤ (ξ / 2 - 2) * (ℓ / 2) :=
-    mul_le_mul_of_nonneg_right (by linarith only [hℓ, hξ]) (by linarith only [hℓ])
-  linarith only [hu', hX', hv', hw', hc', hgap, hX0, hL, hξ, hℓ, log_two_lt_d9]
+  have hxi_nonneg : 0 ≤ ξ := by linarith only [hℓ_large, hxi_large]
+  have hshifted_log := mul_le_mul_of_nonneg_left hlog_shift_lower
+    (by linarith only [hℓ_large, hxi_large] : 0 ≤ ξ - 2)
+  have hweighted_logX := mul_le_mul_of_nonneg_left hlogX_upper hxi_nonneg
+  have hhalf_log_gap := mul_le_mul_of_nonneg_left hlog_half_lower
+    (by linarith only [hℓ_large, hxi_large] : 0 ≤ ξ / 2 - 2)
+  have hweighted_loglog := mul_le_mul_of_nonneg_left hloglog_half_upper
+    (by linarith only [hxi_nonneg] : 0 ≤ ξ / 2)
+  have hweighted_budget := mul_le_mul_of_nonneg_left herror_budget hxi_nonneg
+  have hlinear_gap : ξ / 4 * (ℓ / 2) ≤ (ξ / 2 - 2) * (ℓ / 2) :=
+    mul_le_mul_of_nonneg_right (by linarith only [hℓ_large, hxi_large])
+      (by linarith only [hℓ_large])
+  -- The decay from `log (ξ/2)` pays for the logarithmic error budget.
+  have hdecay : ξ * (ℓ / 8) ≤ (ξ / 2 - 2) * log (ξ / 2) := by
+    linarith only [hhalf_log_gap, hlinear_gap]
+  calc log 2 + (-((ξ - 2) * log (ξ - 2)) + (ξ - 2) * log X + (ξ - 2)) + 4 * log L
+      ≤ -(ξ / 2 * log (ξ / 2)) - ξ / 2 * log ℓ - c * (ξ / 2) := by
+        linarith only [hshifted_log, hweighted_logX, hweighted_budget, hdecay,
+          hlogX_nonneg, hlogL_upper, hxi_large, hℓ_large, log_two_lt_d9]
+    _ ≤ -(ξ / 2 * log (ξ / 2)) - ξ / 2 * log (log (ξ / 2)) - c * (ξ / 2) := by
+        linarith only [hweighted_loglog]
 
 /-- The exponent comparison for [I71, (4.5), (4.10)], using the lower bound on `log x`. -/
-theorem crude_full_exponent_le {c ℓ L ξ X x : ℝ} (hℓ : 2 ≤ ℓ) (hξ : 8 * ℓ ≤ ξ)
-    (hL : log L ≤ ℓ) (hX0 : 0 ≤ log X) (hX : log X ≤ log ℓ / 4)
-    (hv : log ξ ≤ ℓ) (hw : log (log ξ) ≤ log ℓ)
-    (hx : 3 / 5 * log ℓ - 7 * log 2 ≤ log x) (hc : 2 + c + 18 * log 2 ≤ log ℓ / 4) :
+theorem crude_full_exponent_le {c ℓ L ξ X x : ℝ} (hℓ_large : 2 ≤ ℓ) (hxi_large : 8 * ℓ ≤ ξ)
+    (hlogL_upper : log L ≤ ℓ) (hlogX_nonneg : 0 ≤ log X) (hlogX_upper : log X ≤ log ℓ / 4)
+    (hlogxi_upper : log ξ ≤ ℓ) (hloglogxi_upper : log (log ξ) ≤ log ℓ)
+    (hlogx_lower : 3 / 5 * log ℓ - 7 * log 2 ≤ log x)
+    (herror_budget : 2 + c + 18 * log 2 ≤ log ℓ / 4) :
     log 2 + (-((ξ - 2) * log (ξ - 2)) + (ξ - 2) * log X + (ξ - 2)) + 4 * log L ≤
       log x * (5 * (ξ / 2)) + (-(ξ * log ξ) - ξ * log (log ξ) - c * ξ) := by
-  have hξ0 : 0 ≤ ξ := by linarith only [hℓ, hξ]
-  have hX' := mul_le_mul_of_nonneg_left hX hξ0
-  have hw' := mul_le_mul_of_nonneg_left hw hξ0
-  have hx' := mul_le_mul_of_nonneg_right hx (by linarith only [hξ0] : 0 ≤ 5 * (ξ / 2))
-  have hc' := mul_le_mul_of_nonneg_left hc hξ0
-  have hu := mul_log_sub_le (by linarith only [hℓ, hξ] : 2 < ξ)
-  have hlog2 : 0 ≤ (ξ / 2 - 1) * log 2 :=
-    mul_nonneg (by linarith only [hℓ, hξ]) (log_nonneg (by norm_num))
-  linarith only [hX', hw', hx', hc', hu, hlog2, hX0, hL, hv, hξ, hℓ]
+  have hxi_nonneg : 0 ≤ ξ := by linarith only [hℓ_large, hxi_large]
+  have hweighted_logX := mul_le_mul_of_nonneg_left hlogX_upper hxi_nonneg
+  have hweighted_loglog := mul_le_mul_of_nonneg_left hloglogxi_upper hxi_nonneg
+  have hweighted_logx := mul_le_mul_of_nonneg_right hlogx_lower
+    (by linarith only [hxi_nonneg] : 0 ≤ 5 * (ξ / 2))
+  have hweighted_budget := mul_le_mul_of_nonneg_left herror_budget hxi_nonneg
+  have hshift_loss := mul_log_sub_le (by linarith only [hℓ_large, hxi_large] : 2 < ξ)
+  have hlog_two_margin : 0 ≤ (ξ / 2 - 1) * log 2 :=
+    mul_nonneg (by linarith only [hℓ_large, hxi_large]) (log_nonneg (by norm_num))
+  -- The factor `x^(5ξ/2)` absorbs the shift loss and the remaining errors.
+  calc log 2 + (-((ξ - 2) * log (ξ - 2)) + (ξ - 2) * log X + (ξ - 2)) + 4 * log L
+      ≤ log x * (5 * (ξ / 2)) + (-(ξ * log ξ) - ξ * log ℓ - c * ξ) := by
+        linarith only [hweighted_logX, hweighted_logx, hweighted_budget, hshift_loss,
+          hlog_two_margin, hlogX_nonneg, hlogL_upper, hlogxi_upper, hxi_large, hℓ_large]
+    _ ≤ log x * (5 * (ξ / 2)) + (-(ξ * log ξ) - ξ * log (log ξ) - c * ξ) := by
+        linarith only [hweighted_loglog]
 
 -- Preserve the existing `hc` parameter; the explicit bounds involving `c` already suffice.
 set_option linter.unusedVariables false in
