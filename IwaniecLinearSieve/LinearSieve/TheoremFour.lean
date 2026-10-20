@@ -191,6 +191,24 @@ theorem src_le_of_le_xi {cR CR : ℝ} (hR : ∀ z ≥ 2, |R z * log z - cR| ≤ 
   · simp only [src, ite_true, zero_add]
     exact hE
 
+/-- Corollary 1 and the source estimate together give the full main term: the source
+restores the upper-sieve correction `(3 - s)⁺` subtracted from the prime sum. -/
+theorem main_sum_add_src_le {cR CR C₁ : ℝ} (hcR : 0 ≤ cR) {lower : Bool} {y s : ℝ}
+    (hcor1 : ∑ p ∈ (rosserPrimes lower y (y ^ (1 / s))).filter
+        (fun p : ℕ => y ^ (1 / xi y) ≤ p),
+        mainMaj (!lower) (log y / log p - 1) / (p * log (y / p)) ≤
+      (mainMaj lower s - (if lower then 0 else max (3 - s) 0)) / log y +
+        C₁ * s ^ 2 * errMaj lower s * pntE (y ^ (1 / xi y)) / log y)
+    (hsrc : src lower y (y ^ (1 / s)) ≤ (if lower then 0 else cR * max (3 - s) 0 / log y) +
+      6 * CR * s ^ 2 * errMaj lower s * pntE (y ^ (1 / xi y)) / log y) :
+    cR * ∑ p ∈ (rosserPrimes lower y (y ^ (1 / s))).filter
+        (fun p : ℕ => y ^ (1 / xi y) ≤ p),
+        mainMaj (!lower) (log y / log p - 1) / (p * log (y / p)) +
+      src lower y (y ^ (1 / s)) ≤ cR * mainMaj lower s / log y +
+        (cR * C₁ + 6 * CR) * s ^ 2 * errMaj lower s * pntE (y ^ (1 / xi y)) / log y := by
+  refine (add_le_add (mul_le_mul_of_nonneg_left hcor1 hcR) hsrc).trans_eq ?_
+  cases lower <;> simp only [Bool.false_eq_true, ite_false, ite_true] <;> ring
+
 /-! ### Small `y` -/
 
 theorem SLT_mono {a b : ℝ} (hab : a ≤ b) : SLT a ≤ SLT b := by
@@ -340,6 +358,23 @@ theorem ratio_le {r : ℕ} {ε : ℝ} (hε : ε * ((r : ℝ) + 1) ^ 2 ≤ 1) :
   rw [div_le_div_iff₀ (by positivity) (by positivity)]
   nlinarith
 
+/-- The depth condition supplies the relative gain `(log L)²/(4L²)` used in [I71, (4.6)].
+Here `Λ` stands for `log L`; the estimate only needs `Λ > 0`. -/
+theorem ratio_le_of_depth {r : ℕ} {L Λ : ℝ} (hL : 0 < L) (hΛ : 0 < Λ)
+    (hdepth : (r : ℝ) + 2 ≤ 2 * L / Λ) :
+    (r : ℝ) / (r + 1) ≤ ((r + 1 : ℕ) : ℝ) / ((r + 1 : ℕ) + 1) *
+      (1 - Λ ^ 2 / (4 * L ^ 2)) := by
+  apply ratio_le
+  have hr : ((r : ℝ) + 2) * Λ ≤ 2 * L := (le_div_iff₀ hΛ).1 hdepth
+  have hr' : ((r : ℝ) + 1) * Λ ≤ 2 * L :=
+    (mul_le_mul_of_nonneg_right (by linarith only) hΛ.le).trans hr
+  have hsq : (((r : ℝ) + 1) * Λ) ^ 2 ≤ (2 * L) ^ 2 :=
+    pow_le_pow_left₀ (by positivity) hr' 2
+  calc
+    Λ ^ 2 / (4 * L ^ 2) * ((r : ℝ) + 1) ^ 2 =
+        (((r : ℝ) + 1) * Λ) ^ 2 / (2 * L) ^ 2 := by ring
+    _ ≤ 1 := (div_le_one (by positivity)).2 hsq
+
 /-- The final bookkeeping of the inductive step ([I71, (4.6)]). -/
 theorem combine {cR c₇ L D M F cr E T ρ ρ' ε : ℝ}
     (hF : F ≤ cr + (cR * M / L + E) + cR * c₇ * ρ * T) (hcr : cr ≤ D / L ^ 2)
@@ -396,39 +431,29 @@ theorem main_step {cR c₇ CR C₁ C₃ : ℝ} {r : ℕ} (IH : Bound cR c₇ r) 
       cR * (mainMaj lower s / log y +
         c₇ * (((r + 1 : ℕ) : ℝ) / ((r + 1 : ℕ) + 1)) * delta s y * errMaj lower s /
           log y ^ 2) := by
-  set L := log y with hLdef
+  set L := log y
   set ξ := xi y
   set w := y ^ (1 / ξ)
   set Λ := log (log y)
   set G := errMaj lower s
   set ρ' := ((r + 1 : ℕ) : ℝ) / ((r + 1 : ℕ) + 1)
   set S := (rosserPrimes lower y (y ^ (1 / s))).filter (fun p : ℕ => w ≤ p)
+  set M := ∑ p ∈ S, mainMaj (!lower) (L / log p - 1) / (p * log (y / p))
+  set T := ∑ p ∈ S, delta (L / log p - 1) (y / p) * errMaj (!lower) (L / log p - 1) /
+    (p * log (y / p) ^ 2)
   set D := delta s y * G / L ^ 2 with hD
   set ε := Λ ^ 2 / (4 * L ^ 2) with hε
   have hs1 : 1 ≤ s := (one_le_sMin lower).trans hs
   have hL : 0 < L := log_pos hy
-  have hL2 : 0 < L ^ 2 := by positivity
   have hG := errMaj_pos lower s
   have hδs := one_le_delta hs1 y
   have hpE := pntE_pos w
   have hD0 : 0 ≤ D := by positivity
-  -- splitting and the induction hypothesis
-  have hwz : w ≤ y ^ (1 / s) := rpow_one_div_le_rpow_one_div hy.le (by linarith) hsξ
-  have hsplit := fail_succ_le_split lower r (y := y) hwz
-  have hih := sum_ih_le IH hy hs
-  -- main terms
+  -- Corollary 1 and the source term recover the main term, with an error of size `D/L²`.
   set K := cR * C₁ + 6 * CR
-  have hmain : cR * ∑ p ∈ S, mainMaj (!lower) (L / log p - 1) / (p * log (y / p)) +
-      src lower y (y ^ (1 / s)) ≤ cR * mainMaj lower s / L + K * s ^ 2 * G * pntE w / L := by
-    have h1 := mul_le_mul_of_nonneg_left hcor1 hcR.le
-    have : cR * ((mainMaj lower s - (if lower then 0 else max (3 - s) 0)) / L +
-        C₁ * s ^ 2 * G * pntE w / L) + ((if lower then 0 else cR * max (3 - s) 0 / L) +
-        6 * CR * s ^ 2 * G * pntE w / L) =
-        cR * mainMaj lower s / L + K * s ^ 2 * G * pntE w / L := by
-      cases lower
-      · simp only [Bool.false_eq_true, ite_false, K]; ring
-      · simp only [ite_true, K]; ring
-    linarith
+  have hmain : cR * M + src lower y (y ^ (1 / s)) ≤
+      cR * mainMaj lower s / L + K * s ^ 2 * G * pntE w / L :=
+    main_sum_add_src_le hcR.le hcor1 hsrc
   have hE : K * s ^ 2 * G * pntE w / L ≤ D / L ^ 2 := by
     have hK0 : 0 ≤ K := by positivity
     have hsq : s ^ 2 ≤ ξ ^ 2 := by gcongr
@@ -438,50 +463,48 @@ theorem main_step {cR c₇ CR C₁ C₃ : ℝ} {r : ℕ} (IH : Bound cR c₇ r) 
       _ ≤ G * (K * ξ ^ 2 * L ^ 3 * pntE w) * L := by gcongr
       _ ≤ G * 1 * L := by gcongr
       _ ≤ delta s y * G * L := by
-          have := mul_le_mul_of_nonneg_right hδs (by positivity : 0 ≤ G * L)
-          linarith
-  -- error terms
-  have hT : ∑ p ∈ S, delta (L / log p - 1) (y / p) * errMaj (!lower) (L / log p - 1) /
-      (p * log (y / p) ^ 2) ≤ D * (1 + ε / 2) := by
+          simpa only [one_mul, mul_assoc] using
+            mul_le_mul_of_nonneg_right hδs (by positivity : 0 ≤ G * L)
+  -- Corollary 3 bounds the propagated error with relative loss at most `ε/2`.
+  have hT : T ≤ D * (1 + ε / 2) := by
     refine hcor3.trans ?_
-    have hmax := delta_max_le hs1 (by linarith [add_one_le_exp (32 : ℝ)] : 1 ≤ exp 32) y
+    have hmax := delta_max_le hs1 (one_le_exp (by norm_num) : 1 ≤ exp 32) y
     have hb : 0 ≤ 1 + C₃ * ξ ^ 2 * pntE w := by positivity
-    have hε2 : ε / 2 = Λ ^ 2 / (8 * L ^ 2) := by rw [hε]; field_simp; ring
+    have hε2 : ε / 2 = Λ ^ 2 / (8 * L ^ 2) := by rw [hε]; ring
     calc delta (max s (exp 32)) y * G / L ^ 2 * (1 + C₃ * ξ ^ 2 * pntE w)
         ≤ delta (exp 32) y * delta s y * G / L ^ 2 * (1 + C₃ * ξ ^ 2 * pntE w) := by gcongr
       _ = D * (delta (exp 32) y * (1 + C₃ * ξ ^ 2 * pntE w)) := by rw [hD]; ring
       _ ≤ D * (1 + ε / 2) := by rw [hε2]; gcongr
-  -- the depth condition
-  have hΛ0 : 0 < Λ := by linarith
-  have hr : ((r : ℝ) + 2) * Λ ≤ 2 * L := by
-    have := not_lt.1 hdepth
-    rwa [le_div_iff₀ hΛ0] at this
-  have hρ : (r : ℝ) / (r + 1) ≤ ρ' * (1 - ε) := by
-    refine ratio_le ?_
-    have h1 : ((r : ℝ) + 1) * Λ ≤ 2 * L :=
-      le_trans (mul_le_mul_of_nonneg_right (by linarith) hΛ0.le) hr
-    have h2 : (((r : ℝ) + 1) * Λ) ^ 2 ≤ (2 * L) ^ 2 := pow_le_pow_left₀ (by positivity) h1 2
-    have h3 : ε * ((r : ℝ) + 1) ^ 2 = (((r : ℝ) + 1) * Λ) ^ 2 / (2 * L) ^ 2 := by
-      rw [hε]; field_simp; ring
-    rw [h3, div_le_one (by positivity)]
-    exact h2
+  -- The depth increment absorbs this loss and the two errors of size `D/L²`.
+  have hρ : (r : ℝ) / (r + 1) ≤ ρ' * (1 - ε) :=
+    ratio_le_of_depth hL (zero_lt_one.trans_le hΛ) (not_lt.1 hdepth)
   have hεL : 1 / (4 * L ^ 2) ≤ ε := by
     rw [hε]
-    exact div_le_div_of_nonneg_right (by nlinarith) (by positivity)
+    exact div_le_div_of_nonneg_right (by nlinarith only [hΛ]) (by positivity)
   have hρ' : 1 / 2 ≤ ρ' := by
     simp only [ρ']
     rw [div_le_div_iff₀ (by norm_num) (by positivity)]; push_cast; linarith
   have hcr : fail lower (r + 1) y w ≤ D / L ^ 2 := by
     refine hcrude.trans_eq ?_
     rw [hD, div_div]; ring
+  -- Split at `w`, apply the inner induction bounds, then combine the main sum and source.
+  have hwz : w ≤ y ^ (1 / s) := rpow_one_div_le_rpow_one_div hy.le (by linarith) hsξ
   have hF : fail lower (r + 1) y (y ^ (1 / s)) ≤ fail lower (r + 1) y w +
       (cR * mainMaj lower s / L + K * s ^ 2 * G * pntE w / L) +
-      cR * c₇ * ((r : ℝ) / (r + 1)) * ∑ p ∈ S, delta (L / log p - 1) (y / p) *
-        errMaj (!lower) (L / log p - 1) / (p * log (y / p) ^ 2) := by
-    linarith
-  have := combine hF hcr hE hT hρ (by positivity) (by positivity) hεL hρ' hc₇ hD0 hL
-  refine this.trans_eq ?_
-  rw [hD]; ring
+      cR * c₇ * ((r : ℝ) / (r + 1)) * T := by
+    calc
+      _ ≤ fail lower (r + 1) y w + ∑ p ∈ S, fail (!lower) r (y / p) p / p +
+          src lower y (y ^ (1 / s)) := fail_succ_le_split lower r hwz
+      _ ≤ fail lower (r + 1) y w + (cR * M + cR * c₇ * ((r : ℝ) / (r + 1)) * T) +
+          src lower y (y ^ (1 / s)) :=
+        add_le_add (add_le_add le_rfl (sum_ih_le IH hy hs)) le_rfl
+      _ = fail lower (r + 1) y w + (cR * M + src lower y (y ^ (1 / s))) +
+          cR * c₇ * ((r : ℝ) / (r + 1)) * T := by ring
+      _ ≤ _ := add_le_add (add_le_add le_rfl hmain) le_rfl
+  calc
+    _ ≤ cR * mainMaj lower s / L + cR * c₇ * ρ' * D :=
+      combine hF hcr hE hT hρ (by positivity) (by positivity) hεL hρ' hc₇ hD0 hL
+    _ = _ := by rw [hD]; ring
 
 end IwaniecLinearSieve.TheoremFour
 
