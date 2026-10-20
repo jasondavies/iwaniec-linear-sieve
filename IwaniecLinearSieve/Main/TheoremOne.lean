@@ -160,6 +160,45 @@ theorem exists_card_rosserSet_le : ∃ C₂ : ℝ, 0 ≤ C₂ ∧
     _ = y * (c / log y) * (c₇ / c * delta s y * bigM s / log y) := by field_simp
     _ ≤ y * Rk k (y ^ (1 / s)) * (c₇ / c * delta s y * bigM s / log y) := by gcongr
 
+/-- On `1 < y < y₀`, a fixed extra constant makes the error term at least `2`,
+and its product with `y R_k` at least `2y`. These bounds absorb the small range in Theorem 1. -/
+theorem small_range_error_ge {C y y₀ s : ℝ} (k : ℕ) (hy : 1 < y) (hyy : y < y₀)
+    (hs : 1 ≤ s) (hsξ : s ≤ xi y)
+    (hC : 2 * log y₀ / (R y₀ * bigM (log y₀ / log (log 3) ^ (11 / 5 : ℝ))) ≤ C) :
+    2 * y ≤ y * Rk k (y ^ (1 / s)) * (C * (delta s y * bigM s / log y)) ∧
+      2 ≤ C * (delta s y * bigM s / log y) := by
+  set Ξ := log y₀ / log (log 3) ^ (11 / 5 : ℝ)
+  set C₀ := 2 * log y₀ / (R y₀ * bigM Ξ)
+  have hL : 0 < log y := log_pos hy
+  have hL₀ : 0 < log y₀ := log_pos (hy.trans hyy)
+  have hRy₀ := R_pos y₀
+  have hBΞ0 := bigM_pos Ξ
+  have hC₀ : 0 ≤ C₀ := by positivity
+  have hC0 : 0 ≤ C := hC₀.trans hC
+  have hδ1 : 1 ≤ delta s y := TheoremFour.one_le_delta hs y
+  have hB : bigM Ξ ≤ delta s y * bigM s := by
+    calc bigM Ξ ≤ bigM s := bigM_antitone (hsξ.trans (TheoremFive.xi_le_of_lt hy hyy))
+      _ = 1 * bigM s := (one_mul _).symm
+      _ ≤ delta s y * bigM s := mul_le_mul_of_nonneg_right hδ1 (bigM_pos s).le
+  have hRk : R y₀ ≤ Rk k (y ^ (1 / s)) :=
+    (R_antitone ((rpow_one_div_le_self hy.le hs).trans hyy.le)).trans (R_le_Rk k _)
+  have hLL : log y ≤ log y₀ := log_le_log (by linarith only [hy]) hyy.le
+  have hnum : C₀ * bigM Ξ ≤ C * (delta s y * bigM s) := mul_le_mul hC hB hBΞ0.le hC0
+  -- The choice of constant gives the common lower bound `2 / R(y₀)`.
+  have herror : 2 / R y₀ ≤ C * (delta s y * bigM s / log y) := by
+    calc 2 / R y₀ = C₀ * bigM Ξ / log y₀ := by dsimp [C₀]; field_simp
+      _ ≤ C * (delta s y * bigM s) / log y :=
+          div_le_div₀ ((mul_nonneg hC₀ hBΞ0.le).trans hnum) hnum hL hLL
+      _ = C * (delta s y * bigM s / log y) := by ring
+  have htwo : 2 ≤ 2 / R y₀ := by
+    rw [le_div_iff₀ hRy₀]
+    linarith only [R_le_one y₀]
+  refine ⟨?_, htwo.trans herror⟩
+  calc 2 * y = y * R y₀ * (2 / R y₀) := by field_simp
+    _ ≤ y * Rk k (y ^ (1 / s)) * (C * (delta s y * bigM s / log y)) := by
+        gcongr
+        exact mul_nonneg (by linarith only [hy]) (Rk_nonneg k _)
+
 end Main
 
 open Main
@@ -183,102 +222,73 @@ theorem theorem1_core : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Multiset ℤ
   have hC₀ : 0 ≤ C₀ := by have := R_pos y₀; have := bigM_pos Ξ; positivity
   refine ⟨C₁ + C₂ + C₀, by positivity, fun k M y s hy hM hsξ => ?_⟩
   have hL : 0 < log y := log_pos hy
-  have hy0 : 0 ≤ y := by linarith
-  -- the small range `y < y₀`
-  have small : y < y₀ → 1 ≤ s →
-      2 * y ≤ y * Rk k (y ^ (1 / s)) * ((C₁ + C₂ + C₀) * delta s y * bigM s / log y) ∧
-      2 ≤ (C₁ + C₂ + C₀) * delta s y * bigM s / log y := by
-    intro hyy hs1
-    have hδ1 : 1 ≤ delta s y := TheoremFour.one_le_delta hs1 y
-    have hsΞ : s ≤ Ξ := hsξ.trans (TheoremFive.xi_le_of_lt hy hyy)
-    have hBΞ : bigM Ξ ≤ bigM s := bigM_antitone hsΞ
-    have hBΞ0 := bigM_pos Ξ
-    have hRy₀ := R_pos y₀
-    have hR1 : R y₀ ≤ 1 := R_le_one y₀
-    have hRk : R y₀ ≤ Rk k (y ^ (1 / s)) :=
-      (R_antitone ((rpow_one_div_le_self hy.le hs1).trans hyy.le)).trans (R_le_Rk k _)
-    have hLL : log y ≤ log y₀ := log_le_log (by linarith) hyy.le
-    have n1 : C₀ * bigM Ξ ≤ (C₁ + C₂ + C₀) * delta s y * bigM s := by
-      have : bigM Ξ ≤ delta s y * bigM s := by nlinarith
-      calc C₀ * bigM Ξ ≤ (C₁ + C₂ + C₀) * bigM Ξ := by gcongr; linarith
-        _ ≤ (C₁ + C₂ + C₀) * (delta s y * bigM s) := by gcongr
-        _ = (C₁ + C₂ + C₀) * delta s y * bigM s := by ring
-    have h1 : 2 / R y₀ ≤ (C₁ + C₂ + C₀) * delta s y * bigM s / log y := by
-      calc 2 / R y₀ = C₀ * bigM Ξ / log y₀ := by
-            simp only [C₀]; field_simp
-        _ ≤ (C₁ + C₂ + C₀) * delta s y * bigM s / log y :=
-            div_le_div₀ (le_trans (by positivity) n1) n1 hL hLL
-    have h2 : 2 ≤ 2 / R y₀ := by rw [le_div_iff₀ hRy₀]; linarith
-    refine ⟨?_, h2.trans h1⟩
-    calc 2 * y = y * R y₀ * (2 / R y₀) := by field_simp
-      _ ≤ y * Rk k (y ^ (1 / s)) * ((C₁ + C₂ + C₀) * delta s y * bigM s / log y) := by
-          gcongr
-          exact mul_nonneg hy0 (Rk_nonneg k _)
-  have hRk0 := Rk_pos k (y ^ (1 / s))
-  have hyRk : 0 < y * Rk k (y ^ (1 / s)) := mul_pos (by linarith) hRk0
+  have hy0 : 0 ≤ y := by linarith only [hy]
+  set E := delta s y * bigM s / log y
+  have hCE (c : ℝ) : c * delta s y * bigM s / log y = c * E := by dsimp [E]; ring
+  simp only [hCE]
+  have hE0 (hs1 : 1 ≤ s) : 0 ≤ E :=
+    div_nonneg (mul_nonneg (delta_pos hs1 y).le (bigM_pos s).le) hL.le
+  have herror_mono (hs1 : 1 ≤ s) : (C₁ + C₂) * E ≤ (C₁ + C₂ + C₀) * E :=
+    mul_le_mul_of_nonneg_right (by linarith only [hC₀]) (hE0 hs1)
+  have small (hyy : y < y₀) (hs1 : 1 ≤ s) :
+      2 * y ≤ y * Rk k (y ^ (1 / s)) * ((C₁ + C₂ + C₀) * E) ∧
+      2 ≤ (C₁ + C₂ + C₀) * E :=
+    small_range_error_ge k hy hyy hs1 hsξ (by linarith only [hC₁, hC₂])
+  have hyRk : 0 < y * Rk k (y ^ (1 / s)) :=
+    mul_pos (by linarith only [hy]) (Rk_pos k _)
   constructor
   · intro hs1
-    have hs0 : 0 < s := by linarith
+    have hs0 : 0 < s := by linarith only [hs1]
     have hm : 0 ≤ mainMaj false s / s := div_nonneg (mainMaj_nonneg false s) hs0.le
     rcases lt_or_ge y y₀ with hyy | hyy
-    · -- trivial: `A ≤ y + 1 < 2y`
+    · -- The extra constant absorbs `A ≤ y + 1 < 2y`.
       have hA := siftedCount_le_add_one (z := y ^ (1 / s)) hM
-      have h := (small hyy hs1).1
-      have : 0 ≤ y * Rk k (y ^ (1 / s)) * (1 + mainMaj false s / s) := by positivity
-      nlinarith
+      have hsmall := (small hyy hs1).1
+      calc (siftedCount k M (y ^ (1 / s)) : ℝ) ≤ 2 * y := by linarith only [hA, hy]
+        _ ≤ y * Rk k (y ^ (1 / s)) * ((C₁ + C₂ + C₀) * E) := hsmall
+        _ ≤ y * Rk k (y ^ (1 / s)) * (1 + mainMaj false s / s + (C₁ + C₂ + C₀) * E) :=
+            mul_le_mul_of_nonneg_left (by linarith only [hm]) hyRk.le
     · obtain ⟨hz, hf⟩ := hfail (#(primesLT (y ^ (1 / s))) + 1) false y s hyy hs1 hsξ
       have hA := siftedCount_le_fail (k := k) hy0 hM
         (Nat.lt_succ_self (#(primesLT (y ^ (1 / s)))))
       have hc := hcard k false y s hy hs1 hsξ hz
-      have hδB : 0 ≤ delta s y * bigM s / log y :=
-        div_nonneg (mul_nonneg (TheoremFour.one_le_delta hs1 y |>.trans' zero_le_one)
-          (bigM_pos s).le) hL.le
+      simp only [hCE] at hf hc
+      -- Add the failure and counting errors, then enlarge the constant.
       calc (siftedCount k M (y ^ (1 / s)) : ℝ)
-          ≤ y * Rk k (y ^ (1 / s)) * (1 + mainMaj false s / s + C₁ * delta s y * bigM s / log y)
-            + y * Rk k (y ^ (1 / s)) * (C₂ * delta s y * bigM s / log y) := by
+          ≤ y * Rk k (y ^ (1 / s)) * (1 + mainMaj false s / s + C₁ * E)
+            + y * Rk k (y ^ (1 / s)) * (C₂ * E) := by
             refine hA.trans (add_le_add (mul_le_mul_of_nonneg_left ?_ hyRk.le) hc)
             simp only [Nat.succ_eq_add_one] at hf ⊢
-            linarith
-        _ = y * Rk k (y ^ (1 / s)) * (1 + mainMaj false s / s +
-              (C₁ + C₂) * (delta s y * bigM s / log y)) := by ring
-        _ ≤ y * Rk k (y ^ (1 / s)) * (1 + mainMaj false s / s +
-              (C₁ + C₂ + C₀) * (delta s y * bigM s / log y)) := by
-            exact mul_le_mul_of_nonneg_left (by linarith [mul_nonneg hC₀ hδB]) hyRk.le
-        _ = y * Rk k (y ^ (1 / s)) * (1 + mainMaj false s / s +
-              (C₁ + C₂ + C₀) * delta s y * bigM s / log y) := by ring
+            linarith only [hf]
+        _ = y * Rk k (y ^ (1 / s)) * (1 + mainMaj false s / s + (C₁ + C₂) * E) := by ring
+        _ ≤ y * Rk k (y ^ (1 / s)) * (1 + mainMaj false s / s + (C₁ + C₂ + C₀) * E) :=
+            mul_le_mul_of_nonneg_left (add_le_add le_rfl (herror_mono hs1)) hyRk.le
   · intro hs2
-    have hs1 : (1 : ℝ) ≤ s := by linarith
-    have hs0 : 0 < s := by linarith
+    have hs1 : (1 : ℝ) ≤ s := by linarith only [hs2]
+    have hs0 : 0 < s := by linarith only [hs2]
     have hf0 : 0 ≤ fSieve s / s := div_nonneg (fSieve_nonneg s) hs0.le
     rcases lt_or_ge y y₀ with hyy | hyy
-    · -- trivial: the bracket is negative
-      have h := (small hyy hs1).2
-      have : y * Rk k (y ^ (1 / s)) *
-          (1 - fSieve s / s - (C₁ + C₂ + C₀) * delta s y * bigM s / log y) ≤ 0 :=
-        mul_nonpos_of_nonneg_of_nonpos hyRk.le (by linarith)
-      exact this.trans (Nat.cast_nonneg _)
+    · -- The extra constant makes the lower bound nonpositive.
+      have hsmall := (small hyy hs1).2
+      calc y * Rk k (y ^ (1 / s)) * (1 - fSieve s / s - (C₁ + C₂ + C₀) * E) ≤ 0 :=
+            mul_nonpos_of_nonneg_of_nonpos hyRk.le (by linarith only [hsmall, hf0])
+        _ ≤ siftedCount k M (y ^ (1 / s)) := Nat.cast_nonneg _
     · obtain ⟨hz, hf⟩ := hfail (#(primesLT (y ^ (1 / s))) + 1) true y s hyy hs2 hsξ
       have hA := fail_le_siftedCount (k := k) hy0 hM
         (Nat.lt_succ_self (#(primesLT (y ^ (1 / s)))))
       have hc := hcard k true y s hy hs2 hsξ hz
-      have hδB : 0 ≤ delta s y * bigM s / log y :=
-        div_nonneg (mul_nonneg (TheoremFour.one_le_delta hs1 y |>.trans' zero_le_one)
-          (bigM_pos s).le) hL.le
+      simp only [hCE, mainMaj_true] at hf hc
+      -- Subtract the same two errors, with the same enlarged constant.
       refine le_trans ?_ hA
-      calc y * Rk k (y ^ (1 / s)) *
-            (1 - fSieve s / s - (C₁ + C₂ + C₀) * delta s y * bigM s / log y)
-          = y * Rk k (y ^ (1 / s)) * (1 - fSieve s / s -
-              (C₁ + C₂ + C₀) * (delta s y * bigM s / log y)) := by ring
-        _ ≤ y * Rk k (y ^ (1 / s)) * (1 - fSieve s / s -
-              (C₁ + C₂) * (delta s y * bigM s / log y)) := by
-            exact mul_le_mul_of_nonneg_left (by linarith [mul_nonneg hC₀ hδB]) hyRk.le
-        _ = y * Rk k (y ^ (1 / s)) * (1 - (fSieve s / s + C₁ * delta s y * bigM s / log y))
-            - y * Rk k (y ^ (1 / s)) * (C₂ * delta s y * bigM s / log y) := by ring
+      calc y * Rk k (y ^ (1 / s)) * (1 - fSieve s / s - (C₁ + C₂ + C₀) * E)
+          ≤ y * Rk k (y ^ (1 / s)) * (1 - fSieve s / s - (C₁ + C₂) * E) :=
+            mul_le_mul_of_nonneg_left (sub_le_sub le_rfl (herror_mono hs1)) hyRk.le
+        _ = y * Rk k (y ^ (1 / s)) * (1 - (fSieve s / s + C₁ * E))
+            - y * Rk k (y ^ (1 / s)) * (C₂ * E) := by ring
         _ ≤ y * Rk k (y ^ (1 / s)) * (1 - fail true (#(primesLT (y ^ (1 / s))) + 1) y
               (y ^ (1 / s)) / R (y ^ (1 / s))) - #(rosserSet true y (y ^ (1 / s))) := by
             refine sub_le_sub (mul_le_mul_of_nonneg_left ?_ hyRk.le) hc
-            rw [mainMaj_true] at hf
-            linarith
+            linarith only [hf]
 
 /-- `C δ 𝔐 / L < c₀ δ 𝔐 log log 3k / L` for `c₀ = (C + 1) / log log 3`. -/
 theorem lt_loglog_err {C y s : ℝ} (hC : 0 ≤ C) (hy : 1 < y) (hs : 1 ≤ s) {k : ℕ} (hk : 1 ≤ k) :
