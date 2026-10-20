@@ -184,6 +184,42 @@ theorem mul_log_sub_le {ξ : ℝ} (hξ : 2 < ξ) :
   have e : (ξ - 2) * (ξ / (ξ - 2) - 1) = 2 := by field_simp; ring
   nlinarith
 
+/-- The exponent comparison for [I71, (4.4), (4.9)], after bounding the logarithms. -/
+theorem crude_half_exponent_le {c ℓ L ξ X : ℝ} (hℓ : 2 ≤ ℓ) (hξ : 8 * ℓ ≤ ξ)
+    (hL : log L ≤ ℓ) (hX0 : 0 ≤ log X) (hX : log X ≤ log ℓ / 4)
+    (hu : log (ξ / 2) ≤ log (ξ - 2)) (hv : ℓ / 2 ≤ log (ξ / 2))
+    (hw : log (log (ξ / 2)) ≤ log ℓ) (hc : 2 + c / 2 + 3 / 4 * log ℓ ≤ ℓ / 8) :
+    log 2 + (-((ξ - 2) * log (ξ - 2)) + (ξ - 2) * log X + (ξ - 2)) + 4 * log L ≤
+      -(ξ / 2 * log (ξ / 2)) - ξ / 2 * log (log (ξ / 2)) - c * (ξ / 2) := by
+  have hξ0 : 0 ≤ ξ := by linarith only [hℓ, hξ]
+  have hu' := mul_le_mul_of_nonneg_left hu (by linarith only [hℓ, hξ] : 0 ≤ ξ - 2)
+  have hX' := mul_le_mul_of_nonneg_left hX hξ0
+  have hv' := mul_le_mul_of_nonneg_left hv (by linarith only [hℓ, hξ] : 0 ≤ ξ / 2 - 2)
+  have hw' := mul_le_mul_of_nonneg_left hw (by linarith only [hξ0] : 0 ≤ ξ / 2)
+  have hc' := mul_le_mul_of_nonneg_left hc hξ0
+  have hgap : ξ / 4 * (ℓ / 2) ≤ (ξ / 2 - 2) * (ℓ / 2) :=
+    mul_le_mul_of_nonneg_right (by linarith only [hℓ, hξ]) (by linarith only [hℓ])
+  linarith only [hu', hX', hv', hw', hc', hgap, hX0, hL, hξ, hℓ, log_two_lt_d9]
+
+/-- The exponent comparison for [I71, (4.5), (4.10)], using the lower bound on `log x`. -/
+theorem crude_full_exponent_le {c ℓ L ξ X x : ℝ} (hℓ : 2 ≤ ℓ) (hξ : 8 * ℓ ≤ ξ)
+    (hL : log L ≤ ℓ) (hX0 : 0 ≤ log X) (hX : log X ≤ log ℓ / 4)
+    (hv : log ξ ≤ ℓ) (hw : log (log ξ) ≤ log ℓ)
+    (hx : 3 / 5 * log ℓ - 7 * log 2 ≤ log x) (hc : 2 + c + 18 * log 2 ≤ log ℓ / 4) :
+    log 2 + (-((ξ - 2) * log (ξ - 2)) + (ξ - 2) * log X + (ξ - 2)) + 4 * log L ≤
+      log x * (5 * (ξ / 2)) + (-(ξ * log ξ) - ξ * log (log ξ) - c * ξ) := by
+  have hξ0 : 0 ≤ ξ := by linarith only [hℓ, hξ]
+  have hX' := mul_le_mul_of_nonneg_left hX hξ0
+  have hw' := mul_le_mul_of_nonneg_left hw hξ0
+  have hx' := mul_le_mul_of_nonneg_right hx (by linarith only [hξ0] : 0 ≤ 5 * (ξ / 2))
+  have hc' := mul_le_mul_of_nonneg_left hc hξ0
+  have hu := mul_log_sub_le (by linarith only [hℓ, hξ] : 2 < ξ)
+  have hlog2 : 0 ≤ (ξ / 2 - 1) * log 2 :=
+    mul_nonneg (by linarith only [hℓ, hξ]) (log_nonneg (by norm_num))
+  linarith only [hX', hw', hx', hc', hu, hlog2, hX0, hL, hv, hξ, hℓ]
+
+-- Preserve the existing `hc` parameter; the explicit bounds involving `c` already suffice.
+set_option linter.unusedVariables false in
 /-- The comparisons [I71, (4.4), (4.5), (4.9), (4.10)] in the variable `ℓ = log log 3y`, with
 `L = e^ℓ - log 3` and `ξ = L / ℓ^{11/5}`, under explicit "ℓ large" hypotheses. -/
 theorem crude_alg {c C' ℓ L ξ : ℝ} (hc : 0 ≤ c) (hC' : 1 ≤ C') (hℓ : 2 ≤ ℓ)
@@ -197,79 +233,67 @@ theorem crude_alg {c C' ℓ L ξ : ℝ} (hc : 0 ≤ c) (hC' : 1 ≤ C') (hℓ : 
       (1 + (ξ / 2) ^ 2 * log (ξ / 2) ^ 5 / L ^ 2) ^ (5 * (ξ / 2)) *
         exp (-(ξ * log ξ) - ξ * log (log ξ) - c * ξ) := by
   set P := ℓ ^ (11 / 5 : ℝ) with hPdef
-  set X := 11 / 5 * log ℓ + C' with hXdef
-  have hℓ0 : 0 < ℓ := by linarith
-  have hlℓ : 0 < log ℓ := log_pos (by linarith)
-  have hPℓ : ℓ ≤ P := self_le_rpow_of_one_le (by linarith) (by norm_num)
-  have hP0 : 0 < P := by linarith
+  set X := 11 / 5 * log ℓ + C'
+  have hℓ0 : 0 < ℓ := by linarith only [hℓ]
+  have hlℓ : 0 < log ℓ := log_pos (by linarith only [hℓ])
+  have hPℓ : ℓ ≤ P := self_le_rpow_of_one_le (by linarith only [hℓ]) (by norm_num)
+  have hP0 : 0 < P := by linarith only [hPℓ, hℓ]
   have hl3 : 0 < log 3 := log_pos (by norm_num)
-  have hl2 : log 2 < 1 := by have := log_two_lt_d9; linarith
-  have hl20 : 0 < log 2 := log_pos (by norm_num)
-  have hL0 : 0 < L := by linarith
-  have hLe : L ≤ exp ℓ := by linarith
+  have hL0 : 0 < L := by linarith only [hL, h2, hl3]
+  have hLe : L ≤ exp ℓ := by linarith only [hL, hl3]
   have hlogL : log L ≤ ℓ := by
     calc log L ≤ log (exp ℓ) := log_le_log hL0 hLe
       _ = ℓ := log_exp ℓ
   have hξdef : ξ = L / P := by rw [← hξ]; field_simp
-  have hξ0 : 0 < ξ := by rw [hξdef]; positivity
-  have hξL : ξ ≤ L := by rw [hξdef]; exact div_le_self hL0.le (by linarith)
+  have hξ0 : 0 < ξ := by rw [hξdef]; exact div_pos hL0 hP0
+  have hξL : ξ ≤ L := by rw [hξdef]; exact div_le_self hL0.le (by linarith only [hPℓ, hℓ])
   have hlogξ : log ξ ≤ ℓ := (log_le_log hξ0 hξL).trans hlogL
   -- `ξ ≥ 2 e^{ℓ/2}`
   have hE0 := exp_pos (ℓ / 2)
   have he2 : exp ℓ = exp (ℓ / 2) * exp (ℓ / 2) := by rw [← exp_add]; ring_nf
   have hξbig : 2 * exp (ℓ / 2) ≤ ξ := by
     rw [hξdef, le_div_iff₀ hP0]
-    nlinarith [mul_le_mul_of_nonneg_left h3 hE0.le]
+    nlinarith only [hL, h2, he2, mul_le_mul_of_nonneg_left h3 hE0.le]
+  have hξlarge : 8 * ℓ ≤ ξ := by linarith only [hξbig, h3, hPℓ]
   have hlogξ2 : ℓ / 2 ≤ log (ξ / 2) := by
     calc ℓ / 2 = log (exp (ℓ / 2)) := (log_exp _).symm
-      _ ≤ log (ξ / 2) := log_le_log hE0 (by linarith)
+      _ ≤ log (ξ / 2) := log_le_log hE0 (by linarith only [hξbig])
   -- `X`
   have hX1 : 1 ≤ X := by
-    have := mul_nonneg (by norm_num : (0 : ℝ) ≤ 11 / 5) hlℓ.le; linarith
-  have hX0 : 0 < X := by linarith
-  have hq : ℓ ^ (1 / 4 : ℝ) ≤ ℓ := rpow_le_self_of_one_le (by linarith) (by norm_num)
+    dsimp [X]; linarith only [hlℓ, hC']
+  have hX0 : 0 < X := by linarith only [hX1]
+  have hq : ℓ ^ (1 / 4 : ℝ) ≤ ℓ := rpow_le_self_of_one_le (by linarith only [hℓ]) (by norm_num)
   have hXℓ : X ≤ ℓ := h4.trans hq
   have hlogX0 : 0 ≤ log X := log_nonneg hX1
   have hlogX : log X ≤ log ℓ / 4 := by
     have := log_le_log hX0 h4
-    rw [log_rpow hℓ0] at this; linarith
-  have he : exp 1 < 2.72 := by have := exp_one_lt_d9; norm_num at this ⊢; linarith
+    rw [log_rpow hℓ0] at this; linarith only [this]
+  have he : exp 1 < 2.72 := by have := exp_one_lt_d9; norm_num at this ⊢; linarith only [this]
   have h2e : 2 * exp 1 * X ≤ ξ - 2 := by
     have : exp 1 * X ≤ 2.72 * ℓ := mul_le_mul he.le hXℓ hX0.le (by norm_num)
-    linarith
-  have hu0 : 0 < ξ - 2 := by linarith
+    linarith only [this, hξlarge, hℓ]
+  have hu0 : 0 < ξ - 2 := by linarith only [hξlarge, hℓ]
   have hL4 : L ^ 4 = exp (4 * log L) := by
     rw [show (4 : ℝ) * log L = log (L ^ 4) by rw [log_pow]; norm_num, exp_log (by positivity)]
   have hcr : 2 * (exp 1 * X / (ξ - 2)) ^ (ξ - 2) * L ^ 4 =
       exp (log 2 + (-((ξ - 2) * log (ξ - 2)) + (ξ - 2) * log X + (ξ - 2)) + 4 * log L) := by
     rw [exp_add, exp_add, exp_log two_pos, ← hL4, ← exp_one_mul_div_rpow hX0 hu0]
   -- common bounds
-  have hlam0 : 0 < log (ξ / 2) := by linarith
-  have hlogu : log (ξ / 2) ≤ log (ξ - 2) := log_le_log (by linarith) (by linarith)
-  have hulogu : (ξ - 2) * log (ξ / 2) ≤ (ξ - 2) * log (ξ - 2) :=
-    mul_le_mul_of_nonneg_left hlogu hu0.le
-  have huX : (ξ - 2) * log X ≤ ξ * log X := mul_le_mul_of_nonneg_right (by linarith) hlogX0
-  have hξX : ξ * log X ≤ ξ * (log ℓ / 4) := mul_le_mul_of_nonneg_left hlogX hξ0.le
-  have hlamξ : log (ξ / 2) ≤ log ξ := log_le_log (by positivity) (by linarith)
+  have hlam0 : 0 < log (ξ / 2) := by linarith only [hlogξ2, hℓ]
+  have hlogu : log (ξ / 2) ≤ log (ξ - 2) :=
+    log_le_log (by positivity) (by linarith only [hξlarge, hℓ])
+  have hlamξ : log (ξ / 2) ≤ log ξ := log_le_log (by positivity) (by linarith only [hξ0])
   have hlllam : log (log (ξ / 2)) ≤ log ℓ := log_le_log hlam0 (hlamξ.trans hlogξ)
   refine ⟨hX0, h2e, ?_, ?_⟩ <;> rw [hcr]
   · -- `s ≤ ξ/2`: (4.4), (4.9)
     apply exp_le_exp.2
-    have hA1 : (ξ / 2 - 2) * (ℓ / 2) ≤ (ξ / 2 - 2) * log (ξ / 2) :=
-      mul_le_mul_of_nonneg_left hlogξ2 (by linarith)
-    have hA2 : ξ / 2 * log (log (ξ / 2)) ≤ ξ / 2 * log ℓ :=
-      mul_le_mul_of_nonneg_left hlllam (by linarith)
-    have hA3 : ξ * (2 + c / 2 + 3 / 4 * log ℓ) ≤ ξ * (ℓ / 8) :=
-      mul_le_mul_of_nonneg_left h6 hξ0.le
-    have hA4 : ξ / 4 * (ℓ / 2) ≤ (ξ / 2 - 2) * (ℓ / 2) :=
-      mul_le_mul_of_nonneg_right (by linarith) (by linarith)
-    linarith
+    exact crude_half_exponent_le hℓ hξlarge hlogL hlogX0 hlogX hlogu hlogξ2 hlllam h6
   · -- `s ≥ ξ/2`: (4.5), (4.10)
     set x := (ξ / 2) ^ 2 * log (ξ / 2) ^ 5 / L ^ 2 with hx
     have hx0 : 0 < x := by positivity
     have h1 : exp (log x * (5 * (ξ / 2))) ≤ (1 + x) ^ (5 * (ξ / 2)) := by
       rw [← rpow_def_of_pos hx0]
-      exact rpow_le_rpow hx0.le (by linarith) (by positivity)
+      exact rpow_le_rpow hx0.le (by linarith only) (by positivity)
     refine le_trans ?_ (mul_le_mul_of_nonneg_right h1 (exp_pos _).le)
     rw [← exp_add]
     apply exp_le_exp.2
@@ -284,17 +308,11 @@ theorem crude_alg {c C' ℓ L ξ : ℝ} (hc : 0 ≤ c) (hC' : 1 ≤ C') (hℓ : 
     have hlllam' : log ℓ - log 2 ≤ log (log (ξ / 2)) := by
       rw [← log_div hℓ0.ne' (by norm_num)]
       exact log_le_log (by positivity) hlogξ2
-    have hlx : 3 / 5 * log ℓ - 7 * log 2 ≤ log x := by rw [hlogx]; linarith
-    have hB1 : (3 / 5 * log ℓ - 7 * log 2) * (5 * (ξ / 2)) ≤ log x * (5 * (ξ / 2)) :=
-      mul_le_mul_of_nonneg_right hlx (by positivity)
-    have hlξ0 : 0 < log ξ := log_pos (by linarith)
-    have hB2 : ξ * log (log ξ) ≤ ξ * log ℓ :=
-      mul_le_mul_of_nonneg_left (log_le_log hlξ0 hlogξ) hξ0.le
-    have hB3 : ξ * (2 + c + 18 * log 2) ≤ ξ * (log ℓ / 4) :=
-      mul_le_mul_of_nonneg_left h5 hξ0.le
-    have hB4 := mul_log_sub_le (by linarith : 2 < ξ)
-    have hB5 : 0 ≤ ξ * log 2 := by positivity
-    linarith
+    have hlx : 3 / 5 * log ℓ - 7 * log 2 ≤ log x := by
+      rw [hlogx]; linarith only [hlam, hlllam']
+    have hlξ0 : 0 < log ξ := log_pos (by linarith only [hℓ, hξlarge])
+    exact crude_full_exponent_le hℓ hξlarge hlogL hlogX0 hlogX hlogξ
+      (log_le_log hlξ0 hlogξ) hlx h5
 
 /-- The "ℓ large" hypotheses of `crude_alg` hold eventually. -/
 theorem eventually_crude_hyp (c C' : ℝ) : ∀ᶠ ℓ : ℝ in atTop,
