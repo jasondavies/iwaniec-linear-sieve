@@ -184,6 +184,23 @@ theorem one_le_loglog_of_le {y : ℝ} (hy : exp (exp 1) ≤ y) : 1 ≤ log (log 
   rw [le_log_iff_exp_le (by linarith [exp_pos 1])]
   linarith
 
+/-- The common error constant for (1.3) and (1.4), with
+`e₁ = (C B + CF + 2 log Y / R(Y) + 1) / log log 3`. -/
+theorem exists_corollary_error_constant {C B CF Y : ℝ}
+    (hC : 0 ≤ C) (hB : 0 ≤ B) (hCF : 0 ≤ CF) (hY : 1 < Y) :
+    ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k →
+      C * B + CF + 2 * log Y / R Y + 1 ≤ e₁ * log (log (3 * k)) := by
+  have hLY := log_pos hY
+  have hRY := R_pos Y
+  have ha := loglog_three_pos
+  set e₁ := (C * B + CF + 2 * log Y / R Y + 1) / log (log 3)
+  have he₁ : 0 ≤ e₁ := by positivity
+  refine ⟨e₁, he₁, fun k hk => ?_⟩
+  calc C * B + CF + 2 * log Y / R Y + 1 = e₁ * log (log 3) := by
+        simp only [e₁]; field_simp
+    _ ≤ e₁ * log (log (3 * k)) :=
+      mul_le_mul_of_nonneg_left (loglog_three_le hk) he₁
+
 end Main
 
 open Main
@@ -204,9 +221,8 @@ theorem corollary_upper : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k �
   have hY1 : 1 < Y := lt_of_lt_of_le hYF (le_max_left _ _)
   have hLY : 0 < log Y := log_pos hY1
   have hRY := R_pos Y
-  have ha := loglog_three_pos
-  set e₁ := (C * B + CF + 2 * log Y / R Y + 1) / log (log 3)
-  refine ⟨e₁, by positivity, fun k hk M y z hM hz hzy => ?_⟩
+  obtain ⟨e₁, he₁, herror⟩ := exists_corollary_error_constant hC hB hCF hY1
+  refine ⟨e₁, he₁, fun k hk M y z hM hz hzy => ?_⟩
   have hy1 : 1 < y := by linarith
   have hL : 0 < log y := log_pos hy1
   have hz1 : 1 < z := by linarith
@@ -219,12 +235,8 @@ theorem corollary_upper : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k �
   have hls : log y / s = log z := by rw [hs]; field_simp
   rw [show FSieve s + max (3 - s) 0 = mainMaj false s from rfl]
   have hm : 0 ≤ mainMaj false s / s := div_nonneg (mainMaj_nonneg false s) hs0.le
-  have hk3 := loglog_three_le hk
   have hT : 0 < y * Rk k z := mul_pos (by linarith) (Rk_pos k z)
-  have he : C * B + CF + 2 * log Y / R Y + 1 ≤ e₁ * log (log (3 * k)) := by
-    calc C * B + CF + 2 * log Y / R Y + 1 = e₁ * log (log 3) := by
-          simp only [e₁]; field_simp
-      _ ≤ e₁ * log (log (3 * k)) := by gcongr
+  have he := herror k hk
   have hCB := mul_nonneg hC hB
   have hlYR : 0 ≤ 2 * log Y / R Y := by positivity
   set E := e₁ * log (log (3 * k)) with hE
@@ -244,7 +256,6 @@ theorem corollary_upper : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k �
     have : 0 ≤ y * Rk k z * (1 + mainMaj false s / s) := by positivity
     rw [e]; linarith
   have hlam := one_le_loglog_of_le (le_trans (le_max_right _ _) hyY)
-  have hCE : C * B < E := by linarith
   have hCFE : CF < E := by linarith
   rcases le_or_gt s (xi y) with hsξ | hsξ
   · have hA := (h1 k M y s hy1 hM hsξ).1 hs1
@@ -280,9 +291,8 @@ theorem corollary_lower : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k �
   have hLY : 0 < log Y := log_pos hY1
   have hRY := R_pos Y
   have hRY1 := R_le_one Y
-  have ha := loglog_three_pos
-  set e₁ := (C * B + CF + 2 * log Y / R Y + 1) / log (log 3)
-  refine ⟨e₁, by positivity, fun k hk M y z hy1 hM hz => ?_⟩
+  obtain ⟨e₁, he₁, herror⟩ := exists_corollary_error_constant hC hB hCF hY1
+  refine ⟨e₁, he₁, fun k hk M y z hy1 hM hz => ?_⟩
   have hL : 0 < log y := log_pos hy1
   have hz1 : 1 < z := by linarith
   have hlz : 0 < log z := log_pos hz1
@@ -290,12 +300,8 @@ theorem corollary_lower : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k �
   have hs0 : 0 < s := by positivity
   have hzs : y ^ (1 / s) = z := rpow_one_div_log_div (by linarith) hz1 hL.ne'
   have hls : log y / s = log z := by rw [hs]; field_simp
-  have hk3 := loglog_three_le hk
   have hT : 0 < y * Rk k z := mul_pos (by linarith) (Rk_pos k z)
-  have he : C * B + CF + 2 * log Y / R Y + 1 ≤ e₁ * log (log (3 * k)) := by
-    calc C * B + CF + 2 * log Y / R Y + 1 = e₁ * log (log 3) := by
-          simp only [e₁]; field_simp
-      _ ≤ e₁ * log (log (3 * k)) := by gcongr
+  have he := herror k hk
   have hCB := mul_nonneg hC hB
   have hlYR : log Y ≤ 2 * log Y / R Y := by
     rw [le_div_iff₀ hRY]; nlinarith
@@ -318,7 +324,6 @@ theorem corollary_lower : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k �
     have : 1 < E / log y := by rw [lt_div_iff₀ hL]; linarith
     linarith
   have hlam := one_le_loglog_of_le (le_trans (le_max_right _ _) hyY)
-  have hCE : C * B < E := by linarith
   have hCFE : CF < E := by linarith
   rcases le_or_gt s (xi y) with hsξ | hsξ
   · have hA := (h1 k M y s hy1 hM hsξ).2 hs2

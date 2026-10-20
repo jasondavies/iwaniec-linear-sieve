@@ -181,9 +181,6 @@ theorem theorem3_fst : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Multiset ℤ)
   have hT : 0 < y * Rk k z := mul_pos (by linarith) (Rk_pos k z)
   have hE0 : 0 < (exp 1 / (s * log s)) ^ s := by
     have := log_pos (by linarith : (1 : ℝ) < s); positivity
-  have hmain : (2 + C₀) * B * (y * Rk k z * (exp 1 / (s * log s)) ^ s) +
-      2 / (R Y₁ * e) * (y * Rk k z * (exp 1 / (s * log s)) ^ s) =
-      ((2 + C₀) * B + 2 / (R Y₁ * e)) * y * Rk k z * (exp 1 / (s * log s)) ^ s := by ring
   have hp1 : 0 ≤ (2 + C₀) * B * (y * Rk k z * (exp 1 / (s * log s)) ^ s) := by positivity
   rcases lt_or_ge y Y₁ with hyY | hyY
   · -- bounded `y`: `s` is bounded and the claim is trivial
@@ -248,18 +245,9 @@ theorem theorem3_fst : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Multiset ℤ)
   have hl2 := mul_le_mul_of_nonneg_left hl' hT.le
   rw [abs_le]
   constructor
-  · have q1 : y * Rk k z * (1 - fSieve s / s - C₀ * delta s y * bigM s / log y) =
-        y * Rk k z - y * Rk k z * (fSieve s / s + C₀ * delta s y * bigM s / log y) := by ring
-    have q2 : y * Rk k z * ((2 + C₀) * B * (exp 1 / (s * log s)) ^ s) =
-        (2 + C₀) * B * (y * Rk k z * (exp 1 / (s * log s)) ^ s) := by ring
-    have h0 : 0 ≤ 2 / (R Y₁ * e) * (y * Rk k z * (exp 1 / (s * log s)) ^ s) := by positivity
+  · have h0 : 0 ≤ 2 / (R Y₁ * e) * (y * Rk k z * (exp 1 / (s * log s)) ^ s) := by positivity
     linarith
-  · have q1 : y * Rk k z * (1 + mainMaj false s / s + C₀ * delta s y * bigM s / log y) =
-        y * Rk k z + y * Rk k z * (mainMaj false s / s + C₀ * delta s y * bigM s / log y) := by
-      ring
-    have q2 : y * Rk k z * ((2 + C₀) * B * (exp 1 / (s * log s)) ^ s) =
-        (2 + C₀) * B * (y * Rk k z * (exp 1 / (s * log s)) ^ s) := by ring
-    have h0 : 0 ≤ 2 / (R Y₁ * e) * (y * Rk k z * (exp 1 / (s * log s)) ^ s) := by positivity
+  · have h0 : 0 ≤ 2 / (R Y₁ * e) * (y * Rk k z * (exp 1 / (s * log s)) ^ s) := by positivity
     linarith
 
 namespace Main
