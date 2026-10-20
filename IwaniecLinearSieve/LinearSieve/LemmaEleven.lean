@@ -58,6 +58,22 @@ theorem hasDerivAt_growth (L a : ℝ) {t : ℝ} (ht : 1 ≤ t) :
   field_simp
   ring
 
+/-- The scalar consequences of `4E ≤ W(60u + 100)` when `u ≥ 32` and `0 ≤ W ≤ 1/160`. -/
+theorem rate_bound_of_small_weight {u W E : ℝ} (hu : 32 ≤ u) (hW0 : 0 ≤ W)
+    (hW : W ≤ 1 / 160) (hE : 4 * E ≤ W * (60 * u + 100)) :
+    4 * E ≤ u - 1 ∧ 4 * E * (1 + 5 * (W * u)) ≤ 5 * (W * u) * u := by
+  have hu0 : 0 ≤ u := by linarith only [hu]
+  have hWu : 0 ≤ W * u := mul_nonneg hW0 hu0
+  constructor
+  · have h := mul_le_mul_of_nonneg_right hW (by linarith only [hu] : 0 ≤ 60 * u + 100)
+    linarith only [hE, h, hu]
+  · calc 4 * E * (1 + 5 * (W * u)) ≤ W * (60 * u + 100) * (1 + 5 * (W * u)) :=
+          mul_le_mul_of_nonneg_right hE (by linarith only [hWu])
+      _ ≤ 5 * (W * u) * u := by
+          have h := mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_right hW hu0) hW0
+          nlinarith only [h, hWu, hu, hW0]
+
 /-- The logarithmic derivative of `(1 + x)^{5(t-a)}` is at most `w (15 log t + 25)`; the
 consequences used below. -/
 theorem rate_bound {L a t : ℝ} (ha : 0 ≤ a) (ha1 : a ≤ 1) (ht1 : 1 ≤ t) (ht : 32 ≤ log t)
@@ -70,40 +86,36 @@ theorem rate_bound {L a t : ℝ} (ha : 0 ≤ a) (ha1 : a ≤ 1) (ht1 : 1 ≤ t) 
     4 * (5 * log (1 + t ^ 2 * log t ^ 5 / L ^ 2) + 5 * (t - a) *
         ((2 * t * log t ^ 5 + 5 * t * log t ^ 4) / L ^ 2) / (1 + t ^ 2 * log t ^ 5 / L ^ 2)) *
         (1 + 5 * (t ^ 2 * log t ^ 5 / L ^ 2)) ≤ 5 * (t ^ 2 * log t ^ 5 / L ^ 2) * log t := by
-  set u := log t with hu
+  set u := log t
   set W := t ^ 2 * u ^ 4 / L ^ 2 with hW
   have hW0 : 0 ≤ W := by positivity
   have hx : t ^ 2 * u ^ 5 / L ^ 2 = W * u := by rw [hW]; ring
   have hx' : t * ((2 * t * u ^ 5 + 5 * t * u ^ 4) / L ^ 2) = W * (2 * u + 5) := by rw [hW]; ring
-  have hd0 : 0 ≤ (2 * t * u ^ 5 + 5 * t * u ^ 4) / L ^ 2 := by
-    have : 0 ≤ u := by linarith
-    positivity
+  have hd0 : 0 ≤ (2 * t * u ^ 5 + 5 * t * u ^ 4) / L ^ 2 := by positivity
   rw [hx]
   set E := 5 * log (1 + W * u) + 5 * (t - a) * ((2 * t * u ^ 5 + 5 * t * u ^ 4) / L ^ 2) /
     (1 + W * u) with hE
-  have hWu : 0 ≤ W * u := mul_nonneg hW0 (by linarith)
-  have h1 : 0 ≤ log (1 + W * u) := log_nonneg (by linarith)
+  have hWu : 0 ≤ W * u := mul_nonneg hW0 (by linarith only [ht])
+  have h1 : 0 ≤ log (1 + W * u) := log_nonneg (by linarith only [hWu])
   have h2 : log (1 + W * u) ≤ W * u := by
-    have := log_le_sub_one_of_pos (by linarith : 0 < 1 + W * u); linarith
+    have := log_le_sub_one_of_pos (by linarith only [hWu] : 0 < 1 + W * u)
+    linarith only [this]
   have h3 : 0 ≤ (t - a) * ((2 * t * u ^ 5 + 5 * t * u ^ 4) / L ^ 2) / (1 + W * u) :=
-    div_nonneg (mul_nonneg (by linarith) hd0) (by linarith)
+    div_nonneg (mul_nonneg (by linarith only [ht1, ha1]) hd0) (by linarith only [hWu])
   have h4 : (t - a) * ((2 * t * u ^ 5 + 5 * t * u ^ 4) / L ^ 2) / (1 + W * u) ≤
       W * (2 * u + 5) := by
-    rw [div_le_iff₀ (by linarith), ← hx']
-    have : (t - a) * ((2 * t * u ^ 5 + 5 * t * u ^ 4) / L ^ 2) ≤
-        t * ((2 * t * u ^ 5 + 5 * t * u ^ 4) / L ^ 2) :=
-      mul_le_mul_of_nonneg_right (by linarith) hd0
-    nlinarith [mul_nonneg hWu (mul_nonneg (by linarith : (0 : ℝ) ≤ t) hd0)]
+    calc (t - a) * ((2 * t * u ^ 5 + 5 * t * u ^ 4) / L ^ 2) / (1 + W * u)
+        ≤ (t - a) * ((2 * t * u ^ 5 + 5 * t * u ^ 4) / L ^ 2) :=
+          div_le_self (mul_nonneg (by linarith only [ht1, ha1]) hd0)
+            (by linarith only [hWu])
+      _ ≤ t * ((2 * t * u ^ 5 + 5 * t * u ^ 4) / L ^ 2) :=
+          mul_le_mul_of_nonneg_right (by linarith only [ha]) hd0
+      _ = W * (2 * u + 5) := hx'
   have hE0 : 0 ≤ E := by rw [hE, mul_assoc 5, mul_div_assoc]; positivity
   have hE1 : 4 * E ≤ W * (60 * u + 100) := by
-    rw [hE, mul_assoc 5 (t - a), mul_div_assoc]; nlinarith
-  refine ⟨hE0, by nlinarith, ?_⟩
-  have hu0 : 0 < u := by linarith
-  calc 4 * E * (1 + 5 * (W * u)) ≤ W * (60 * u + 100) * (1 + 5 * (W * u)) := by
-        gcongr
-    _ ≤ 5 * (W * u) * u := by
-        have : W * (W * u) ≤ W * (u / 160) := mul_le_mul_of_nonneg_left (by nlinarith) hW0
-        nlinarith [mul_nonneg hW0 hu0.le]
+    rw [hE, mul_assoc 5 (t - a), mul_div_assoc]
+    linarith only [h2, h4]
+  exact ⟨hE0, rate_bound_of_small_weight ht hW0 hw hE1⟩
 
 /-! ### The Corollary to Lemma 10 in the form used here -/
 
