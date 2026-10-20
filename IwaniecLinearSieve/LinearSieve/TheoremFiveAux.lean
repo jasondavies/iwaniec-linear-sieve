@@ -1,6 +1,6 @@
 module
 
-public import IwaniecLinearSieve.LinearSieve.Corollaries
+public import IwaniecLinearSieve.LinearSieve.TheoremFourAsymp
 
 @[expose] public section
 
@@ -15,7 +15,7 @@ collects the "for `y ≥ y₀`" facts used in the proof of Theorem 5:
 * `crude_exponent_le`: the comparison of the crude count of `rosserSet lower y y^{1/(ξ-1)}` with
   `y exp(-ξ log ξ + (3/2) ξ log λ) / (8 L⁴)` ([I71, p. 27]);
 * `exists_slack`: the losses `δ(e^{32}, y) (1 + C ξ² pntE(y^{1/ξ})) - 1` of Corollary 3 are at
-  most `(log log y)² / (8 L²)`.
+  most `(log log y)² / (8 L²)`, reusing `TheoremFour.eventually_delta_mul_le`.
 -/
 
 open Real Filter Topology
@@ -170,86 +170,10 @@ theorem one_add_rpow_le_exp {x p : ℝ} (hx : 0 ≤ x) (hp : 0 ≤ p) : (1 + x) 
 theorem exists_slack (C : ℝ) (hC : 0 ≤ C) : ∃ y₀ : ℝ, ∀ y ≥ y₀,
     delta (exp 32) y * (1 + C * xi y ^ 2 * pntE (y ^ (1 / xi y))) - 1 ≤
       log (log y) ^ 2 / (8 * log y ^ 2) ∧ 1 ≤ log (log y) := by
-  set K : ℝ := 5 * exp 32 * (exp 32 ^ 2 * 32 ^ 5) with hK
-  have hK0 : 0 ≤ K := by positivity
-  obtain ⟨y₀, hy₀⟩ := eventually_atTop.1
-    (eventually_scalar (max 100 (max (16 * (K + 1) + 2) (max C (25 / pntκ ^ 2)))) le_sup_left)
-  refine ⟨y₀, fun y hy => ?_⟩
-  obtain ⟨hy3, -, h3, h1, hℓ1, hℓ2, h24, -, -, -, hlogξ⟩ := hy₀ y hy
-  have hy1 : 1 < y := by linarith
-  set L := log y with hLdef
-  set ℓ := log L with hℓdef
-  have hL0 : 0 < L := log_pos hy1
-  have hm0 := lam_pos hy1
-  have hξ0 := xi_pos hy1
-  have hM1 := le_max_right 100 (max (16 * (K + 1) + 2) (max C (25 / pntκ ^ 2)))
-  have hM2 := le_max_left (16 * (K + 1) + 2) (max C (25 / pntκ ^ 2))
-  have hM3 := le_max_left C (25 / pntκ ^ 2)
-  have hM4 := le_max_right C (25 / pntκ ^ 2)
-  have hM5 := le_max_right (16 * (K + 1) + 2) (max C (25 / pntκ ^ 2))
-  -- `ℓ` is large and `ℓ ≤ L`
-  have hℓ1' : 1 ≤ ℓ := by linarith
-  have hℓL : ℓ ≤ L := by linarith [log_le_sub_one_of_pos hL0]
-  have hℓsq : 16 * (K + 1) ≤ ℓ ^ 2 := by nlinarith
-  have hLsq : K + 1 ≤ L ^ 2 := by nlinarith
-  refine ⟨?_, hℓ1'⟩
-  -- the error term `E ≤ 1/L²`
-  set E := C * xi y ^ 2 * pntE (y ^ (1 / xi y)) with hE
-  have hE0 : 0 ≤ E := by have := pntE_pos (y ^ (1 / xi y)); positivity
-  have hξL : xi y ≤ L := by
-    rw [xi_eq_lam]; exact div_le_self hL0.le (one_le_rpow (by linarith) (by norm_num))
-  have hlogy : log (y ^ (1 / xi y)) = (lam y) ^ (11 / 5 : ℝ) := by
-    rw [log_rpow (by linarith), xi_eq_lam, ← hLdef]
-    field_simp
-  have hsplit : (lam y) ^ (11 / 5 : ℝ) = (lam y) ^ 2 * (lam y) ^ (1 / 5 : ℝ) := by
-    rw [← rpow_natCast, ← rpow_add hm0]; norm_num
-  have hsqrt : 5 * (lam y) / pntκ ≤ √(log (y ^ (1 / xi y))) := by
-    have hκ := pntκ_pos
-    rw [hlogy, le_sqrt (by positivity) (by positivity), hsplit, div_pow, mul_pow]
-    have h25 : 25 / pntκ ^ 2 ≤ (lam y) ^ (1 / 5 : ℝ) := by linarith
-    rw [div_le_iff₀ (by positivity)]
-    have : 25 ≤ (lam y) ^ (1 / 5 : ℝ) * pntκ ^ 2 := by rwa [div_le_iff₀ (by positivity)] at h25
-    nlinarith [sq_nonneg (lam y)]
-  have hpE : pntE (y ^ (1 / xi y)) ≤ exp (-(5 * (lam y))) := by
-    rw [pntE, exp_le_exp]
-    have hκ := pntκ_pos
-    have := mul_le_mul_of_nonneg_left hsqrt hκ.le
-    rw [mul_div_cancel₀ _ hκ.ne'] at this
-    linarith
-  have hLexp : L ≤ exp (lam y) := by
-    calc L = exp ℓ := (exp_log hL0).symm
-      _ ≤ exp (lam y) := exp_le_exp.2 hℓ1
-  have hEL : E * L ^ 2 ≤ 1 := by
-    have hCe : C ≤ exp (lam y) := by linarith [add_one_le_exp (lam y)]
-    calc E * L ^ 2 ≤ C * L ^ 2 * exp (-(5 * (lam y))) * L ^ 2 := by
-          rw [hE]; gcongr; exact pntE_nonneg _
-      _ = C * exp (-(5 * (lam y))) * L ^ 4 := by ring
-      _ ≤ exp (lam y) * exp (-(5 * (lam y))) * exp (lam y) ^ 4 := by gcongr
-      _ = 1 := by
-          rw [← exp_nat_mul, ← exp_add, ← exp_add]
-          convert exp_zero using 2
-          push_cast; ring
-  have hE1 : E ≤ 1 / L ^ 2 := by rw [le_div_iff₀ (by positivity)]; exact hEL
-  -- `δ(s₀, y) ≤ e^{K/L²}`
-  have hδ : delta (exp 32) y ≤ exp (K / L ^ 2) := by
-    rw [delta, log_exp, ← hLdef]
-    refine (one_add_rpow_le_exp (by positivity) (by positivity)).trans (le_of_eq ?_)
-    rw [hK]; ring_nf
-  have hprod : delta (exp 32) y * (1 + E) ≤ exp ((K + 1) / L ^ 2) := by
-    have h1E : 1 + E ≤ exp (1 / L ^ 2) := by
-      linarith [add_one_le_exp E, exp_le_exp.2 hE1]
-    calc delta (exp 32) y * (1 + E) ≤ exp (K / L ^ 2) * exp (1 / L ^ 2) := by
-          gcongr
-      _ = exp ((K + 1) / L ^ 2) := by rw [← exp_add]; ring_nf
-  have hx1 : (K + 1) / L ^ 2 ≤ 1 := by rw [div_le_one (by positivity)]; exact hLsq
-  have hx0 : 0 ≤ (K + 1) / L ^ 2 := by positivity
-  have hexp := abs_exp_sub_one_le (abs_le.2 ⟨by linarith, hx1⟩)
-  rw [abs_of_nonneg hx0] at hexp
-  have hexp' := (abs_le.1 hexp).2
-  calc delta (exp 32) y * (1 + E) - 1 ≤ exp ((K + 1) / L ^ 2) - 1 := by linarith
-    _ ≤ 2 * ((K + 1) / L ^ 2) := hexp'
-    _ ≤ ℓ ^ 2 / (8 * L ^ 2) := by
-        rw [mul_div_assoc', div_le_div_iff₀ (by positivity) (by positivity)]
-        nlinarith [sq_nonneg L]
+  apply eventually_atTop.1
+  filter_upwards [TheoremFour.eventually_delta_mul_le C hC,
+    (tendsto_log_atTop.comp tendsto_log_atTop).eventually (eventually_ge_atTop (1 : ℝ))]
+    with y hslack hloglog
+  exact ⟨sub_le_iff_le_add'.2 hslack, hloglog⟩
 
 end IwaniecLinearSieve.TheoremFive

@@ -491,8 +491,8 @@ Items 1–4 are done, in `LinearSieve/Calculus.lean`, `LemmaSeven.lean`, `LemmaE
      `(y/p)^{1/(t_p-1)} = p`, `sMin (!lower) ≤ t_p - 1` by `rosserPrimes_facts`, which also
      covers the upper sieve with `s < 3` since `p³ < y`), then `cor3_xi`. With
      `Q = δ(s,y) G(s) y/L²`, `ε = (log L)²/(8L²)`, `X = δ(s₀,y)(1 + C ξ² pntE(y^{1/ξ})) - 1`:
-     `δ(max s s₀) ≤ δ(s) δ(s₀)` (`delta_max_le`), `X ≤ ε` (`exists_slack`: `δ(s₀,y) ≤ e^{K/L²}`,
-     `C ξ² pntE(y^{1/ξ}) ≤ 1/L²` since `log y^{1/ξ} = λ^{11/5}`), the crude part `≤ Q ε`, and
+     `δ(max s s₀) ≤ δ(s) δ(s₀)` (`delta_max_le`), `X ≤ ε` (`exists_slack`, reusing
+     `TheoremFour.eventually_delta_mul_le`), the crude part `≤ Q ε`, and
      `(r+2)/(r+3) - (r+1)/(r+2) ≥ 2ε` from `r + 3 ≤ 2L/log L` (`gap_le`); `close_step` closes.
    The crude part (`exists_card_small`, [I71, p. 27] with (4.9), (4.10)): with `λ = lam y =
    log log 3y`, `u = ξ(1 - 2/λ)`, `K = ⌊u⌋`: elements with `ω ≤ K` number `≤ (K+1)(2w)^K ≤
