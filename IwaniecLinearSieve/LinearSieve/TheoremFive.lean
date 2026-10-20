@@ -130,6 +130,50 @@ theorem inner_le {c₇ : ℝ} {r : ℕ} (ih : Bound c₇ r) {lower : Bool} {y s 
   refine h.trans (le_of_eq ?_)
   field_simp
 
+/-- Sum the inner induction bounds over `p ≥ y^{1/(ξ-1)}`, then enlarge the prime range
+to `p ≥ y^{1/ξ}` so that Corollary 3 applies. -/
+theorem sum_inner_le {c₇ : ℝ} (hc₇ : 0 ≤ c₇) {r : ℕ} (ih : Bound c₇ r)
+    {lower : Bool} {y s : ℝ} (hy : 1 < y) (hs : sMin lower ≤ s) (hξ : 1 < xi y) :
+    ∑ p ∈ (rosserPrimes lower y (y ^ (1 / s))).filter
+        (fun p : ℕ => y ^ (1 / (xi y - 1)) ≤ p),
+        (#{d ∈ rosserSet (!lower) (y / p) p | #d.primeFactors ≤ r} : ℝ) ≤
+      c₇ * ((r + 1) / (r + 2)) * y *
+        ∑ p ∈ (rosserPrimes lower y (y ^ (1 / s))).filter
+            (fun p : ℕ => y ^ (1 / xi y) ≤ p),
+          delta (log y / log p - 1) (y / p) * errMaj (!lower) (log y / log p - 1) /
+            (p * log (y / p) ^ 2) := by
+  set P := rosserPrimes lower y (y ^ (1 / s))
+  set w := y ^ (1 / (xi y - 1)) with hw
+  set φ : ℝ := ((r : ℝ) + 1) / (r + 2)
+  set term : ℕ → ℝ := fun p => delta (log y / log p - 1) (y / p) *
+    errMaj (!lower) (log y / log p - 1) / (p * log (y / p) ^ 2) with hterm
+  have hφ0 : 0 ≤ φ := by positivity
+  calc
+    _ ≤ ∑ p ∈ P.filter (fun p : ℕ => w ≤ p), c₇ * φ * y * term p := by
+      refine sum_le_sum fun p hp => ?_
+      obtain ⟨hpP, hwp⟩ := mem_filter.1 hp
+      obtain ⟨hp1, -, -⟩ := rosserPrimes_facts hy hs hpP
+      have hp1' : (1 : ℝ) < p := by exact_mod_cast hp1
+      have hlp : 0 < log (p : ℝ) := log_pos hp1'
+      have ht : log y / log p ≤ xi y := by
+        have hlog := log_le_log (by positivity) hwp
+        rw [hw, log_rpow_one_div (by linarith)] at hlog
+        rw [div_le_iff₀ (by linarith)] at hlog
+        rw [div_le_iff₀ hlp]
+        nlinarith only [hlog, hlp]
+      exact inner_le ih hy hs hpP ht
+    _ ≤ ∑ p ∈ P.filter (fun p : ℕ => y ^ (1 / xi y) ≤ p), c₇ * φ * y * term p := by
+      refine sum_le_sum_of_subset_of_nonneg (fun p hp => ?_) fun p hp _ => ?_
+      · obtain ⟨hpP, hwp⟩ := mem_filter.1 hp
+        exact mem_filter.2 ⟨hpP, (rpow_one_div_le_rpow_one_div hy.le (by linarith)
+          (by linarith)).trans hwp⟩
+      · obtain ⟨-, -, hsp⟩ := rosserPrimes_facts hy hs (mem_filter.1 hp).1
+        have := delta_pos (one_le_of_sMin_le hsp) (y / p)
+        have := errMaj_pos (!lower) (log y / log p - 1)
+        simp only [hterm]
+        positivity
+    _ = _ := (mul_sum ..).symm
+
 /-! ### Closing the induction -/
 
 theorem delta_max_le {s s₀ : ℝ} (hs : 1 ≤ s) (hs₀ : 1 ≤ s₀) (y : ℝ) :
@@ -188,87 +232,64 @@ theorem step_main {c₇ C : ℝ} (hc₇ : 1 ≤ c₇) {r : ℕ} (ih : Bound c₇
         log y ^ 2 := by
   have hL0 : 0 < log y := log_pos hy
   have hs1 := one_le_of_sMin_le hs
-  have hξ1 : 1 < xi y - 1 := by linarith [add_one_le_exp (32 : ℝ), four_lt_of_exp_le hξ32]
-  set L := log y with hL
-  set ξ := xi y with hξ
-  set w := y ^ (1 / (ξ - 1)) with hw
-  set P := rosserPrimes lower y (y ^ (1 / s)) with hP
+  have hξ1 : 1 < xi y := by linarith only [four_lt_of_exp_le hξ32]
+  set L := log y
+  set w := y ^ (1 / (xi y - 1))
   set φ : ℝ := ((r : ℝ) + 1) / (r + 2) with hφ
-  set E := C * ξ ^ 2 * pntE (y ^ (1 / ξ)) with hE
+  set E := C * xi y ^ 2 * pntE (y ^ (1 / xi y))
   set Q := delta s y * errMaj lower s * y / L ^ 2 with hQ
-  set term : ℕ → ℝ := fun p => delta (log y / log p - 1) (y / p) *
-    errMaj (!lower) (log y / log p - 1) / (p * log (y / p) ^ 2) with hterm
+  -- Each loss is at most `ε`; the depth increment supplies at least `2ε`.
+  set ε := log (log y) ^ 2 / (8 * L ^ 2) with hε
+  set X := delta (exp 32) y * (1 + E) - 1 with hX
   have hδs := delta_pos hs1 y
   have hGs := errMaj_pos lower s
   have hQ0 : 0 ≤ Q := by positivity
   have hφ0 : 0 ≤ φ := by positivity
   have hφ1 : φ ≤ 1 := by rw [hφ, div_le_one (by positivity)]; linarith
-  have hE0 : 0 ≤ E := by have := pntE_pos (y ^ (1 / ξ)); positivity
+  have hE0 : 0 ≤ E := by have := pntE_pos (y ^ (1 / xi y)); positivity
   have hs₀ : (1 : ℝ) ≤ exp 32 := one_le_exp (by norm_num)
   have hδ₀ := one_le_delta hs₀ y
-  -- the primes `p ≥ w`
-  have hterm0 : ∀ p ∈ P, 0 ≤ term p := fun p hp => by
-    obtain ⟨hp1, -, hsp⟩ := rosserPrimes_facts hy hs hp
-    have := delta_pos ((one_le_of_sMin_le hsp)) (y / p)
-    have := errMaj_pos (!lower) (log y / log p - 1)
-    simp only [hterm]; positivity
-  have hinner : ∑ p ∈ P.filter (fun p : ℕ => w ≤ p),
-      (#{d ∈ rosserSet (!lower) (y / p) p | #d.primeFactors ≤ r} : ℝ) ≤
-      c₇ * φ * y * ∑ p ∈ P.filter (fun p : ℕ => y ^ (1 / ξ) ≤ p), term p := by
-    rw [mul_sum]
-    calc _ ≤ ∑ p ∈ P.filter (fun p : ℕ => w ≤ p), c₇ * φ * y * term p := by
-          refine sum_le_sum fun p hp => ?_
-          obtain ⟨hpP, hwp⟩ := mem_filter.1 hp
-          obtain ⟨hp1, -, -⟩ := rosserPrimes_facts hy hs hpP
-          have hp1' : (1 : ℝ) < p := by exact_mod_cast hp1
-          have hlp : 0 < log (p : ℝ) := log_pos hp1'
-          have ht : log y / log p ≤ ξ := by
-            have := log_le_log (by positivity) hwp
-            rw [hw, log_rpow_one_div (by linarith)] at this
-            rw [div_le_iff₀ (by linarith)] at this
-            rw [div_le_iff₀ hlp]; nlinarith
-          exact inner_le ih hy hs hpP ht
-      _ ≤ _ := by
-          refine sum_le_sum_of_subset_of_nonneg (fun p hp => ?_) fun p hp _ => ?_
-          · obtain ⟨hpP, hwp⟩ := mem_filter.1 hp
-            exact mem_filter.2 ⟨hpP, (rpow_one_div_le_rpow_one_div hy.le (by linarith)
-              (by linarith)).trans hwp⟩
-          · have := hterm0 p (mem_filter.1 hp).1
-            have : 0 ≤ c₇ * φ := by positivity
-            positivity
-  -- assemble
-  have hsplit := card_filter_succ_le r lower y (y ^ (1 / s)) w
-  have hN : (#(rosserSet lower y w) : ℝ) ≤ Q * (log (log y) ^ 2 / (8 * L ^ 2)) := by
-    have : delta s y * errMaj lower s * y / (8 * L ^ 4) ≤ Q * (log (log y) ^ 2 / (8 * L ^ 2)) := by
-      rw [hQ, div_mul_div_comm, div_le_div_iff₀ (by positivity) (by positivity)]
-      have : 1 ≤ log (log y) ^ 2 := by nlinarith
-      have h0 : 0 ≤ delta s y * errMaj lower s * y := by positivity
-      nlinarith [mul_le_mul_of_nonneg_left this (mul_nonneg h0 (pow_pos hL0 4).le),
-        pow_pos hL0 2]
-    linarith
-  have hmain' : c₇ * φ * y * (delta (max s (exp 32)) y * errMaj lower s / L ^ 2 * (1 + E)) ≤
-      c₇ * φ * Q * (1 + (delta (exp 32) y * (1 + E) - 1)) := by
-    have hmax := delta_max_le hs1 hs₀ y
-    have hc : 0 ≤ c₇ * φ := by positivity
-    rw [hQ, add_sub_cancel]
-    have h1E : 0 ≤ 1 + E := by linarith
-    calc c₇ * φ * y * (delta (max s (exp 32)) y * errMaj lower s / L ^ 2 * (1 + E))
-        = c₇ * φ * (y * errMaj lower s / L ^ 2 * (1 + E)) * delta (max s (exp 32)) y := by ring
-      _ ≤ c₇ * φ * (y * errMaj lower s / L ^ 2 * (1 + E)) * (delta s y * delta (exp 32) y) := by
-          gcongr
-      _ = _ := by ring
-  have hgap := gap_le (r := r) hL0 (by linarith) hmain
-  have hclose := close_step hc₇ hQ0 hφ1 (by nlinarith) hslack hgap
+  have hX0 : 0 ≤ X := by
+    rw [hX]
+    nlinarith only [hδ₀, hE0]
+  -- The crude count uses at most `Qε` of the induction gap.
+  have hsmallPart : (#(rosserSet lower y w) : ℝ) ≤ Q * ε := by
+    calc
+      _ ≤ 1 + (#(rosserSet lower y w) : ℝ) := by linarith only
+      _ ≤ delta s y * errMaj lower s * y / (8 * L ^ 4) := hsmall
+      _ = Q * (1 / (8 * L ^ 2)) := by rw [hQ]; ring
+      _ ≤ Q * ε := by
+        rw [hε]
+        have : (1 : ℝ) ≤ log (log y) ^ 2 := by nlinarith only [hℓ]
+        gcongr
+  -- The inner induction bounds and Corollary 3 give the main term with relative loss `X`.
+  have hlargePart : ∑ p ∈ (rosserPrimes lower y (y ^ (1 / s))).filter
+        (fun p : ℕ => w ≤ p),
+        (#{d ∈ rosserSet (!lower) (y / p) p | #d.primeFactors ≤ r} : ℝ) ≤
+      c₇ * φ * Q * (1 + X) := by
+    refine (sum_inner_le (zero_le_one.trans hc₇) ih hy hs hξ1).trans ?_
+    calc
+      _ ≤ c₇ * φ * y *
+          (delta (max s (exp 32)) y * errMaj lower s / L ^ 2 * (1 + E)) := by
+        exact mul_le_mul_of_nonneg_left hcor (by positivity)
+      _ = c₇ * φ * (y * errMaj lower s / L ^ 2 * (1 + E)) *
+          delta (max s (exp 32)) y := by ring
+      _ ≤ c₇ * φ * (y * errMaj lower s / L ^ 2 * (1 + E)) *
+          (delta s y * delta (exp 32) y) := by
+        exact mul_le_mul_of_nonneg_left (delta_max_le hs1 hs₀ y) (by positivity)
+      _ = c₇ * φ * Q * (1 + X) := by rw [hQ, hX]; ring
+  have hgap := gap_le (r := r) hL0 (zero_lt_one.trans_le hℓ) hmain
   have hgoal : c₇ * ((((r + 1 : ℕ) : ℝ) + 1) / (((r + 1 : ℕ) : ℝ) + 2)) * delta s y *
       errMaj lower s * y / L ^ 2 = c₇ * (((r : ℝ) + 1 + 1) / (r + 1 + 2)) * Q := by
     rw [hQ]; push_cast; ring
   rw [hgoal]
-  calc (#{d ∈ rosserSet lower y (y ^ (1 / s)) | #d.primeFactors ≤ r + 1} : ℝ)
-      ≤ #(rosserSet lower y w) + c₇ * φ * y *
-          (delta (max s (exp 32)) y * errMaj lower s / L ^ 2 * (1 + E)) := by
-        refine hsplit.trans (add_le_add le_rfl (hinner.trans ?_))
-        gcongr
-    _ ≤ _ := by linarith
+  calc
+    _ ≤ #(rosserSet lower y w) + ∑ p ∈ (rosserPrimes lower y (y ^ (1 / s))).filter
+        (fun p : ℕ => w ≤ p),
+        (#{d ∈ rosserSet (!lower) (y / p) p | #d.primeFactors ≤ r} : ℝ) :=
+      card_filter_succ_le r lower y (y ^ (1 / s)) w
+    _ ≤ Q * ε + c₇ * φ * Q * (1 + X) := add_le_add hsmallPart hlargePart
+    _ ≤ _ := close_step hc₇ hQ0 hφ1 hX0 hslack hgap
 
 /-! ### The small-`y` case -/
 
