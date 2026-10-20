@@ -265,6 +265,13 @@ theorem lemma11 (r : ℕ) {y s b : ℝ} (hs : exp 32 ≤ s) (hsb : s ≤ b)
 theorem four_lt_of_exp_le {t : ℝ} (ht : exp 32 ≤ t) : 4 < t := by
   linarith [add_one_le_exp (32 : ℝ)]
 
+/-- If the growth rate satisfies `4E ≤ ℓ` and the decay satisfies `Gℓ ≤ 4K`, then
+`EG ≤ K` for `G ≥ 0`. This is the scalar comparison used in Lemma 12. -/
+theorem growth_le_decay {E G K ℓ : ℝ} (hG : 0 ≤ G) (hE : 4 * E ≤ ℓ)
+    (hdecay : G * ℓ ≤ 4 * K) : E * G ≤ K := by
+  have h := (mul_le_mul_of_nonneg_left hE hG).trans hdecay
+  nlinarith only [h]
+
 /-- If `g ≥ 0` has derivative `-k` with `g ℓ ≤ 4 k` and `ℓ ≥ log t - 1`, then
 `(1 + x)^{5(t-1)} g(t)` is antitone on `[s, b]` (for `e^{32} ≤ s`, `160 b² log⁴ b ≤ L²`). -/
 theorem antitoneOn_growth_mul {L s b : ℝ} {g k ℓ : ℝ → ℝ} (hs : exp 32 ≤ s)
@@ -272,32 +279,31 @@ theorem antitoneOn_growth_mul {L s b : ℝ} {g k ℓ : ℝ → ℝ} (hs : exp 32
     (hg0 : ∀ t ∈ Icc s b, 0 ≤ g t) (hgk : ∀ t ∈ Icc s b, g t * ℓ t ≤ 4 * k t)
     (hℓ : ∀ t ∈ Icc s b, log t - 1 ≤ ℓ t) :
     AntitoneOn (fun t => (1 + t ^ 2 * log t ^ 5 / L ^ 2) ^ (5 * (t - 1)) * g t) (Icc s b) := by
-  have hd : ∀ t ∈ Icc s b, HasDerivAt
-      (fun t => (1 + t ^ 2 * log t ^ 5 / L ^ 2) ^ (5 * (t - 1)) * g t)
-      ((1 + t ^ 2 * log t ^ 5 / L ^ 2) ^ (5 * (t - 1)) *
-        (5 * log (1 + t ^ 2 * log t ^ 5 / L ^ 2) + 5 * (t - 1) *
-          ((2 * t * log t ^ 5 + 5 * t * log t ^ 4) / L ^ 2) /
-            (1 + t ^ 2 * log t ^ 5 / L ^ 2)) * g t +
-        (1 + t ^ 2 * log t ^ 5 / L ^ 2) ^ (5 * (t - 1)) * -k t) t := fun t ht =>
-    (hasDerivAt_growth L 1 (range_facts (hs.trans ht.1) ht.2 hb).1).mul (hg t ht)
-  refine antitoneOn_of_hasDerivWithinAt_nonpos (convex_Icc s b)
-    (continuousOn_of_forall_continuousAt fun t ht => (hd t ht).continuousAt)
-    (fun t ht => (hd t (interior_subset ht)).hasDerivWithinAt) fun t ht => ?_
-  have ht' := interior_subset ht
-  obtain ⟨ht1, hlt, hw, -⟩ := range_facts (hs.trans ht'.1) ht'.2 hb
-  obtain ⟨hE0, hE1, -⟩ := rate_bound (L := L) (a := 1) zero_le_one le_rfl ht1 hlt hw
-  set E := 5 * log (1 + t ^ 2 * log t ^ 5 / L ^ 2) + 5 * (t - 1) *
+  let A : ℝ → ℝ := fun t => (1 + t ^ 2 * log t ^ 5 / L ^ 2) ^ (5 * (t - 1))
+  let E : ℝ → ℝ := fun t => 5 * log (1 + t ^ 2 * log t ^ 5 / L ^ 2) + 5 * (t - 1) *
     ((2 * t * log t ^ 5 + 5 * t * log t ^ 4) / L ^ 2) / (1 + t ^ 2 * log t ^ 5 / L ^ 2)
-  have hP : 0 < (1 + t ^ 2 * log t ^ 5 / L ^ 2) ^ (5 * (t - 1)) :=
-    rpow_pos_of_pos (by linarith [lsx_nonneg L ht1]) _
-  have hℓ' := hℓ t ht'
-  have hgk' := hgk t ht'
-  have hg0' := hg0 t ht'
-  have hℓ0 : 0 < ℓ t := by linarith
-  have hk0 : 0 ≤ k t := by nlinarith
-  have h1 : ℓ t * (E * g t) ≤ ℓ t * k t := by nlinarith
-  have h2 : E * g t ≤ k t := le_of_mul_le_mul_left h1 hℓ0
-  nlinarith
+  -- `A' = AE` and `g' = -k`, so the product has derivative `A(Eg - k)`.
+  have hd : ∀ t ∈ Icc s b,
+      HasDerivAt (fun t => A t * g t) (A t * (E t * g t - k t)) t := by
+    intro t ht
+    have hA : HasDerivAt A (A t * E t) t :=
+      hasDerivAt_growth L 1 (range_facts (hs.trans ht.1) ht.2 hb).1
+    convert hA.mul (hg t ht) using 1
+    ring
+  -- The rate bound and the decay hypothesis give `Eg ≤ k`, hence a nonpositive derivative.
+  have hnonpos : ∀ t ∈ Icc s b, A t * (E t * g t - k t) ≤ 0 := by
+    intro t ht
+    obtain ⟨ht1, hlt, hw, -⟩ := range_facts (hs.trans ht.1) ht.2 hb
+    obtain ⟨-, hE, -⟩ := rate_bound (L := L) (a := 1) zero_le_one le_rfl ht1 hlt hw
+    have hdecay : E t * g t ≤ k t :=
+      growth_le_decay (hg0 t ht) (hE.trans (hℓ t ht)) (hgk t ht)
+    have hA0 : 0 ≤ A t :=
+      (rpow_pos_of_pos (by linarith only [lsx_nonneg L ht1]) _).le
+    exact mul_nonpos_of_nonneg_of_nonpos hA0 (sub_nonpos.2 hdecay)
+  exact antitoneOn_of_hasDerivWithinAt_nonpos (convex_Icc s b)
+    (continuousOn_of_forall_continuousAt fun t ht => (hd t ht).continuousAt)
+    (fun t ht => (hd t (interior_subset ht)).hasDerivWithinAt)
+    (fun t ht => hnonpos t (interior_subset ht))
 
 /-- [I71, Lemma 12]: `μ(t) = (1 + t² log⁵ t / L²)^{5(t-1)} G_{r+1}(t)` is antitone on `[s, b]`
 for `e^{32} ≤ s` and `160 b² log⁴ b ≤ L²`. -/
