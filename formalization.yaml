@@ -126,6 +126,7 @@ automation:
         Solution.lean, comparator.json and this file. No mathematical content
         was changed.
     - method: agent
+      models: ["gpt-6-astra"]
       framework: "Codex"
       tool_setup: >-
         Follow-up review checked (*) against the first page of [I71] and

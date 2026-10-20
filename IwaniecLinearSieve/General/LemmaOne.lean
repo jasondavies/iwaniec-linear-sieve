@@ -352,7 +352,8 @@ theorem sum_moebius_mul_le_of_approx {D : Finset ℕ} {M : Multiset ℤ} {y : �
         mul_le_mul hμ (hM d hd) (abs_nonneg _) zero_le_one
     _ = 1 := one_mul 1
 
-/-- [I71, (2.5), (2.7)] for any even depth: under `(*) |M_d - y/d| ≤ 1` for squarefree `d` with `(d, k) = 1`,
+/-- [I71, (2.5), (2.7)] for any even depth: under `(*) |M_d - y/d| ≤ 1` for squarefree `d`
+with `(d, k) = 1`,
 `A_k(M; z) ≤ y G(z) + Σ₁(z)` with `Σ₁(z) = #D⁺`. -/
 theorem lemma1_cor_upper (hn : Even n) (h : List ℕ) {M : Multiset ℤ} {y : ℝ}
     (hM : ∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :
@@ -368,7 +369,8 @@ theorem lemma1_cor_upper (hn : Even n) (h : List ℕ) {M : Multiset ℤ} {y : �
   linarith [le_abs_self (∑ d ∈ truncSet f k false n h z, (μ d : ℝ) * multiplesCount M d -
     y * ∑ d ∈ truncSet f k false n h z, (μ d : ℝ) / d)]
 
-/-- [I71, (2.6), (2.8)] for any odd depth: under `(*) |M_d - y/d| ≤ 1` for squarefree `d` with `(d, k) = 1`,
+/-- [I71, (2.6), (2.8)] for any odd depth: under `(*) |M_d - y/d| ≤ 1` for squarefree `d`
+with `(d, k) = 1`,
 `A_k(M; z) ≥ y D(z) - Σ₂(z)` with `Σ₂(z) = #D⁻`. -/
 theorem lemma1_cor_lower (hn : Odd n) (h : List ℕ) {M : Multiset ℤ} {y : ℝ}
     (hM : ∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :

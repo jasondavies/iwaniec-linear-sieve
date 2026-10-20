@@ -10,7 +10,8 @@ public import IwaniecLinearSieve.Main.Basic
 Notation: `L = log y`, `z = y^{1/s}`, `ξ(y) = L / (log log 3y)^{11/5}` (`xi`),
 `δ(s, y) = (1 + s² log⁵ s / L²)^{5s}` (`delta`).
 
-**Theorem 1.** Let `y > 1`, `s ≤ ξ(y)`, and assume `(*)`: `|M_d - y/d| ≤ 1` for squarefree `d` with `(d, k) = 1`.
+**Theorem 1.** Let `y > 1`, `s ≤ ξ(y)`, and assume `(*)`: `|M_d - y/d| ≤ 1` for squarefree `d`
+with `(d, k) = 1`.
 There is an absolute constant `c₀` such that
 
 * (1.1) `A_k(M; y^{1/s}) < y R_k(y^{1/s}) (1 + F(s)/s + c₀ δ(s, y) 𝔐(s) log log 3k / L)`
@@ -296,7 +297,8 @@ theorem lt_loglog_err {C y s : ℝ} (hC : 0 ≤ C) (hy : 1 < y) (hs : 1 ≤ s) {
 
 /-- **[I71, Theorem 1]**, (1.1) and (1.2), with the error term as printed (with `log log 3k`).
 Let `y > 1`, `s ≤ ξ(y) = log y / (log log 3y)^{11/5}`, and assume `(*)`:
-`|M_d - y/d| ≤ 1` for all squarefree `d` coprime to `k`. There is an absolute constant `c₀` such that
+`|M_d - y/d| ≤ 1` for all squarefree `d` coprime to `k`.
+There is an absolute constant `c₀` such that
 
 * (1.1) `A_k(M; y^{1/s}) < y R_k(y^{1/s}) (1 + F(s)/s + c₀ δ(s, y) 𝔐(s) log log 3k / log y)`
   for `s ≥ 3`;
