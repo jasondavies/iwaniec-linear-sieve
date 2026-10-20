@@ -106,70 +106,69 @@ theorem eventually_mul_pntE_le (K : ℝ) : ∀ᶠ y : ℝ in atTop,
     _ ≤ |K| * log y ^ 5 * pntE (y ^ (1 / xi y)) := by gcongr
     _ ≤ 1 := by rw [mul_assoc]; linarith
 
+/-- On `[0, 1]`, the exponential is at most `1 + 2v`. -/
+theorem exp_le_one_add_two_mul {v : ℝ} (hv0 : 0 ≤ v) (hv1 : v ≤ 1) :
+    exp v ≤ 1 + 2 * v := by
+  have h := (abs_le.1 (abs_exp_sub_one_sub_id_le
+    (by rw [abs_of_nonneg hv0]; exact hv1))).2
+  nlinarith only [h, hv0, hv1]
+
 theorem eventually_delta_mul_le (C : ℝ) (hC : 0 ≤ C) : ∀ᶠ y : ℝ in atTop,
     delta (exp 32) y * (1 + C * xi y ^ 2 * pntE (y ^ (1 / xi y))) ≤
       1 + log (log y) ^ 2 / (8 * log y ^ 2) := by
   set A : ℝ := 5 * exp 32 * (exp 32 ^ 2 * 32 ^ 5) with hA
   have hA0 : 0 ≤ A := by positivity
   have hsq := tendsto_pow_atTop (α := ℝ) (two_ne_zero)
-  filter_upwards [tendsto_log_pow_pntE.eventually (eventually_le_nhds
-      (by positivity : (0 : ℝ) < 1 / (2 * (C + 1)))),
-    eventually_gt_atTop 1, tendsto_log_log_three_mul.eventually (eventually_ge_atTop 1),
+  filter_upwards [eventually_mul_pntE_le (2 * C),
     tendsto_log_atTop.eventually (eventually_ge_atTop 1),
     (hsq.comp tendsto_log_atTop).eventually (eventually_ge_atTop (A + 1)),
     (hsq.comp (tendsto_log_atTop.comp tendsto_log_atTop)).eventually
-      (eventually_ge_atTop (8 * (2 * A + 1)))] with y h1 hy hℓ hL1 hL2 hΛ
+      (eventually_ge_atTop (8 * (2 * A + 1)))] with y hPNT hL1 hL2 hΛ
   simp only [Function.comp] at hL2 hΛ
   set L := log y
   set b := C * xi y ^ 2 * pntE (y ^ (1 / xi y))
-  have hL : 0 < L := by linarith
+  have hL : 0 < L := by linarith only [hL1]
   have hLsq : 0 < L ^ 2 := by positivity
-  have hξ0 := xi_nonneg hy
-  have hξL := xi_le_log hy hℓ
   have hpE := pntE_pos (y ^ (1 / xi y))
   have hb0 : 0 ≤ b := by positivity
-  -- `b L² ≤ 1/2`
+  -- The shared PNT estimate gives `b L³ ≤ 1/2`; `L ≥ 1` gives the needed `b L²` bound.
   have hbL : b * L ^ 2 ≤ 1 / 2 := by
-    have : xi y ^ 2 * L ^ 2 ≤ L ^ 5 := by
-      have : xi y ^ 2 ≤ L ^ 2 := by gcongr
-      calc xi y ^ 2 * L ^ 2 ≤ L ^ 2 * L ^ 2 := by gcongr
-        _ = L ^ 4 * 1 := by ring
-        _ ≤ L ^ 4 * L := by gcongr
-        _ = L ^ 5 := by ring
-    calc b * L ^ 2 = C * (xi y ^ 2 * L ^ 2) * pntE (y ^ (1 / xi y)) := by ring
-      _ ≤ (C + 1) * (L ^ 5 * pntE (y ^ (1 / xi y))) := by
-          rw [mul_assoc]; gcongr; linarith
-      _ ≤ (C + 1) * (1 / (2 * (C + 1))) := by gcongr
-      _ = 1 / 2 := by field_simp
+    have hbL3 : b * L ^ 3 ≤ 1 / 2 := by
+      dsimp [b, L]
+      nlinarith only [hPNT]
+    calc b * L ^ 2 ≤ b * L ^ 3 :=
+          mul_le_mul_of_nonneg_left (pow_le_pow_right₀ hL1 (by norm_num : 2 ≤ 3)) hb0
+      _ ≤ 1 / 2 := hbL3
   -- `δ(s₀, y) ≤ exp (A / L²)`
   have hδ : delta (exp 32) y ≤ exp (A / L ^ 2) := by
     rw [delta, log_exp]
     set x := exp 32 ^ 2 * 32 ^ 5 / L ^ 2
     have hx : 0 ≤ x := by positivity
-    rw [rpow_def_of_pos (by linarith)]
+    rw [rpow_def_of_pos (by linarith only [hx])]
     apply exp_le_exp.2
-    have := log_le_sub_one_of_pos (by linarith : 0 < 1 + x)
-    calc log (1 + x) * (5 * exp 32) ≤ x * (5 * exp 32) := by gcongr; linarith
+    have hlog := log_le_sub_one_of_pos (by linarith only [hx] : 0 < 1 + x)
+    calc log (1 + x) * (5 * exp 32) ≤ x * (5 * exp 32) := by
+          gcongr
+          linarith only [hlog]
       _ = A / L ^ 2 := by rw [hA]; simp only [x]; ring
+  -- Combine the two errors in the exponent, then fit `2v` inside the target margin.
   set v := A / L ^ 2 + b
   have hv0 : 0 ≤ v := by positivity
   have hvL : v * L ^ 2 ≤ A + 1 / 2 := by
-    have : v * L ^ 2 = A + b * L ^ 2 := by simp only [v]; field_simp
-    linarith
+    calc v * L ^ 2 = A + b * L ^ 2 := by simp only [v]; field_simp
+      _ ≤ A + 1 / 2 := add_le_add le_rfl hbL
   have hv1 : v ≤ 1 := by
-    have : v * L ^ 2 ≤ 1 * L ^ 2 := by linarith
+    have : v * L ^ 2 ≤ 1 * L ^ 2 := by linarith only [hvL, hL2]
     exact le_of_mul_le_mul_right this hLsq
-  have hexp : exp v ≤ 1 + 2 * v := by
-    have := abs_exp_sub_one_sub_id_le (by rw [abs_of_nonneg hv0]; exact hv1)
-    have := (abs_le.1 this).2
-    nlinarith
   have h2v : 2 * v ≤ log (log y) ^ 2 / (8 * L ^ 2) := by
     rw [le_div_iff₀ (by positivity)]
-    nlinarith
+    linarith only [hvL, hΛ]
   calc delta (exp 32) y * (1 + b) ≤ exp (A / L ^ 2) * exp b :=
-        mul_le_mul hδ (by linarith [add_one_le_exp b]) (by linarith) (exp_pos _).le
+        mul_le_mul hδ (by simpa only [add_comm] using add_one_le_exp b)
+          (by linarith only [hb0]) (exp_pos _).le
     _ = exp v := by rw [← exp_add]
-    _ ≤ _ := by linarith
+    _ ≤ 1 + 2 * v := exp_le_one_add_two_mul hv0 hv1
+    _ ≤ _ := add_le_add le_rfl h2v
 
 /-! ### The crude bound against the Lemma 9 lower bounds -/
 
