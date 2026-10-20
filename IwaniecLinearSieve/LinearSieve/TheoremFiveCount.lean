@@ -236,6 +236,36 @@ theorem one_le_of_sMin_le (hs : sMin lower ≤ s) : 1 ≤ s := by
 theorem one_le_delta (hs : 1 ≤ s) (y : ℝ) : 1 ≤ delta s y :=
   one_le_rpow (by linarith [lsx_nonneg (log y) hs]) (by linarith)
 
+/-- For `s ≥ ξ/2` and `log s ≥ λ/2`, the growth of `δ` supplies the factor
+`exp (s (3 log λ - 5 log 128))` in [I71, (4.10)]. -/
+theorem exp_le_delta_of_half_le (hy : 1 < y) (hs : xi y / 2 ≤ s)
+    (hlogs : lam y / 2 ≤ log s) :
+    exp (s * (3 * log (lam y) - 5 * log 128)) ≤ delta s y := by
+  set L := log y
+  set ξ := xi y
+  set m := lam y
+  have hL0 : 0 < L := log_pos hy
+  have hξ0 : 0 < ξ := xi_pos hy
+  have hm0 : 0 < m := lam_pos hy
+  have hs0 : 0 ≤ s := by linarith only [hs, hξ0]
+  set a₀ := ξ ^ 2 * m ^ 5 / (128 * L ^ 2) with ha₀
+  have ha₀0 : 0 < a₀ := by positivity
+  -- The factors `s²` and `log⁵ s` contribute `ξ² λ⁵ / 128`.
+  have hx : a₀ ≤ s ^ 2 * log s ^ 5 / L ^ 2 := by
+    calc a₀ = (ξ / 2) ^ 2 * (m / 2) ^ 5 / L ^ 2 := by rw [ha₀]; ring
+      _ ≤ s ^ 2 * log s ^ 5 / L ^ 2 := by gcongr
+  have hloga₀ : 5 * log a₀ = 3 * log m - 5 * log 128 := by
+    rw [ha₀, log_div (by positivity) (by positivity), log_mul (by positivity) (by positivity),
+      log_mul (by norm_num) (by positivity), log_pow, log_pow, log_pow, log_xi_eq hy]
+    push_cast
+    ring
+  calc exp (s * (3 * log m - 5 * log 128)) = a₀ ^ (5 * s) := by
+        rw [rpow_def_of_pos ha₀0, ← hloga₀]
+        ring_nf
+    _ ≤ (1 + s ^ 2 * log s ^ 5 / L ^ 2) ^ (5 * s) :=
+        rpow_le_rpow ha₀0.le (by linarith only [hx]) (by positivity)
+    _ = delta s y := rfl
+
 /-- [I71, (4.9), (4.10)] in the form needed for Theorem 5: for `sMin lower ≤ s ≤ ξ`,
 `exp(-ξ log ξ + (3/2) ξ log λ) ≤ δ(s, y) G(s)`, given the lower bound of Lemma 9 with constant
 `c_G ≥ 0` and the scalar facts of `eventually_scalar`. For `s ≤ ξ/2` this uses Lemma 9 only; for
@@ -246,85 +276,77 @@ theorem exp_le_delta_errMaj {cG : ℝ} (hcG : 0 ≤ cG)
     (h8 : lam y / 2 ≤ log (xi y / 2)) (h9 : 4 * log (lam y) + cG ≤ log (xi y))
     (h10 : log (xi y) ≤ lam y) (lower : Bool) (hs : sMin lower ≤ s) (hsξ : s ≤ xi y) :
     exp (-(xi y * log (xi y)) + 3 / 2 * xi y * log (lam y)) ≤ delta s y * errMaj lower s := by
-  have hlogξ := log_xi_eq hy
-  set L := log y with hL
-  set ξ := xi y with hξ
-  set m := lam y with hm
-  set a := log m with ha
-  have hL0 : 0 < L := log_pos hy
+  set ξ := xi y
+  set a := log (lam y)
   have h128 : 0 ≤ log 128 := log_nonneg (by norm_num)
-  have ha0 : 0 ≤ a := by linarith
-  have hm0 : 0 < m := lam_pos hy
+  have ha0 : 0 ≤ a := by linarith only [h2, hcG, h128]
   have hs1 := one_le_of_sMin_le hs
   have hδ1 := one_le_delta hs1 y
   have hGl : ∀ t ≥ 3, exp (-(t * log t) - t * log (log t) - cG * t) ≤ errMaj lower t := by
     intro t ht; rw [errMaj_eq_majG_succ]; exact hG _ t ht
   have hll : ∀ t, 3 ≤ t → t ≤ ξ → log (log t) ≤ a := fun t ht htξ ↦
-    log_le_log (log_pos (by linarith)) ((log_le_log (by linarith) htξ).trans h10)
+    log_le_log (log_pos (by linarith only [ht]))
+      ((log_le_log (by linarith only [ht]) htξ).trans h10)
   rcases le_or_gt s (ξ / 2) with hsh | hsh
   · -- `s ≤ ξ/2`: Lemma 9 at `s' = max s 3`
-    set s' := max s 3 with hs'
+    set s' := max s 3
     have hs'3 : 3 ≤ s' := le_max_right _ _
-    have hs'h : s' ≤ ξ / 2 := max_le hsh (by linarith)
+    have hs'h : s' ≤ ξ / 2 := max_le hsh (by linarith only [h6])
     have hGs : errMaj lower s' ≤ errMaj lower s := errMaj_antitone lower (le_max_left _ _)
-    have hl0 : 0 ≤ log s' := log_nonneg (by linarith)
-    have hl1 : log s' ≤ log ξ := log_le_log (by linarith) (by linarith)
-    have hll' := hll s' hs'3 (by linarith)
-    have e1 : s' * log s' ≤ ξ / 2 * log ξ := mul_le_mul hs'h hl1 hl0 (by linarith)
-    have e2 : s' * log (log s') ≤ ξ / 2 * a :=
-      (mul_le_mul_of_nonneg_left hll' (by linarith)).trans
+    have hl0 : 0 ≤ log s' := log_nonneg (by linarith only [hs'3])
+    have hl1 : log s' ≤ log ξ :=
+      log_le_log (by linarith only [hs'3]) (by linarith only [hs'h, h6])
+    have hll' := hll s' hs'3 (by linarith only [hs'h, h6])
+    have hmain_loss : s' * log s' ≤ ξ / 2 * log ξ :=
+      mul_le_mul hs'h hl1 hl0 (by linarith only [h6])
+    have hloglog_loss : s' * log (log s') ≤ ξ / 2 * a :=
+      (mul_le_mul_of_nonneg_left hll' (by linarith only [hs'3])).trans
         (mul_le_mul_of_nonneg_right hs'h ha0)
-    have e3 : cG * s' ≤ cG * (ξ / 2) := mul_le_mul_of_nonneg_left hs'h hcG
-    have e4 : 0 ≤ ξ / 2 * (log ξ - 4 * a - cG) := mul_nonneg (by linarith) (by linarith)
+    have hconstant_loss : cG * s' ≤ cG * (ξ / 2) := mul_le_mul_of_nonneg_left hs'h hcG
+    have hmargin : 0 ≤ ξ / 2 * (log ξ - 4 * a - cG) :=
+      mul_nonneg (by linarith only [h6]) (by linarith only [h9])
+    have hhalf_exponent : -(ξ * log ξ) + 3 / 2 * ξ * a ≤
+        -(s' * log s') - s' * log (log s') - cG * s' := by
+      linarith only [hmain_loss, hloglog_loss, hconstant_loss, hmargin]
     calc exp (-(ξ * log ξ) + 3 / 2 * ξ * a)
-        ≤ exp (-(s' * log s') - s' * log (log s') - cG * s') := exp_le_exp.2 (by nlinarith)
+        ≤ exp (-(s' * log s') - s' * log (log s') - cG * s') := exp_le_exp.2 hhalf_exponent
       _ ≤ errMaj lower s' := hGl s' hs'3
       _ ≤ errMaj lower s := hGs
       _ = 1 * errMaj lower s := (one_mul _).symm
-      _ ≤ delta s y * errMaj lower s := by
-          gcongr; exact (errMaj_pos lower s).le
+      _ ≤ delta s y * errMaj lower s :=
+          mul_le_mul_of_nonneg_right hδ1 (errMaj_pos lower s).le
   · -- `s > ξ/2`: the growth of `δ`
-    have hs3 : 3 ≤ s := by linarith
-    have hs0 : 0 ≤ s := by linarith
-    have hlogs : m / 2 ≤ log s := h8.trans (log_le_log (by linarith) hsh.le)
-    set a₀ := ξ ^ 2 * m ^ 5 / (128 * L ^ 2) with ha₀
-    have ha₀0 : 0 < a₀ := by have : 0 < ξ := by linarith
-                             positivity
-    have hx : a₀ ≤ s ^ 2 * log s ^ 5 / L ^ 2 := by
-      rw [ha₀, div_le_div_iff₀ (by positivity) (by positivity)]
-      have h1 : (ξ / 2) ^ 2 ≤ s ^ 2 := by gcongr
-      have h2 : (m / 2) ^ 5 ≤ log s ^ 5 := by gcongr
-      have : ξ ^ 2 * m ^ 5 ≤ 128 * (s ^ 2 * log s ^ 5) := by
-        have := mul_le_mul h1 h2 (by positivity) (by positivity)
-        nlinarith
-      nlinarith [sq_nonneg L]
-    have hloga₀ : 5 * log a₀ = 3 * a - 5 * log 128 := by
-      have hξ0 : 0 < ξ := by linarith
-      rw [ha₀, log_div (by positivity) (by positivity), log_mul (by positivity) (by positivity),
-        log_mul (by norm_num) (by positivity), log_pow, log_pow, log_pow, hlogξ]
-      push_cast; ring
-    have hδ : exp (s * (3 * a - 5 * log 128)) ≤ delta s y := by
-      calc exp (s * (3 * a - 5 * log 128)) = a₀ ^ (5 * s) := by
-            rw [rpow_def_of_pos ha₀0, ← hloga₀]; ring_nf
-        _ ≤ (1 + s ^ 2 * log s ^ 5 / L ^ 2) ^ (5 * s) :=
-            rpow_le_rpow ha₀0.le (by linarith) (by linarith)
-        _ = delta s y := rfl
+    have hs3 : 3 ≤ s := by linarith only [hsh, h6]
+    have hs0 : 0 ≤ s := by linarith only [hs3]
+    have hlogs : lam y / 2 ≤ log s :=
+      h8.trans (log_le_log (by linarith only [h6]) hsh.le)
+    have hδ := exp_le_delta_of_half_le hy hsh.le hlogs
     have hGs : exp (-(s * log s) - s * a - cG * s) ≤ errMaj lower s := by
       refine le_trans (exp_le_exp.2 ?_) (hGl s hs3)
-      nlinarith [hll s hs3 hsξ]
+      have hloglog_loss := mul_le_mul_of_nonneg_left (hll s hs3 hsξ) hs0
+      linarith only [hloglog_loss]
     set c₁ := cG + 5 * log 128 with hc₁
-    have hsq : s * (log s - 2 * a + c₁) ≤ ξ * (log ξ - 2 * a + c₁) := by
-      rcases le_or_gt (log s - 2 * a + c₁) 0 with hq | hq
-      · nlinarith
-      · have : log s ≤ log ξ := log_le_log (by linarith) hsξ
-        nlinarith
-    have hξc : ξ * (2 * c₁) ≤ ξ * a := mul_le_mul_of_nonneg_left (by linarith) (by linarith)
+    -- Compare the combined loss at `s` with its value at `ξ`.
+    have hendpoint : 0 ≤ log ξ - 2 * a + c₁ := by
+      dsimp [c₁]
+      linarith only [h9, ha0, hcG, h128]
+    have hcombined_loss : s * (log s - 2 * a + c₁) ≤ ξ * (log ξ - 2 * a + c₁) := by
+      have hlog : log s ≤ log ξ := log_le_log (by linarith only [hs3]) hsξ
+      calc s * (log s - 2 * a + c₁) ≤ s * (log ξ - 2 * a + c₁) :=
+            mul_le_mul_of_nonneg_left (by linarith only [hlog]) hs0
+        _ ≤ ξ * (log ξ - 2 * a + c₁) := mul_le_mul_of_nonneg_right hsξ hendpoint
+    have hconstant_margin : ξ * (2 * c₁) ≤ ξ * a :=
+      mul_le_mul_of_nonneg_left h2 (by linarith only [h6])
+    have hfull_exponent : -(ξ * log ξ) + 3 / 2 * ξ * a ≤
+        s * (3 * a - 5 * log 128) + (-(s * log s) - s * a - cG * s) := by
+      rw [hc₁] at hcombined_loss hconstant_margin
+      linarith only [hcombined_loss, hconstant_margin]
     calc exp (-(ξ * log ξ) + 3 / 2 * ξ * a)
         ≤ exp (s * (3 * a - 5 * log 128) + (-(s * log s) - s * a - cG * s)) :=
-          exp_le_exp.2 (by rw [hc₁] at hsq hξc; linarith)
+          exp_le_exp.2 hfull_exponent
       _ = exp (s * (3 * a - 5 * log 128)) * exp (-(s * log s) - s * a - cG * s) := exp_add _ _
-      _ ≤ delta s y * errMaj lower s := by
-          gcongr
+      _ ≤ delta s y * errMaj lower s :=
+          mul_le_mul hδ hGs (exp_pos _).le (delta_pos hs1 y).le
 
 /-- [I71, p. 27]: for large `y`, `sMin lower ≤ s ≤ ξ` and `w = y^{1/(ξ - 1)}`,
 `1 + #(rosserSet lower y w) ≤ δ(s, y) G(s) y / (8 L⁴)`. -/
