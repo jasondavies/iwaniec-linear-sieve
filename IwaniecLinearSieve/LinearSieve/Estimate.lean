@@ -45,6 +45,16 @@ theorem div_one_add_le_log_one_add {x : ℝ} (hx : 0 ≤ x) : x / (1 + x) ≤ lo
   have : (1 + x)⁻¹ - 1 = -(x / (1 + x)) := by field_simp; ring
   linarith
 
+/-- If `0 ≤ x ≤ 1/2` and `s ≥ 2 + x`, then `log(s - 1) ≥ 2x/3`.
+This supplies the logarithmic gain in the linear sieve estimate and Theorem 2. -/
+theorem two_mul_div_three_le_log_sub_one {x s : ℝ} (hx : 0 ≤ x) (hxhalf : x ≤ 1 / 2)
+    (hs : 2 + x ≤ s) : 2 * x / 3 ≤ log (s - 1) := by
+  calc 2 * x / 3 = x / (3 / 2) := by ring
+    _ ≤ x / (1 + x) :=
+        div_le_div_of_nonneg_left hx (by positivity) (by linarith only [hxhalf])
+    _ ≤ log (1 + x) := div_one_add_le_log_one_add hx
+    _ ≤ log (s - 1) := log_le_log (by positivity) (by linarith only [hs])
+
 /-- `pntE z · log z → 0`. -/
 theorem tendsto_pntE_mul_log : Tendsto (fun z => pntE z * log z) atTop (nhds 0) := by
   have hu : Tendsto (fun z : ℝ => pntκ * √(log z)) atTop atTop :=
@@ -161,14 +171,10 @@ theorem linearSieveEstimate : LinearSieveEstimate := by
     have hlog : 2 * A / (3 * ℓ) ≤ log (s - 1) := by
       have hx : s - 1 = 1 + A / ℓ := by
         rw [hs, hL]; field_simp; ring
-      have hxA : A / ℓ ≤ 1 / 2 := by rw [div_le_iff₀ hℓ0]; linarith
-      have hx0 : 0 ≤ A / ℓ := by positivity
-      rw [hx]
-      refine le_trans ?_ (div_one_add_le_log_one_add hx0)
-      rw [div_le_div_iff₀ (by positivity) (by positivity)]
-      rw [show A / ℓ * (3 * ℓ) = 3 * A by field_simp]
-      have h1 := mul_nonneg (by linarith : (0 : ℝ) ≤ A) (by linarith : (0 : ℝ) ≤ 1 - 2 * (A / ℓ))
-      linarith
+      have hxA : A / ℓ ≤ 1 / 2 := by rw [div_le_iff₀ hℓ0]; linarith only [hlz]
+      calc 2 * A / (3 * ℓ) = 2 * (A / ℓ) / 3 := by ring
+        _ ≤ log (s - 1) :=
+            two_mul_div_three_le_log_sub_one (by positivity) hxA (by linarith only [hx])
     -- the error term
     have herr : c₇ * ((r : ℝ) / (r + 1)) * delta s y * errMaj true s ≤ B := by
       have hδ : delta s y ≤ D := hD ▸ delta_le_of_le_three (s := s) (by linarith) (by linarith) hL1

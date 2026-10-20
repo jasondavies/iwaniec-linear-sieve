@@ -98,14 +98,9 @@ theorem exists_siftedCount_interval_pos : ∃ c : ℝ, 1 ≤ c ∧
   have hs0 : 0 < s := by linarith
   have hf := one_sub_fSieve_div_ge s ⟨by linarith, hs4⟩
   have hlog : 2 * c / (3 * ℓ) ≤ log (s - 1) := by
-    have h1 : c / ℓ / (1 + c / ℓ) ≤ log (1 + c / ℓ) := div_one_add_le_log_one_add hcℓ0
-    have h2 : log (1 + c / ℓ) ≤ log (s - 1) := log_le_log (by positivity) (by linarith)
-    have h3 : 2 * c / (3 * ℓ) ≤ c / ℓ / (1 + c / ℓ) := by
-      rw [div_div, div_le_div_iff₀ (by positivity) (by positivity)]
-      have : (ℓ * (1 + c / ℓ)) = ℓ + c := by field_simp
-      rw [this]
-      nlinarith
-    linarith
+    have hcℓ : c / ℓ ≤ 1 / 2 := by rw [div_le_iff₀ hℓ]; linarith only [hlz]
+    calc 2 * c / (3 * ℓ) = 2 * (c / ℓ) / 3 := by ring
+      _ ≤ log (s - 1) := two_mul_div_three_le_log_sub_one hcℓ0 hcℓ hs2
   have hpos : e₁ * log (log 3) / L ≤ 1 - fSieve s / s := by
     have h3 : 2 * c / L ≤ 3 * log (s - 1) / s := by
       rw [← hsℓ, div_le_div_iff₀ (by positivity) hs0]
