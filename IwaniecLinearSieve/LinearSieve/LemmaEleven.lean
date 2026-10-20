@@ -168,6 +168,27 @@ theorem delta_pos {s : ℝ} (hs : 1 ≤ s) (y : ℝ) : 0 < delta s y := by
   have := lsx_nonneg (log y) hs
   exact rpow_pos_of_pos (by linarith) _
 
+/-- The algebraic decay estimate in Lemma 11: the bound on the growth rate `E`
+and `G ℓ ≤ 4K` imply `K / (1 + x)⁵ ≤ K - EG`. -/
+theorem lemma11_decay_bound {x E G K ℓ : ℝ} (hx : 0 ≤ x) (hE : 0 ≤ E)
+    (hK : 0 ≤ K) (hℓ : 0 < ℓ) (hG : G * ℓ ≤ 4 * K)
+    (hrate : 4 * E * (1 + 5 * x) ≤ 5 * x * ℓ) :
+    K / (1 + x) ^ 5 ≤ K - E * G := by
+  have hx5 : 0 < 1 + 5 * x := by linarith only [hx]
+  have hbern : 1 + 5 * x ≤ (1 + x) ^ 5 :=
+    one_add_mul_le_pow (by linarith only [hx]) 5
+  have hEG : E * G * (1 + 5 * x) ≤ 5 * x * K := by
+    have h1 := mul_le_mul_of_nonneg_left hG hE
+    have h2 := mul_le_mul_of_nonneg_right h1 hx5.le
+    have h3 := mul_le_mul_of_nonneg_right hrate hK
+    apply le_of_mul_le_mul_left (a := ℓ) _ hℓ
+    nlinarith only [h2, h3]
+  calc K / (1 + x) ^ 5 ≤ K / (1 + 5 * x) :=
+        div_le_div_of_nonneg_left hK hx5 hbern
+    _ ≤ K - E * G := by
+        rw [div_le_iff₀ hx5]
+        nlinarith only [hEG]
+
 /-- [I71, Lemma 11] ((3.15)), with `s₀ = e^{32}`, `c₃ = 4`, and the upper limit `ξ` replaced by any
 `b` with `160 b² log⁴ b ≤ log² y`:
 `∫_s^b (1 + t² log⁵ t / L²)^{5(t-1)} G_r(t-1) t/(t-1)² dt < δ(s, y) G_{r+1}(s)`. -/
@@ -176,10 +197,9 @@ theorem lemma11 (r : ℕ) {y s b : ℝ} (hs : exp 32 ≤ s) (hsb : s ≤ b)
     ∫ t in s..b, (1 + t ^ 2 * log t ^ 5 / log y ^ 2) ^ (5 * (t - 1)) * majG r (t - 1) * t /
       (t - 1) ^ 2 < delta s y * majG (r + 1) s := by
   set L := log y
-  have hs1 : 1 ≤ s := (range_facts hs hsb hb).1
   have hs3 : 3 < s := by linarith [add_one_le_exp (32 : ℝ)]
   -- `τ(t) = δ(t) G_{r+1}(t)` and its derivative
-  set τ : ℝ → ℝ := fun t => delta t y * majG (r + 1) t with hτ
+  set τ : ℝ → ℝ := fun t => delta t y * majG (r + 1) t
   have hτd : ∀ t, 3 < t → HasDerivAt τ
       ((1 + t ^ 2 * log t ^ 5 / L ^ 2) ^ (5 * (t - 0)) *
         (5 * log (1 + t ^ 2 * log t ^ 5 / L ^ 2) + 5 * (t - 0) *
@@ -206,41 +226,26 @@ theorem lemma11 (r : ℕ) {y s b : ℝ} (hs : exp 32 ≤ s) (hsb : s ≤ b)
   have ht3 : 3 < t := by linarith [ht.1]
   obtain ⟨ht1, hlt, hw, hL⟩ := range_facts (L := L) (hs.trans ht.1.le) ht.2.le hb
   obtain ⟨hE0, -, hE2⟩ := rate_bound (L := L) (a := 0) le_rfl zero_le_one ht1 hlt hw
-  set x := t ^ 2 * log t ^ 5 / L ^ 2 with hx
+  set x := t ^ 2 * log t ^ 5 / L ^ 2
   set E := 5 * log (1 + x) + 5 * (t - 0) * ((2 * t * log t ^ 5 + 5 * t * log t ^ 4) / L ^ 2) /
-    (1 + x) with hE
-  have hK0 : 0 < majG r (t - 1) * t / (t - 1) ^ 2 := by
-    have : 0 < t - 1 := by linarith
-    have := majG_pos r (t - 1)
-    have : 0 < t := by linarith
-    positivity
+    (1 + x)
+  have hK0 : 0 < majG r (t - 1) * t / (t - 1) ^ 2 :=
+    div_pos (mul_pos (majG_pos r _) (by linarith only [ht3]))
+      (sq_pos_of_pos (by linarith only [ht3]))
   set K := majG r (t - 1) * t / (t - 1) ^ 2 with hK
   set G := majG (r + 1) t
   have hx0 : 0 ≤ x := lsx_nonneg L ht1
-  have hG : G * log t < 4 * K := majG_succ_mul_log_lt r (by linarith)
-  have hP : 0 < (1 + x) ^ (5 * (t - 0)) := rpow_pos_of_pos (by linarith) _
-  have hbern : 1 + 5 * x ≤ (1 + x) ^ 5 := by
-    have := one_add_mul_le_pow (a := x) (by linarith) 5
-    norm_num at this ⊢; linarith
-  -- `E G (1 + 5x) ≤ 5 x K`
-  have i1 : E * (G * log t) ≤ E * (4 * K) := mul_le_mul_of_nonneg_left hG.le hE0
-  have i2 : 4 * E * (1 + 5 * x) * K ≤ 5 * x * log t * K := mul_le_mul_of_nonneg_right hE2 hK0.le
-  have i3 : E * G * (1 + 5 * x) ≤ 5 * x * K := by
-    have hl : 0 < log t := by linarith
-    have : log t * (E * G * (1 + 5 * x)) ≤ log t * (5 * x * K) := by nlinarith
-    exact le_of_mul_le_mul_left this hl
-  have i4 : K / (1 + x) ^ 5 ≤ K - E * G := by
-    calc K / (1 + x) ^ 5 ≤ K / (1 + 5 * x) :=
-          div_le_div_of_nonneg_left hK0.le (by linarith) hbern
-      _ ≤ K - E * G := by
-          rw [div_le_iff₀ (by linarith)]; nlinarith
+  have hG : G * log t < 4 * K := majG_succ_mul_log_lt r (by linarith only [ht3])
+  have hP : 0 < (1 + x) ^ (5 * (t - 0)) := rpow_pos_of_pos (by linarith only [hx0]) _
+  have hdecay := lemma11_decay_bound hx0 hE0 hK0.le
+    (by linarith only [hlt] : 0 < log t) hG.le hE2
   show (1 + x) ^ (5 * (t - 1)) * majG r (t - 1) * t / (t - 1) ^ 2 ≤
     -((1 + x) ^ (5 * (t - 0)) * E * G + (1 + x) ^ (5 * (t - 0)) * -K)
   rw [rpow_five_mul_sub_one (by linarith)]
   simp only [sub_zero] at hP ⊢
   calc (1 + x) ^ (5 * t) / (1 + x) ^ 5 * majG r (t - 1) * t / (t - 1) ^ 2
       = (1 + x) ^ (5 * t) * (K / (1 + x) ^ 5) := by rw [hK]; ring
-    _ ≤ (1 + x) ^ (5 * t) * (K - E * G) := mul_le_mul_of_nonneg_left i4 hP.le
+    _ ≤ (1 + x) ^ (5 * t) * (K - E * G) := mul_le_mul_of_nonneg_left hdecay hP.le
     _ = _ := by ring
 
 /-! ### Lemma 12 and the monotonicity used in Corollary 3 -/
