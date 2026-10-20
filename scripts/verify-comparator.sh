@@ -58,4 +58,8 @@ pathlib.Path(destination).write_text(json.dumps(config, indent=2) + "\n", encodi
 PY
 
 lake exe cache get
+# Comparator makes only the root .lake writable. Build Solution first so the
+# contained strong_pnt package has up-to-date artifacts in vendor/strong-pnt/.lake
+# before Comparator rebuilds and exports inside its read-only source sandbox.
+lake build Solution
 lake comparator --config "$config"
