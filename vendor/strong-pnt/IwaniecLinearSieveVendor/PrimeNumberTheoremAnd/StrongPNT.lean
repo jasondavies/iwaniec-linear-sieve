@@ -208,11 +208,10 @@ theorem BorelCaratheodoryDeriv {M r R : ℝ} {f : ℂ → ℂ} {z : ℂ}
     (realPartBounded : ∀ z ∈ Metric.ball 0 R, (f z).re ≤ M)
     (hyp_z : z ∈ Metric.closedBall 0 r) :
     ‖deriv f z‖ ≤ 16 * M * R ^ 2 / (R - r) ^ 3 := by
-  have hRr : 0 < R - r := sub_pos.2 hyp_r
   have hr' : 2 * M * ((R + r) / 2) ^ 2 / ((R - (R + r) / 2) * ((R + r) / 2 - r) ^ 2) =
       4 * M * (R + r) ^ 2 / (R - r) ^ 3 := by
-    rw [show R - (R + r) / 2 = (R - r) / 2 by ring, show (R + r) / 2 - r = (R - r) / 2 by ring,
-      div_eq_div_iff (by positivity) (by positivity)]
+    rw [div_eq_div_iff (mul_ne_zero (by linarith) (pow_ne_zero _ (by linarith)))
+      (pow_ne_zero _ (by linarith))]
     ring
   calc ‖deriv f z‖
     _ ≤ 4 * M * (R + r) ^ 2 / (R - r) ^ 3 := hr' ▸

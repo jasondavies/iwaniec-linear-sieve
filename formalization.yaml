@@ -72,8 +72,8 @@ related_formalizations:
     note: >-
       The import closure of StrongPNT (the prime number theorem with de la
       Vallée Poussin error term) and IEANTN/Mertens.lean are vendored from
-      revision c39a751132c88b6e8080b74c74023fd95b3d8be0 under the module prefix
-      IwaniecLinearSieveVendor, ported to Lean 4.35.0 and the module system;
+      Lean 4.35.0 revision 127b50e33f6033e2147921167a117af96d9ba4ea under the
+      module prefix IwaniecLinearSieveVendor, adapted to the module system;
       vendor/strong-pnt/UPSTREAM.json records file hashes and every local
       patch.
 

@@ -70,7 +70,6 @@ import all IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Fourier
 import all IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.IEANTN.Mertens
 import all IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Mathlib.Algebra.Notation.Support
 import all IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Mathlib.Analysis.SpecialFunctions.Log.Basic
-import all IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Mathlib.Tactic.LinearCombinationPrime
 import all IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.MediumPNT
 import all IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.MellinCalculus
 import all IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Rectangle
@@ -78,7 +77,6 @@ import all IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.ResidueCalcOnRectangle
 import all IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.SmoothExistence
 import all IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Sobolev
 import all IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.StrongPNT
-import all IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Tactic.AdditiveCombination
 import all IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.ZetaBounds
 import all IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.ZetaConj
 meta import Lean

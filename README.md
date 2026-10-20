@@ -92,10 +92,12 @@ with relative error `o(1/log x)` uniformly over all scales; this needs PNT-stren
 (see `BLUEPRINT.md`). We use the de la Vallée Poussin form
 `ψ(x) = x + O(x exp(-c √log x))` (`StrongPNT`) from
 [PrimeNumberTheoremAnd](https://github.com/AlexKontorovich/PrimeNumberTheoremAnd), whose
-15-file import closure is vendored in `vendor/strong-pnt` (Apache 2.0) and ported to
-Lean 4.35.0, together with its `IEANTN/Mertens.lean` (Mertens' theorems with the constant
-`e^{-γ}`), and to the Lean module system; `vendor/strong-pnt/UPSTREAM.json` records the
-revision, file hashes, the module-system rewrite and the local patches to seven files. The
+14-file import closure is vendored in `vendor/strong-pnt` (Apache 2.0), together with its
+`IEANTN/Mertens.lean` (Mertens' theorems with the constant `e^{-γ}`). The snapshot uses
+upstream's Lean 4.35.0 revision, adapted to the Lean module system;
+`vendor/strong-pnt/UPSTREAM.json` records the revision, file hashes, the module-system rewrite
+and the local patches to three files. Most upstream sources are still non-modules, which
+prevents direct imports from our module-based library through a pinned dependency. The
 vendored modules live under the prefix `IwaniecLinearSieveVendor`, so a project can depend on
 both this library and PrimeNumberTheoremAnd; since the declarations keep their upstream names, a
 single file should not import both.

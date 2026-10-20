@@ -622,10 +622,10 @@ Files `IwaniecLinearSieve/EulerGamma/{Mertens,Buchstab,LemmaFive,TheoremFour}.le
 `IwaniecLinearSieve/EulerGamma.lean`. Nothing in §§A–D depends on them.
 
 1. **Mertens' third theorem** (`Mertens.lean`). PrimeNumberTheoremAnd's
-   `PrimeNumberTheoremAnd/IEANTN/Mertens.lean` is vendored in `vendor/strong-pnt` (two port
-   fixes: the import `Mathlib.Analysis.SpecialFunctions.Integrability.LogMeromorphic` is now
-   `…Integrability.Log`, and `integrableOn_indicator_iff` takes a `NullMeasurableSet`; recorded in
-   `UPSTREAM.json`). From `Mertens.E₃.bound''` (`∏_{p ≤ x}(1 - 1/p) ~ e^{-γ}/log x`), via
+   `PrimeNumberTheoremAnd/IEANTN/Mertens.lean` is vendored in `vendor/strong-pnt` from upstream's
+   Lean 4.35.0 revision. It is converted to the module system and explicitly imports
+   `Mathlib.Algebra.Order.Floor.Semifield`, as recorded in `UPSTREAM.json`.
+   From `Mertens.E₃.bound''` (`∏_{p ≤ x}(1 - 1/p) ~ e^{-γ}/log x`), via
    `R_nat_add_half : R(n + 1/2) = ∏_{p ≤ n}(1 - 1/p)`:
    * `tendsto_R_nat_add_half_mul_log`, `tendsto_R_mul_log :
      Tendsto (fun z => R z * log z) atTop (𝓝 (exp (-eulerMascheroniConstant)))`;

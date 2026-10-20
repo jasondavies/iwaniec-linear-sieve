@@ -7,7 +7,6 @@ public import Mathlib.Analysis.Complex.RemovableSingularity
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.Analysis.Meromorphic.NormalForm
 public import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Rectangle
-public import IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.Tactic.AdditiveCombination
 
 @[expose] public section
 
@@ -397,7 +396,7 @@ lemma RectanglePullToNhdOfPole' [CompleteSpace E] {z₀ z₁ z₂ z₃ p : ℂ}
   have h₇ := RectangleIntegralHSplit' hright' hright
   have h₈ := fHolo.vanishesOnRectangle hright''
   simp only [re_add_im] at *
-  additive_combination h₁ + h₂ + h₃ + h₄ + h₅ + h₆ + h₇ + h₈
+  linear_combination (norm := abel) h₁ + h₂ + h₃ + h₄ + h₅ + h₆ + h₇ + h₈
 
 blueprint_comment /--
 The next lemma allows to zoom a big rectangle down to a small
