@@ -59,6 +59,42 @@ theorem tendsto_pntE_mul_log : Tendsto (fun z => pntE z * log z) atTop (nhds 0) 
   rw [mul_pow, sq_sqrt hl, neg_mul]
   field_simp [pntκ_pos.ne']
 
+/-- For `2 ≤ s ≤ 5/2`, choosing `A = B + 5` absorbs the bounded sieve error `B`
+and leaves a saving of `4/ℓ²`. -/
+theorem sieve_error_absorption {A B s ℓ : ℝ} (hA : A = B + 5) (hB : 0 ≤ B)
+    (hs2 : 2 ≤ s) (hs25 : s ≤ 5 / 2) (hℓ : 0 < ℓ) :
+    (s - 2 * A / ℓ) / (s * ℓ) + B / (s * ℓ) ^ 2 ≤ 1 / ℓ - 4 / ℓ ^ 2 := by
+  have hs0 : 0 < s := by linarith only [hs2]
+  have hkey : 4 * s ^ 2 ≤ 2 * A * s - B := by
+    have hmargin : 2 * A * s - B - 4 * s ^ 2 =
+        B * (2 * s - 1) + 2 * s * (5 - 2 * s) := by rw [hA]; ring
+    have hBterm := mul_nonneg hB (by linarith only [hs2] : (0 : ℝ) ≤ 2 * s - 1)
+    have hsterm := mul_nonneg (by positivity : (0 : ℝ) ≤ 2 * s)
+      (by linarith only [hs25] : (0 : ℝ) ≤ 5 - 2 * s)
+    linarith only [hmargin, hBterm, hsterm]
+  have hsaving : 4 / ℓ ^ 2 ≤ (2 * A * s - B) / (s ^ 2 * ℓ ^ 2) := by
+    calc 4 / ℓ ^ 2 = (4 * s ^ 2) / (s ^ 2 * ℓ ^ 2) := by field_simp
+      _ ≤ (2 * A * s - B) / (s ^ 2 * ℓ ^ 2) :=
+          div_le_div_of_nonneg_right hkey (by positivity)
+  calc (s - 2 * A / ℓ) / (s * ℓ) + B / (s * ℓ) ^ 2 =
+      1 / ℓ - (2 * A * s - B) / (s ^ 2 * ℓ ^ 2) := by field_simp; ring
+    _ ≤ 1 / ℓ - 4 / ℓ ^ 2 := sub_le_sub le_rfl hsaving
+
+/-- If the PNT error `e` satisfies `eℓ ≤ 3c`, the saving `4c/ℓ²` leaves the
+factor `1 - 1/ℓ` against the lower estimate `(c - e)/ℓ` for `R(z)`. -/
+theorem pnt_error_absorption {c e ℓ : ℝ} (hℓ : 0 < ℓ) (he0 : 0 ≤ e)
+    (he : e * ℓ ≤ 3 * c) :
+    c / ℓ - 4 * c / ℓ ^ 2 ≤ (c - e) / ℓ * (1 - 1 / ℓ) := by
+  have herror : e / ℓ ≤ 3 * c / ℓ ^ 2 := by
+    calc e / ℓ = (e * ℓ) / ℓ ^ 2 := by field_simp
+      _ ≤ 3 * c / ℓ ^ 2 := div_le_div_of_nonneg_right he (sq_nonneg ℓ)
+  have hremaining : 0 ≤ e / ℓ ^ 2 := div_nonneg he0 (sq_nonneg ℓ)
+  have hsplit : 4 * c / ℓ ^ 2 = c / ℓ ^ 2 + 3 * c / ℓ ^ 2 := by ring
+  calc c / ℓ - 4 * c / ℓ ^ 2
+      ≤ c / ℓ - c / ℓ ^ 2 - e / ℓ + e / ℓ ^ 2 := by
+        linarith only [herror, hremaining, hsplit]
+    _ = (c - e) / ℓ * (1 - 1 / ℓ) := by field_simp; ring
+
 /-- [I78, Lemma 2], from [I71, Theorems 4 and 5]: at level `C₀ z²` the
 Rosser lower-bound sieve leaves a main term `≫ R(z)/log z`, and its support has size
 `≪ z² / log² z`. -/
@@ -151,49 +187,25 @@ theorem linearSieveEstimate : LinearSieveEstimate := by
         rw [mainMaj_true]
         have h3 : 3 * (2 * A / (3 * ℓ)) = 2 * A / ℓ := by field_simp
         gcongr
-        linarith
+        linarith only [hf, hlog, h3]
       have hfin : (s - 2 * A / ℓ) / log y + B / log y ^ 2 ≤ 1 / ℓ - 4 / ℓ ^ 2 := by
         rw [← hsℓ]
-        have hs0 : 0 < s := by linarith
-        have heq : (s - 2 * A / ℓ) / (s * ℓ) + B / (s * ℓ) ^ 2 =
-            1 / ℓ - (2 * A * s - B) / (s ^ 2 * ℓ ^ 2) := by
-          field_simp; ring
-        have hkey : 4 * s ^ 2 ≤ 2 * A * s - B := by
-          have he : 2 * A * s - B - 4 * s ^ 2 = B * (2 * s - 1) + 2 * s * (5 - 2 * s) := by
-            rw [hA]; ring
-          have h1 := mul_nonneg hB0 (by linarith : (0 : ℝ) ≤ 2 * s - 1)
-          have h2 := mul_nonneg (by linarith : (0 : ℝ) ≤ 2 * s) (by linarith : (0 : ℝ) ≤ 5 - 2 * s)
-          linarith
-        have h4le : 4 / ℓ ^ 2 ≤ (2 * A * s - B) / (s ^ 2 * ℓ ^ 2) := by
-          rw [div_le_div_iff₀ (by positivity) (by positivity)]
-          calc 4 * (s ^ 2 * ℓ ^ 2) = (4 * s ^ 2) * ℓ ^ 2 := by ring
-            _ ≤ (2 * A * s - B) * ℓ ^ 2 := by gcongr
-        rw [heq]; linarith
+        exact sieve_error_absorption hA hB0 hs2 hs25 hℓ0
       calc cR * (mainMaj true s / log y + c₇ * ((r : ℝ) / (r + 1)) * delta s y *
             errMaj true s / log y ^ 2) ≤ cR * (1 / ℓ - 4 / ℓ ^ 2) := by
-            gcongr; exact hmain.trans hfin
+            exact mul_le_mul_of_nonneg_left (hmain.trans hfin) hcR.le
         _ = cR / ℓ - 4 * cR / ℓ ^ 2 := by ring
-    -- the lower bound for `R z`
+    -- The PNT comparison converts the deficit estimate into a bound relative to `R(z)`.
     have hRz : (cR - CR * pntE z) / ℓ ≤ R z := by
       rw [div_le_iff₀ hℓ0]
-      have := (abs_le.1 (hR z hz2)).1
-      rw [← hℓ] at this
-      linarith
+      have hRlower := (abs_le.1 (hR z hz2)).1
+      rw [← hℓ] at hRlower
+      linarith only [hRlower]
     have h1 : 0 ≤ 1 - 1 / ℓ := by
       rw [sub_nonneg, div_le_one hℓ0]; linarith
     calc R z - rosserMain true y z ≤ cR / ℓ - 4 * cR / ℓ ^ 2 := hdef
-      _ ≤ (cR - CR * pntE z) / ℓ * (1 - 1 / ℓ) := by
-        have heq : (cR - CR * pntE z) / ℓ * (1 - 1 / ℓ) =
-            cR / ℓ - cR / ℓ ^ 2 - CR * pntE z / ℓ + CR * pntE z / ℓ ^ 2 := by
-          field_simp; ring
-        have hp1 : CR * pntE z / ℓ ≤ 3 * cR / ℓ ^ 2 := by
-          rw [div_le_div_iff₀ hℓ0 (by positivity)]
-          calc CR * pntE z * ℓ ^ 2 = (CR * pntE z * ℓ) * ℓ := by ring
-            _ ≤ 3 * cR * ℓ := by gcongr
-        have hp2 : 0 ≤ CR * pntE z / ℓ ^ 2 := by
-          have := pntE_pos z; positivity
-        have h43 : 4 * cR / ℓ ^ 2 = cR / ℓ ^ 2 + 3 * cR / ℓ ^ 2 := by ring
-        rw [heq]; linarith
+      _ ≤ (cR - CR * pntE z) / ℓ * (1 - 1 / ℓ) :=
+          pnt_error_absorption hℓ0 (mul_nonneg hCR (pntE_pos z).le) hpnt
       _ ≤ R z * (1 - 1 / ℓ) := mul_le_mul_of_nonneg_right hRz h1
   · -- support
     have h := h5 y hy₀ s ⟨hs2, by linarith⟩
