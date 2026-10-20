@@ -26,7 +26,7 @@ condition `p₁ < f []`; take `f [] ≥ z` to recover [I71] literally) and
   `sum_le_siftedCount`): `A_k(M; z) ≤ ∑_{d ∈ D⁺} μ(d) |M_d|` and
   `A_k(M; z) ≥ ∑_{d ∈ D⁻} μ(d) |M_d|`.
 * Corollary ((2.5)–(2.8); `lemma1_cor_upper`, `lemma1_cor_lower`): under
-  `(*) |M_d - y/d| ≤ 1` for `(d, k) = 1`, `A_k(M; z) ≤ y G_{r,k}(z) + Σ₁(z)` and
+  `(*) |M_d - y/d| ≤ 1` for squarefree `d` with `(d, k) = 1`, `A_k(M; z) ≤ y G_{r,k}(z) + Σ₁(z)` and
   `A_k(M; z) ≥ y D_{r,k}(z) - Σ₂(z)`, with `G, D = truncMain` and `Σ₁, Σ₂` the support sizes.
 * Lemma 2 (`truncMain_false_eq`, `truncMain_true_eq`): `G_{r,k} = S_{r,k}` and `D_{r,k} = T_{r,k}`,
   where `S_{r,k} = R_k + truncDef f k false (2r) [] z` and `T_{r,k} = R_k - truncDef f k true
@@ -352,31 +352,33 @@ theorem sum_moebius_mul_le_of_approx {D : Finset ℕ} {M : Multiset ℤ} {y : �
         mul_le_mul hμ (hM d hd) (abs_nonneg _) zero_le_one
     _ = 1 := one_mul 1
 
-/-- [I71, (2.5), (2.7)] for any even depth: under `(*) |M_d - y/d| ≤ 1` for `(d, k) = 1`,
+/-- [I71, (2.5), (2.7)] for any even depth: under `(*) |M_d - y/d| ≤ 1` for squarefree `d` with `(d, k) = 1`,
 `A_k(M; z) ≤ y G(z) + Σ₁(z)` with `Σ₁(z) = #D⁺`. -/
 theorem lemma1_cor_upper (hn : Even n) (h : List ℕ) {M : Multiset ℤ} {y : ℝ}
-    (hM : ∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :
+    (hM : ∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :
     (siftedCount k M z : ℝ) ≤
       y * truncMain f k false n h z + #(truncSet f k false n h z) := by
   have h1 : (siftedCount k M z : ℝ) ≤
       ∑ d ∈ truncSet f k false n h z, (μ d : ℝ) * multiplesCount M d := by
     exact_mod_cast siftedCount_le_sum hn h M z
   have h2 := sum_moebius_mul_le_of_approx (D := truncSet f k false n h z) (M := M) (y := y)
-    fun d hd ↦ hM d (coprime_of_mem_truncSet hd)
+    fun d hd ↦ hM d (squarefree_and_primeFactors_subset_truncSet hd).1
+      (coprime_of_mem_truncSet hd)
   rw [truncMain]
   linarith [le_abs_self (∑ d ∈ truncSet f k false n h z, (μ d : ℝ) * multiplesCount M d -
     y * ∑ d ∈ truncSet f k false n h z, (μ d : ℝ) / d)]
 
-/-- [I71, (2.6), (2.8)] for any odd depth: under `(*) |M_d - y/d| ≤ 1` for `(d, k) = 1`,
+/-- [I71, (2.6), (2.8)] for any odd depth: under `(*) |M_d - y/d| ≤ 1` for squarefree `d` with `(d, k) = 1`,
 `A_k(M; z) ≥ y D(z) - Σ₂(z)` with `Σ₂(z) = #D⁻`. -/
 theorem lemma1_cor_lower (hn : Odd n) (h : List ℕ) {M : Multiset ℤ} {y : ℝ}
-    (hM : ∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :
+    (hM : ∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :
     y * truncMain f k true n h z - #(truncSet f k true n h z) ≤ (siftedCount k M z : ℝ) := by
   have h1 : ∑ d ∈ truncSet f k true n h z, (μ d : ℝ) * multiplesCount M d ≤
       (siftedCount k M z : ℝ) := by
     exact_mod_cast sum_le_siftedCount hn h M z
   have h2 := sum_moebius_mul_le_of_approx (D := truncSet f k true n h z) (M := M) (y := y)
-    fun d hd ↦ hM d (coprime_of_mem_truncSet hd)
+    fun d hd ↦ hM d (squarefree_and_primeFactors_subset_truncSet hd).1
+      (coprime_of_mem_truncSet hd)
   rw [truncMain]
   linarith [neg_abs_le (∑ d ∈ truncSet f k true n h z, (μ d : ℝ) * multiplesCount M d -
     y * ∑ d ∈ truncSet f k true n h z, (μ d : ℝ) / d)]

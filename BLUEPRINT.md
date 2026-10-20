@@ -13,7 +13,8 @@ following
 * [I78] H. Iwaniec, *On the problem of Jacobsthal*, Demonstratio Math. 11 (1978), 225–231,
   doi:10.1515/dema-1978-0121.
 
-[I71] is followed lemma by lemma, specialised to `k = 1` (the only case [I78] uses). The
+[I71] is followed lemma by lemma: the core §4 estimates use `k = 1`, while §§2 and 5
+handle general `k` and finite sequences. [I78] uses only `k = 1`. The
 prime-number input is the de la Vallée Poussin prime number theorem
 `ψ(x) = x + O(x exp(-c √log x))`, taken from PrimeNumberTheoremAnd (`StrongPNT`, vendored in
 `vendor/strong-pnt`).
@@ -24,10 +25,10 @@ prime-number input is the de la Vallée Poussin prime number theorem
 |---|---|---|
 | PNT | `StrongPNT` (vendored) | `IwaniecLinearSieveVendor.PrimeNumberTheoremAnd.StrongPNT` |
 | Prime sums | `S(x) = Σ_{p≤x} 1/p = log log x + c₅ + O(exp(-√log x))`; `R(z) = Π_{p<z}(1-1/p)` with `R(z) log z → e^{-γ}`-type estimate `R(z) = c_R / log z + O(exp(-√log z))`; [I71, Lemma 13, Corollaries 1–3, Lemma 14] | `IwaniecLinearSieve.PrimeSums` |
-| Sieve combinatorics | [I71, §2]: Lemma 1 (the inequalities (2.1), (2.2)), its corollary (2.5)–(2.8), Lemma 2 (`G = S`, `D = T`), the identities (2.14), (2.15) | `IwaniecLinearSieve.Rosser` |
-| Sieve functions | [I71, §3]: `g_n`, `f`, `F`, Lemmas 3–10, `𝔐`, `𝔚`, `𝔣`, `𝔉`, `f(2) = 2` | `IwaniecLinearSieve.SieveFunctions` |
-| Estimates | [I71, §4]: Lemmas 11–17, Theorems 4, 5 | `IwaniecLinearSieve.MainTerm`, `IwaniecLinearSieve.Remainder` |
-| Linear sieve | [I71, §5]: Theorem 1 lower bound (1.2)/(1.4), as needed by [I78, Lemma 2] | `IwaniecLinearSieve.LinearSieve` |
+| Sieve combinatorics | [I71, §2]: Lemma 1 (the inequalities (2.1), (2.2)), its corollary (2.5)–(2.8), Lemma 2 (`G = S`, `D = T`), the identities (2.14), (2.15) | `IwaniecLinearSieve.Rosser`, `IwaniecLinearSieve.General` |
+| Sieve functions | [I71, §3]: `g_n`, `f`, `F`, Lemmas 3–10, `𝔐`, `𝔚`, `𝔣`, `𝔉`, `f(2) = 2` | `IwaniecLinearSieve.SieveFunctions`, `IwaniecLinearSieve.SieveMajorants` |
+| Estimates | [I71, §4]: Lemmas 11–17, Theorems 4, 5 | `IwaniecLinearSieve.LinearSieve`, `IwaniecLinearSieve.General.LemmaSixteen` |
+| Linear sieve | Lower-bound estimate at level `y = C₀ z²`, as needed by [I78, Lemma 2] | `IwaniecLinearSieve.LinearSieve.Estimate` |
 | Theorems 1–3 | [I71, §1, §5]: Theorems 1–3 and the Corollary, general `k` and sequences (section E, T1) | `IwaniecLinearSieve.Main` |
 | Jacobsthal | [I78]: Lemma 1 for intervals, the reduction, `iwaniecBound` | `IwaniecLinearSieve.Jacobsthal.ShiftedSieve`, `IwaniecLinearSieve.Jacobsthal.Reduction`, `IwaniecLinearSieve.Jacobsthal` |
 | Full 1978 | [I78]: Lemma 1 in full, Lemma 2, Theorem, Corollary (section G) | `IwaniecLinearSieve.Jacobsthal.LemmaOne`, `.LemmaTwo`, `.Theorem` |
@@ -35,7 +36,12 @@ prime-number input is the de la Vallée Poussin prime number theorem
 
 ## Deviations from the papers
 
-* `k = 1` throughout [I71].
+* The core §4 estimates use `k = 1`, as in [I71]; §§2 and 5 allow general `k` and sequences.
+* [I71, p. 1] states `(*)` for every positive `d` coprime to `k`. We only require it for
+  squarefree `d`, which strengthens the sieve statements: the truncated sets contain only
+  squarefree elements, and the trivial bounds use `d = 1`.
+* Theorem 1 and its Corollary require `1 ≤ k` for their factor `log log (3k)`. Theorem 3
+  omits that factor and also permits `k = 0`, when no primes are sifted out.
 * [I78] needs from (6) only the lower bound
   `Σ σₙ / Π(p-1) ≥ 2e^γ … `; it is used only to make the main term `≫ (s-2)` for
   `s = 2 + O(1/log z)`. The exact value `F(3) = 2e^γ - 3` in [I71, Lemma 5] rests on the
@@ -537,7 +543,7 @@ a `Finset` is the special case `M.val`); `k : ℕ` is arbitrary (Iwaniec: `k ≥
   (parity-general forms `siftedCount_le_sum` (`Even n`), `sum_le_siftedCount` (`Odd n`), any
   history; per integer `truncSieve_sift`, via Buchstab's identity `siftIndicatorK_eq`, i.e. (2.3)).
   Corollary (2.5)–(2.8), with `truncMain f k lower n h z = ∑_{d ∈ truncSet} μ(d)/d` (`G`, `D`) and
-  `#truncSet` (`Σ₁`, `Σ₂`), under `(*) hM : ∀ d, d.Coprime k → |(multiplesCount M d : ℝ) - y/d| ≤ 1`:
+  `#truncSet` (`Σ₁`, `Σ₂`), under `(*) hM : ∀ d, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y/d| ≤ 1`:
 
       lemma1_cor_upper (hn : Even n) h hM z :
         siftedCount k M z ≤ y * truncMain f k false n h z + #(truncSet f k false n h z)
@@ -684,7 +690,7 @@ Files `IwaniecLinearSieve/EulerGamma/{Mertens,Buchstab,LemmaFive,TheoremFour}.le
 Files `IwaniecLinearSieve/Main/{Basic,TheoremOne,Fundamental,Corollary,TheoremTwo,TheoremThree}.lean`
 ([I71, §1 and §5]). Notation: `L = log y`, `λ = log log 3y`, `ξ(y) = L/λ^{11/5}` (`xi`),
 `δ(s, y) = (1 + s² log⁵ s/L²)^{5s}` (`delta`), `z = y^{1/s}`, `(*)` is
-`∀ d, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1`. All constants are absolute (uniform in
+`∀ d, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1`. All constants are absolute (uniform in
 `k`, `M`, `y`, `s`, `z`), and all statements use only `fSieve`, `FSieve`, `bigM`, `Rk`, `R` (the
 Mertens constant `cR` of `R_asymp` is used inside the proofs only).
 

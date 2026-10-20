@@ -38,8 +38,8 @@ vendored prime number theorem against that allowlist (CI runs both).
   ([doi:10.1090/coll/057](https://doi.org/10.1090/coll/057)), §12.4–12.6, for the modern form of
   the same argument.
 
-[I71] is formalised in full: §2 (Lemmas 1, 2 for general `k` and finite sequences `M`, as multisets, so repeated terms count
-with multiplicity), §3 (the functions
+[I71] is formalized in full: §2 (Lemmas 1, 2 for general `k` and finite sequences `M`, as
+multisets, so repeated terms count with multiplicity), §3 (the functions
 `f`, `F`, `𝔐`, `𝔚`, Lemmas 3–10, including Lemma 5 with `F(3) = 2e^γ - 3` and the asymptotics of
 `𝔐`), §4 (Lemmas 11–17, Theorem 4: main term with error `O(1/log y)`; Theorem 5: support of size
 `O(y / log² y)`) and §5 (Theorem 1 with its Corollary, Theorems 2 and 3), in the module
@@ -48,7 +48,7 @@ with multiplicity), §3 (the functions
 Theorem 1 at level `y = C₀ z²` (`linearSieveEstimate`), so `iwaniecBound` does not depend on §5 or
 on the results involving `γ`.
 
-[I78] is formalised in full: Lemma 1 for arbitrary sequences, multiplicative functions `f`, `g`
+[I78] is formalized in full: Lemma 1 for arbitrary sequences, multiplicative functions `f`, `g`
 and weights, with both the lower bound (4) and the upper bound (3) (`shiftedSieve_lower`,
 `shiftedSieve_upper`); Lemma 2 (`lemma2_sum_abs_le`, `lemma2_sum_sigma_ge`); the Theorem, that
 every interval of length `c ∏ (1 - 1/q_i)⁻¹ r² log r` contains at least `r²` integers coprime to
@@ -136,12 +136,18 @@ single file should not import both.
   supersolutions `exp(-Φ₁)`, `exp(-Φ₋₅)`, `Φ_c(s) = s(log s + log log s - 1 + (log log s + c)/log s)`;
   we then define `ϱ`, prove Iwaniec's two comparisons, and deduce de Bruijn's asymptotics of `ϱ`
   (`dickman_asymp`) from those of `𝔐`.
+* [I71, p. 1] assumes `(*) |M_d - y/d| ≤ 1` for every positive `d` coprime to `k`. We
+  strengthen the sieve statements by requiring this only for squarefree `d`; the proof
+  uses only elements of the truncated sets and `d = 1`.
 * Theorems 1–3 ([I71, §5]): the error terms need no `log log 3k` (since `R ≤ R_k`, so
   `1/R_k ≤ 1/R`), although `theorem1` and the Corollary are stated with it as printed. Theorem 1
-  holds for `s ≤ ξ(y)`; the Corollary and (1.6) also need `z ≤ y^{1/ξ(y)}`, which [I71] does
-  not treat: there we prove a fundamental lemma from the crude bounds at a lower sieve level.
+  holds for `s ≤ ξ(y)`, where `ξ(y) = log y / (log log (3y))^{11/5}`; the Corollary and
+  (1.6) also need `z ≤ y^{1/ξ(y)}`, which [I71] does not treat: there we prove a fundamental
+  lemma from the crude bounds at a lower sieve level.
   (1.3) is stated for `2 ≤ z ≤ y` with `F(s) + (3 - s)⁺` (our `F` is constant below 3), (1.4)
   for all `z ≥ 2`, (1.5) for `s ≥ 2`. Theorem 2 sifts by `z > P_r` rather than `z = P_r`.
+  Theorem 1 and its Corollary require `1 ≤ k` for the printed factor `log log (3k)`;
+  Theorem 3 also allows `k = 0`, when no primes are sifted out.
 * Several small gaps in [I71] are filled (e.g. Lemma 10 assumes, without proof, that
   `𝔐(t-1)/𝔐(t)` increases; the monotonicity used in Corollary 3 does not follow from Lemma 12;
   the slack in Theorem 4's induction must be `(log L)²/L²` rather than `1/L²`); see

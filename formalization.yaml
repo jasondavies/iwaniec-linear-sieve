@@ -106,7 +106,7 @@ automation:
     - method: agent
       models: ["gpt-6-astra"]
       tool_setup: >-
-        The Lean development (definitions, statements and proofs, including
+        The initial Lean development (definitions, statements and proofs, including
         the port of the vendored PrimeNumberTheoremAnd files to Lean 4.35.0)
         was written entirely by GPT-6-Astra; the human author chose the
         papers and directed the work.
@@ -125,6 +125,13 @@ automation:
         collectAxioms with `import all`; and wrote Challenge.lean,
         Solution.lean, comparator.json and this file. No mathematical content
         was changed.
+    - method: agent
+      framework: "Codex"
+      tool_setup: >-
+        Follow-up review checked (*) against the first page of [I71] and
+        strengthened the sieve statements to require the approximation only
+        for squarefree divisors. Updated the proofs, Challenge, documentation
+        and provenance record, then reran the build, axiom audit and Comparator.
   notes: >-
     All Lean code in this repository, apart from the vendored
     PrimeNumberTheoremAnd files written by its contributors, was produced by
@@ -134,6 +141,11 @@ automation:
 
 fidelity:
   divergences: >-
+    [I71, p. 1] assumes (*) for every positive d coprime to k. The sieve
+    statements here require it only for squarefree d, a strengthening:
+    the proof uses only elements of the truncated sets and d = 1.
+    Theorem 1 and its Corollary require k ≥ 1 for the printed factor
+    log log (3k); Theorem 3 also permits k = 0, when no primes are sifted out.
     The core estimates (Theorems 4 and 5 of [I71]) are for k = 1, as in
     Iwaniec's proof; general k and sequences enter through §2 and §5. The
     error exp(−√log x) of [I71] is exp(−κ √log x) for a fixed κ > 0 from the

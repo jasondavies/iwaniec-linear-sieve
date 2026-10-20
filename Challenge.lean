@@ -26,9 +26,14 @@ The [I78] statements and [I71, Theorem 2] use only Mathlib. The [I71] sieve stat
 definitions below, copied verbatim from `IwaniecLinearSieve/Definitions.lean`; Comparator checks
 that they are the same constants as in the solution.
 
-The sieve hypothesis `(*)` of [I71] for a finite sequence `M` of integers (a multiset, so
-repeated terms count with multiplicity), a modulus `k` and a level `y` is
-`∀ d : ℕ, d.Coprime k → |multiplesCount M d - y / d| ≤ 1`.
+For a finite sequence `M` of integers (a multiset, so repeated terms count with multiplicity),
+a modulus `k` and a level `y`, we use the following weaker form of the sieve hypothesis `(*)`:
+`∀ d : ℕ, Squarefree d → d.Coprime k → |multiplesCount M d - y / d| ≤ 1`.
+[I71, p. 1] assumes the bound for every positive `d` coprime to `k`; only squarefree `d`
+are needed in the proof, so the statements below hold under a weaker hypothesis.
+
+Theorem 1 and its Corollary require `1 ≤ k` for the printed factor `log log (3k)`.
+Theorem 3 has no such factor and also holds for `k = 0`, when no primes are sifted out.
 -/
 
 open Real Finset
@@ -142,7 +147,7 @@ slip; this is the correct one), and
 `log 𝔐(s) = -s (log s + log log s - 1 + log log s / log s) + O(s / log s)`. -/
 theorem theorem1_full :
     (∃ c₀ : ℝ, 0 < c₀ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Multiset ℤ) (y s : ℝ), 1 < y →
-      (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) →
+      (∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) →
       s ≤ log y / log (log (3 * y)) ^ (11 / 5 : ℝ) →
       (3 ≤ s → (siftedCount k M (y ^ (1 / s)) : ℝ) <
         y * Rk k (y ^ (1 / s)) * (1 + FSieve s / s +
@@ -163,7 +168,7 @@ theorem theorem1_full :
 For `s ≥ 3` this is (1.3) as printed; for `1 ≤ s < 3` the term `(3 - s)⁺` corrects for `F` being
 constant below 3 (the paper gives no range for `z`). -/
 theorem corollary_upper : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Multiset ℤ) (y z : ℝ),
-    (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ z → z ≤ y →
+    (∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ z → z ≤ y →
     (siftedCount k M z : ℝ) < y * Rk k z * (1 + (FSieve (log y / log z) +
       max (3 - log y / log z) 0) / (log y / log z) + e₁ * log (log (3 * k)) / log y) := by
   sorry
@@ -171,7 +176,7 @@ theorem corollary_upper : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k �
 /-- **[I71, Corollary]**, (1.4): under `(*)`, for `y > 1`, `z ≥ 2` and `s = log y / log z`,
 `A_k(M; z) > y R_k(z) (1 - f(s)/s - e₁ log log 3k / log y)`. -/
 theorem corollary_lower : ∃ e₁ : ℝ, 0 ≤ e₁ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Multiset ℤ) (y z : ℝ),
-    1 < y → (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ z →
+    1 < y → (∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ z →
     y * Rk k z * (1 - fSieve (log y / log z) / (log y / log z) -
       e₁ * log (log (3 * k)) / log y) < siftedCount k M z := by
   sorry
@@ -187,7 +192,7 @@ theorem theorem2 : ∃ C : ℝ, ∀ r : ℕ, 2 ≤ r → ∀ (x : ℤ) (m : ℕ)
 /-- **[I71, Theorem 3]**, (1.5): under `(*)`, for `2 ≤ s < log y / (log log 3y)⁶`,
 `|A_k(M; y^{1/s}) - y R_k(y^{1/s})| ≤ C y R_k(y^{1/s}) (e/(s log s))^s`. -/
 theorem theorem3_fst : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Multiset ℤ) (y s : ℝ), 1 < y →
-    (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ s →
+    (∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ s →
     s < log y / log (log (3 * y)) ^ 6 →
     |(siftedCount k M (y ^ (1 / s)) : ℝ) - y * Rk k (y ^ (1 / s))| ≤
       C * y * Rk k (y ^ (1 / s)) * (exp 1 / (s * log s)) ^ s := by
@@ -197,7 +202,7 @@ theorem theorem3_fst : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Multiset ℤ)
 `log z < log y log log log 16y / (2 log log 3y)`,
 `|A_k(M; z) - y R_k(z)| ≤ C y R_k(z) / log y`. -/
 theorem theorem3_snd : ∃ C : ℝ, ∀ (k : ℕ) (M : Multiset ℤ) (y z : ℝ), 1 < y →
-    (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ z →
+    (∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ z →
     log z < log y * log (log (log (16 * y))) / (2 * log (log (3 * y))) →
     |(siftedCount k M z : ℝ) - y * Rk k z| ≤ C * y * Rk k z / log y := by
   sorry

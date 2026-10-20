@@ -93,8 +93,8 @@ theorem theorem2 : ∃ C : ℝ, ∀ r : ℕ, 2 ≤ r → ∀ (x : ℤ) (m : ℕ)
     by_contra hmN
     rw [not_lt] at hmN
     set M := (range N).val.map fun k : ℕ ↦ x + k
-    have hM : ∀ d : ℕ, d.Coprime 1 → |(multiplesCount M d : ℝ) - y / d| ≤ 1 :=
-      fun d _ ↦ abs_multiplesCount_interval_sub_le x N d
+    have hM : ∀ d : ℕ, Squarefree d → d.Coprime 1 → |(multiplesCount M d : ℝ) - y / d| ≤ 1 :=
+      fun d _ _ ↦ abs_multiplesCount_interval_sub_le x N d
     have hA : siftedCount 1 M z = 0 := by
       rw [siftedCount, Multiset.countP_eq_zero]
       intro a ha

@@ -32,7 +32,7 @@ variable {k : ℕ} {M : Multiset ℤ} {y D z : ℝ}
 `y`: under `(*)`, for `r > π(z)`,
 `A_k(M; z) ≤ y R_k(z) (1 + fail false r D z / R(z)) + #D⁺(D, z)`. -/
 theorem siftedCount_le_fail_of_level (hy : 0 ≤ y) (hD : 0 ≤ D)
-    (hM : ∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) {r : ℕ}
+    (hM : ∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) {r : ℕ}
     (hr : #(primesLT z) < r) :
     (siftedCount k M z : ℝ) ≤
       y * Rk k z * (1 + fail false r D z / R z) + #(rosserSet false D z) := by
@@ -49,7 +49,7 @@ theorem siftedCount_le_fail_of_level (hy : 0 ≤ y) (hD : 0 ≤ D)
 `y`: under `(*)`, for `r > π(z)`,
 `A_k(M; z) ≥ y R_k(z) (1 - fail true r D z / R(z)) - #D⁻(D, z)`. -/
 theorem fail_le_siftedCount_of_level (hy : 0 ≤ y) (hD : 0 ≤ D)
-    (hM : ∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) {r : ℕ}
+    (hM : ∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) {r : ℕ}
     (hr : #(primesLT z) < r) :
     y * Rk k z * (1 - fail true r D z / R z) - #(rosserSet true D z) ≤
       (siftedCount k M z : ℝ) := by
@@ -64,9 +64,9 @@ theorem fail_le_siftedCount_of_level (hy : 0 ≤ y) (hD : 0 ≤ D)
 
 /-- Under `(*)`, `A_k(M; z) ≤ |M| ≤ y + 1` (take `d = 1`). -/
 theorem siftedCount_le_add_one
-    (hM : ∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :
+    (hM : ∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :
     (siftedCount k M z : ℝ) ≤ y + 1 := by
-  have h1 := (abs_le.1 (hM 1 (Nat.coprime_one_left k))).2
+  have h1 := (abs_le.1 (hM 1 squarefree_one (Nat.coprime_one_left k))).2
   have h2 : siftedCount k M z ≤ multiplesCount M 1 := by
     unfold siftedCount multiplesCount
     calc _ ≤ Multiset.card M := Multiset.countP_le_card _ _
@@ -81,7 +81,7 @@ theorem Rk_le_one (k : ℕ) (z : ℝ) : Rk k z ≤ 1 :=
 
 /-- The trivial bound `|A_k(M; z) - y R_k(z)| ≤ 2y` under `(*)`, for `y ≥ 1`. -/
 theorem abs_siftedCount_sub_le (hy : 1 ≤ y)
-    (hM : ∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :
+    (hM : ∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :
     |(siftedCount k M z : ℝ) - y * Rk k z| ≤ 2 * y := by
   have h1 := siftedCount_le_add_one hM z
   have h2 : y * Rk k z ≤ y := mul_le_of_le_one_right (by linarith) (Rk_le_one k z)

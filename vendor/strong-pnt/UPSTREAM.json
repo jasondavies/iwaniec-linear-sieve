@@ -10,6 +10,9 @@
       "revision": "v4.34.0",
       "path": "Mathlib/Tactic/LinearCombinationPrime.lean",
       "note": "removed from Mathlib in v4.35.0; vendored at a new module path"
+    },
+    "local": {
+      "note": "Authored in this repository; not copied from an upstream source file."
     }
   },
   "module_prefix": "Every upstream module `M` is vendored as `IwaniecLinearSieveVendor.M` (file `IwaniecLinearSieveVendor/M.lean`, imports rewritten accordingly) so that the vendored copy cannot collide with PrimeNumberTheoremAnd or LeanArchitect in a downstream workspace; local_sha256 includes this rewrite",
@@ -129,6 +132,11 @@
       "upstream_path": "PrimeNumberTheoremAnd/ZetaConj.lean",
       "upstream_sha256": "08a9153c6500464c574f466a5569e82adbd5fb152a96a914fbb77c3208d0a71c",
       "local_sha256": "0989b809a2057b1ffcf896a43b35c4465010c1a2a7dadf59f1cc46855b1da4ee"
+    },
+    "IwaniecLinearSieveVendor/Architect.lean": {
+      "source": "local",
+      "note": "No-op stand-in for LeanArchitect blueprint attributes and commands; the syntax mirrors Architect/Attribute.lean and Architect/Command.lean.",
+      "local_sha256": "3417d0e0b913d4b2e3113cb9a40b04a2c62e73bf5b6ad809f4e4ae91f44e7707"
     }
   },
   "module_system": "Palomar requires every Lean source to use the module system. Every vendored file that upstream does not already write as a module (all except EulerMaclaurin.lean and LinearCombinationPrime.lean) got the header `module`, `public import` for each import, and `@[expose] public section`; AdditiveCombination.lean and the local Architect.lean use `public meta section` instead, as metaprograms. local_sha256 includes this rewrite."

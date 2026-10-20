@@ -161,7 +161,7 @@ open Main
 /-- **[I71, Theorem 3]**, (1.5): under `(*)`, for `2 ≤ s < log y / (log log 3y)⁶`,
 `|A_k(M; y^{1/s}) - y R_k(y^{1/s})| ≤ C y R_k(y^{1/s}) (e/(s log s))^s`. -/
 theorem theorem3_fst : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Multiset ℤ) (y s : ℝ), 1 < y →
-    (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ s →
+    (∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ s →
     s < log y / log (log (3 * y)) ^ 6 →
     |(siftedCount k M (y ^ (1 / s)) : ℝ) - y * Rk k (y ^ (1 / s))| ≤
       C * y * Rk k (y ^ (1 / s)) * (exp 1 / (s * log s)) ^ s := by
@@ -314,7 +314,7 @@ open Main
 `log z < log y · log log log 16y / (2 log log 3y)`,
 `|A_k(M; z) - y R_k(z)| ≤ C y R_k(z) / log y`. -/
 theorem theorem3_snd : ∃ C : ℝ, ∀ (k : ℕ) (M : Multiset ℤ) (y z : ℝ), 1 < y →
-    (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ z →
+    (∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → 2 ≤ z →
     log z < log y * log (log (log (16 * y))) / (2 * log (log (3 * y))) →
     |(siftedCount k M z : ℝ) - y * Rk k z| ≤ C * y * Rk k z / log y := by
   obtain ⟨C₃, hC₃, h15⟩ := theorem3_fst

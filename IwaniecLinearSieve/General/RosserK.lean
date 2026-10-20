@@ -183,7 +183,7 @@ variable {M : Multiset ℤ}
 /-- [I71, (2.7)] for Rosser's sieve: under `(*)`, `A_k(M; z) ≤ y G_k(z) + Σ₁(z)`, where
 `Σ₁(z) = #{d ∈ D⁺ : (d, k) = 1}`. -/
 theorem rosser_cor_upper (hy : 0 ≤ y)
-    (hM : ∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :
+    (hM : ∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :
     (siftedCount k M z : ℝ) ≤
       y * rosserMainK k false y z + #((rosserSet false y z).filter (·.Coprime k)) := by
   have hn : #(primesLT z) ≤ 2 * #(primesLT z) := by omega
@@ -193,7 +193,7 @@ theorem rosser_cor_upper (hy : 0 ≤ y)
 /-- [I71, (2.8)] for Rosser's sieve: under `(*)`, `A_k(M; z) ≥ y D_k(z) - Σ₂(z)`, where
 `Σ₂(z) = #{d ∈ D⁻ : (d, k) = 1}`. -/
 theorem rosser_cor_lower (hy : 0 ≤ y)
-    (hM : ∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :
+    (hM : ∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) (z : ℝ) :
     y * rosserMainK k true y z - #((rosserSet true y z).filter (·.Coprime k)) ≤
       (siftedCount k M z : ℝ) := by
   have hn : #(primesLT z) ≤ 2 * #(primesLT z) + 1 := by omega
@@ -203,7 +203,7 @@ theorem rosser_cor_lower (hy : 0 ≤ y)
 /-- (2.7), Lemma 2 and (2.12) combined: under `(*)`, for `r > π(z)`,
 `A_k(M; z) ≤ y R_k(z) (1 + fail false r y z / R(z)) + #D⁺(y, z)`. -/
 theorem siftedCount_le_fail (hy : 0 ≤ y)
-    (hM : ∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) {r : ℕ}
+    (hM : ∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) {r : ℕ}
     (hr : #(primesLT z) < r) :
     (siftedCount k M z : ℝ) ≤
       y * Rk k z * (1 + fail false r y z / R z) + #(rosserSet false y z) := by
@@ -217,7 +217,7 @@ theorem siftedCount_le_fail (hy : 0 ≤ y)
 /-- (2.8), Lemma 2 and (2.13) combined: under `(*)`, for `r > π(z)`,
 `A_k(M; z) ≥ y R_k(z) (1 - fail true r y z / R(z)) - #D⁻(y, z)`. -/
 theorem fail_le_siftedCount (hy : 0 ≤ y)
-    (hM : ∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) {r : ℕ}
+    (hM : ∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) {r : ℕ}
     (hr : #(primesLT z) < r) :
     y * Rk k z * (1 - fail true r y z / R z) - #(rosserSet true y z) ≤
       (siftedCount k M z : ℝ) := by

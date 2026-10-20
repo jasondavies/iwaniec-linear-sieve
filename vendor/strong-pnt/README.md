@@ -26,6 +26,6 @@ copy and PrimeNumberTheoremAnd.
 * `IwaniecLinearSieveVendor/PrimeNumberTheoremAnd/Mathlib/Tactic/LinearCombinationPrime.lean` is
   Mathlib v4.34.0's `Mathlib/Tactic/LinearCombinationPrime.lean` (Apache 2.0), removed from Mathlib
   in v4.35.0.
-* `UPSTREAM.json` records the upstream revisions and path of every file, the SHA-256 of every
-  upstream and local file, the mechanical rewrite to the Lean module system, and the local
-  patches to seven files.
+* `UPSTREAM.json` records upstream revisions, paths and hashes for copied files, local
+  SHA-256 hashes for every Lean source (including the local `Architect.lean` stand-in),
+  the mechanical rewrite to the Lean module system, and the local patches to seven files.

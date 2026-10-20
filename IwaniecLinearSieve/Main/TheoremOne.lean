@@ -10,7 +10,7 @@ public import IwaniecLinearSieve.Main.Basic
 Notation: `L = log y`, `z = y^{1/s}`, `ξ(y) = L / (log log 3y)^{11/5}` (`xi`),
 `δ(s, y) = (1 + s² log⁵ s / L²)^{5s}` (`delta`).
 
-**Theorem 1.** Let `y > 1`, `s ≤ ξ(y)`, and assume `(*)`: `|M_d - y/d| ≤ 1` for `(d, k) = 1`.
+**Theorem 1.** Let `y > 1`, `s ≤ ξ(y)`, and assume `(*)`: `|M_d - y/d| ≤ 1` for squarefree `d` with `(d, k) = 1`.
 There is an absolute constant `c₀` such that
 
 * (1.1) `A_k(M; y^{1/s}) < y R_k(y^{1/s}) (1 + F(s)/s + c₀ δ(s, y) 𝔐(s) log log 3k / L)`
@@ -169,7 +169,7 @@ open Main
 * `A_k(M; y^{1/s}) ≤ y R_k(y^{1/s}) (1 + (F(s) + (3 - s)⁺)/s + C δ(s, y) 𝔐(s)/log y)` for `s ≥ 1`;
 * `A_k(M; y^{1/s}) ≥ y R_k(y^{1/s}) (1 - f(s)/s - C δ(s, y) 𝔐(s)/log y)` for `s ≥ 2`. -/
 theorem theorem1_core : ∃ C : ℝ, 0 ≤ C ∧ ∀ (k : ℕ) (M : Multiset ℤ) (y s : ℝ), 1 < y →
-    (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → s ≤ xi y →
+    (∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) → s ≤ xi y →
     (1 ≤ s → (siftedCount k M (y ^ (1 / s)) : ℝ) ≤
       y * Rk k (y ^ (1 / s)) * (1 + mainMaj false s / s + C * delta s y * bigM s / log y)) ∧
     (2 ≤ s → y * Rk k (y ^ (1 / s)) * (1 - fSieve s / s - C * delta s y * bigM s / log y) ≤
@@ -296,7 +296,7 @@ theorem lt_loglog_err {C y s : ℝ} (hC : 0 ≤ C) (hy : 1 < y) (hs : 1 ≤ s) {
 
 /-- **[I71, Theorem 1]**, (1.1) and (1.2), with the error term as printed (with `log log 3k`).
 Let `y > 1`, `s ≤ ξ(y) = log y / (log log 3y)^{11/5}`, and assume `(*)`:
-`|M_d - y/d| ≤ 1` for all `d` coprime to `k`. There is an absolute constant `c₀` such that
+`|M_d - y/d| ≤ 1` for all squarefree `d` coprime to `k`. There is an absolute constant `c₀` such that
 
 * (1.1) `A_k(M; y^{1/s}) < y R_k(y^{1/s}) (1 + F(s)/s + c₀ δ(s, y) 𝔐(s) log log 3k / log y)`
   for `s ≥ 3`;
@@ -308,7 +308,7 @@ where `δ(s, y) = (1 + s² log⁵ s / log² y)^{5s}`.
 [I71] assumes `s < ξ(y)`; we allow `s ≤ ξ(y)`. The factor `log log 3k` is not needed
 (`theorem1_core`). -/
 theorem theorem1 : ∃ c₀ : ℝ, 0 < c₀ ∧ ∀ k : ℕ, 1 ≤ k → ∀ (M : Multiset ℤ) (y s : ℝ), 1 < y →
-    (∀ d : ℕ, d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) →
+    (∀ d : ℕ, Squarefree d → d.Coprime k → |(multiplesCount M d : ℝ) - y / d| ≤ 1) →
     s ≤ log y / log (log (3 * y)) ^ (11 / 5 : ℝ) →
     (3 ≤ s → (siftedCount k M (y ^ (1 / s)) : ℝ) < y * Rk k (y ^ (1 / s)) *
       (1 + FSieve s / s + c₀ * (1 + s ^ 2 * log s ^ 5 / log y ^ 2) ^ (5 * s) * bigM s *
