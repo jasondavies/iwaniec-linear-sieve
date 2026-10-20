@@ -124,6 +124,38 @@ theorem card_filter_le_le (lower : Bool) (y : ℝ) {w : ℝ} (hw : 1 ≤ w) (K :
           _ ≤ (2 * w) ^ K := pow_le_pow_right₀ (by linarith) hlK
     _ = (K + 1) * (2 * w) ^ K := by simp
 
+/-- The cutoff `u = ξ(1 - 2/λ)` leaves a saving of `1/λ` in the exponent of `w`. -/
+theorem count_cutoff_ratio_le {ξ m : ℝ} (hm : 0 < m) (hξ : 1 < ξ) (hmξ : m ≤ ξ) :
+    ξ * (1 - 2 / m) / (ξ - 1) ≤ 1 - 1 / m := by
+  rw [div_le_iff₀ (sub_pos.2 hξ)]
+  have hratio : 1 ≤ ξ / m := (le_div_iff₀ hm).2 (by simpa using hmξ)
+  have hinv : 0 ≤ 1 / m := by positivity
+  calc ξ * (1 - 2 / m) = ξ - 2 * (ξ / m) := by ring
+    _ ≤ ξ - ξ / m - 1 + 1 / m := by linarith only [hratio, hinv]
+    _ = (1 - 1 / m) * (ξ - 1) := by ring
+
+/-- Replacing `ξ` by the cutoff `u = ξ(1 - 2/λ)` loses at most `3ξ` in `u log u`. -/
+theorem mul_log_count_cutoff_ge {ξ m : ℝ} (hm : 2 < m) (hξ : 0 < ξ) (hlogξ : log ξ ≤ m) :
+    ξ * log ξ - 3 * ξ ≤ (ξ * (1 - 2 / m)) * log (ξ * (1 - 2 / m)) := by
+  have hm0 : 0 < m := by linarith only [hm]
+  set v := 1 - 2 / m with hv
+  have hv0 : 0 < v := by
+    have : 2 / m < 1 := (div_lt_one hm0).2 hm
+    dsimp [v]
+    linarith only [this]
+  have hlogv : -1 ≤ v * log v := by
+    have h := mul_le_mul_of_nonneg_left (neg_inv_le_log hv0.le) hv0.le
+    simpa only [mul_neg, mul_inv_cancel₀ hv0.ne'] using h
+  have hlog_loss : 2 / m * log ξ ≤ 2 := by
+    rw [div_mul_eq_mul_div, div_le_iff₀ hm0]
+    linarith only [hlogξ]
+  have hweighted_loss := mul_le_mul_of_nonneg_left hlog_loss hξ.le
+  have hweighted_logv := mul_le_mul_of_nonneg_left hlogv hξ.le
+  calc ξ * log ξ - 3 * ξ
+      ≤ ξ * log ξ - ξ * (2 / m * log ξ) + ξ * (v * log v) := by
+        linarith only [hweighted_loss, hweighted_logv]
+    _ = (ξ * v) * log (ξ * v) := by rw [log_mul hξ.ne' hv0.ne', hv]; ring
+
 /-- The crude count of `rosserSet lower y w` for `w = y^{1/(ξ-1)}`, `ξ = xi y`, `λ = lam y`
 ([I71, p. 27]):
 `#(rosserSet lower y w) ≤ e^{L + 2ξ - L/λ} + 2 e^{L - ξ log ξ + ξ log λ + 5ξ}`. -/
@@ -134,99 +166,88 @@ theorem card_rosserSet_rpow_le (hy : 1 < y) (hw : 2 ≤ y ^ (1 / (xi y - 1)))
       exp (log y + 2 * xi y - log y / lam y) +
         2 * exp (log y - xi y * log (xi y) + xi y * log (lam y) + 5 * xi y) := by
   set L := log y with hL
-  set ξ := xi y with hξ
-  set m := lam y with hm
+  set ξ := xi y
+  set m := lam y
   set w := y ^ (1 / (ξ - 1)) with hwdef
   have hL0 : 0 < L := log_pos hy
-  have hm0 : 0 < m := by linarith
-  have hξ1 : 1 < ξ := by linarith
+  have hm0 : 0 < m := by linarith only [hlam]
+  have hξ1 : 1 < ξ := by linarith only [h24, hlam]
   set u := ξ * (1 - 2 / m) with hu
   have hv : 1 / 2 ≤ 1 - 2 / m := by
-    have : 2 / m ≤ 1 / 2 := by rw [div_le_iff₀ hm0]; linarith
-    linarith
-  have hv1 : 1 - 2 / m ≤ 1 := by have : 0 ≤ 2 / m := by positivity
-                                 linarith
-  have hu2 : ξ / 2 ≤ u := by rw [hu]; nlinarith
-  have huξ : u ≤ ξ := by rw [hu]; nlinarith
-  have hu0 : 0 < u := by linarith
+    have : 2 / m ≤ 1 / 2 := by rw [div_le_iff₀ hm0]; linarith only [hlam]
+    linarith only [this]
+  have hv1 : 1 - 2 / m ≤ 1 := sub_le_self _ (by positivity)
+  have hu2 : ξ / 2 ≤ u := by
+    have h := mul_le_mul_of_nonneg_left hv (by linarith only [hξ1] : 0 ≤ ξ)
+    dsimp [u]
+    linarith only [h]
+  have huξ : u ≤ ξ := by
+    simpa only [mul_one] using
+      mul_le_mul_of_nonneg_left hv1 (by linarith only [hξ1] : 0 ≤ ξ)
+  have hu0 : 0 < u := by linarith only [hu2, hξ1]
   set K := ⌊u⌋₊ with hK
   have hKu : (K : ℝ) ≤ u := Nat.floor_le hu0.le
   have huK : u < K + 1 := Nat.lt_floor_add_one u
   have hK1 : 1 ≤ K := by
-    rw [hK, Nat.one_le_floor_iff]; linarith
+    rw [hK, Nat.one_le_floor_iff]
+    linarith only [hu2, h24, hlam]
   rw [← card_filter_add_card_filter_not (fun d ↦ #d.primeFactors ≤ K)]
   push_cast
   gcongr
-  · -- few prime factors
-    refine (card_filter_le_le lower y (by linarith) K).trans ?_
-    have h2w : 1 ≤ 2 * w := by linarith
-    have hA : (K : ℝ) + 1 ≤ exp ξ := by linarith [add_one_le_exp ξ]
-    have hB : (2 * w) ^ K ≤ exp ξ * exp (L - L / m) := by
+  · -- Few prime factors: bound the three factors `K + 1`, `2^u`, and `w^u`.
+    refine (card_filter_le_le lower y (by linarith only [hw]) K).trans ?_
+    have h2w : 1 ≤ 2 * w := by linarith only [hw]
+    have hcount_factor : (K : ℝ) + 1 ≤ exp ξ := by
+      linarith only [hKu, huξ, add_one_le_exp ξ]
+    have htwo_power : (2 : ℝ) ^ u ≤ exp ξ := by
+      rw [rpow_def_of_pos (by norm_num), exp_le_exp]
+      have hlogtwo : log 2 ≤ 1 := by linarith only [log_le_sub_one_of_pos two_pos]
+      calc log 2 * u ≤ 1 * u := mul_le_mul_of_nonneg_right hlogtwo hu0.le
+        _ ≤ ξ := by simpa only [one_mul] using huξ
+    have hcutoff_power : w ^ u ≤ exp (L - L / m) := by
+      have hratio : u / (ξ - 1) ≤ 1 - 1 / m :=
+        count_cutoff_ratio_le hm0 hξ1 (by linarith only [h24, hlam])
+      rw [hwdef, ← rpow_mul (by linarith only [hy]),
+        rpow_def_of_pos (by linarith only [hy]), exp_le_exp, ← hL]
+      calc L * (1 / (ξ - 1) * u) = L * (u / (ξ - 1)) := by ring
+        _ ≤ L * (1 - 1 / m) := mul_le_mul_of_nonneg_left hratio hL0.le
+        _ = L - L / m := by ring
+    have hpower : (2 * w) ^ K ≤ exp ξ * exp (L - L / m) := by
       rw [← rpow_natCast]
       calc (2 * w) ^ (K : ℝ) ≤ (2 * w) ^ u := rpow_le_rpow_of_exponent_le h2w hKu
-        _ = 2 ^ u * w ^ u := mul_rpow (by norm_num) (by linarith)
-        _ ≤ exp ξ * exp (L - L / m) := by
-          gcongr
-          · rw [rpow_def_of_pos (by norm_num), exp_le_exp]
-            have : log 2 ≤ 1 := by
-              linarith [log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 2)]
-            nlinarith
-          · rw [hwdef, ← rpow_mul (by linarith), rpow_def_of_pos (by linarith), exp_le_exp,
-              ← hL]
-            have h1 : 1 / (ξ - 1) * u ≤ 1 - 1 / m := by
-              rw [div_mul_eq_mul_div, one_mul, div_le_iff₀ (by linarith), hu]
-              have : ξ / m ≥ 1 - 1 / m := by
-                rw [ge_iff_le, le_div_iff₀ hm0]
-                have : 1 / m * m = 1 := by field_simp
-                nlinarith
-              have e1 : ξ * (1 - 2 / m) = ξ - 2 * (ξ / m) := by ring
-              have e2 : (1 - 1 / m) * (ξ - 1) = ξ - ξ / m - 1 + 1 / m := by ring
-              rw [e1, e2]; linarith
-            have := mul_le_mul_of_nonneg_left h1 hL0.le
-            calc L * (1 / (ξ - 1) * u) ≤ L * (1 - 1 / m) := this
-              _ = L - L / m := by ring
-    calc ((K : ℝ) + 1) * (2 * w) ^ K ≤ exp ξ * (exp ξ * exp (L - L / m)) := by
-          gcongr
+        _ = 2 ^ u * w ^ u := mul_rpow (by norm_num) (by linarith only [hw])
+        _ ≤ exp ξ * exp (L - L / m) :=
+            mul_le_mul htwo_power hcutoff_power (by positivity) (exp_pos _).le
+    calc ((K : ℝ) + 1) * (2 * w) ^ K ≤ exp ξ * (exp ξ * exp (L - L / m)) :=
+          mul_le_mul hcount_factor hpower (by positivity) (exp_pos _).le
       _ = exp (L + 2 * ξ - L / m) := by rw [← exp_add, ← exp_add]; ring_nf
-  · -- many prime factors
+  · -- Many prime factors: apply the tail bound and compare its exponent.
     have hfilt : ((rosserSet lower y w).filter fun d ↦ ¬ #d.primeFactors ≤ K) =
         (rosserSet lower y w).filter fun d ↦ K + 1 ≤ #d.primeFactors :=
       filter_congr fun d _ ↦ by omega
     rw [hfilt]
     have hX : 2 * exp 1 * (2 * m) ≤ u := by
-      have : exp 1 < 3 := by linarith [exp_one_lt_d9]
-      nlinarith
-    refine (card_filter_le_tail (by linarith) (by split_ifs <;> omega) hu0
+      have he : exp 1 ≤ 3 := by linarith only [exp_one_lt_d9]
+      calc 2 * exp 1 * (2 * m) ≤ 2 * 3 * (2 * m) := by gcongr
+        _ ≤ ξ / 2 := by linarith only [h24]
+        _ ≤ u := hu2
+    refine (card_filter_le_tail (by linarith only [hy]) (by split_ifs <;> omega) hu0
       (by exact_mod_cast huK) hSLT hX).trans ?_
     rw [exp_one_mul_div_rpow (by positivity) hu0]
-    have hy' : y = exp L := (exp_log (by linarith)).symm
+    have hy' : y = exp L := (exp_log (by linarith only [hy])).symm
     rw [hy', mul_assoc, ← exp_add]
     refine mul_le_mul_of_nonneg_left (exp_le_exp.2 ?_) (by norm_num)
-    -- `u log u ≥ ξ log ξ - 3ξ`
-    have hlogv : -1 ≤ log (1 - 2 / m) := by
-      have := log_le_log (by norm_num) hv
-      have h2 : log (1 / 2) = -log 2 := by rw [one_div, log_inv]
-      have : log 2 ≤ 1 := by linarith [log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 2)]
-      linarith
-    have hulog : ξ * log ξ - 3 * ξ ≤ u * log u := by
-      rw [hu, log_mul (by linarith) (by linarith)]
-      have h1 : (1 - 2 / m) * log (1 - 2 / m) ≥ -1 := by nlinarith
-      have h2 : 2 / m * log ξ ≤ 2 := by
-        rw [div_mul_eq_mul_div, div_le_iff₀ hm0]; linarith
-      have hξ0 : 0 ≤ ξ := by linarith
-      have e : ξ * (1 - 2 / m) * (log ξ + log (1 - 2 / m)) =
-          ξ * log ξ - ξ * (2 / m * log ξ) + ξ * ((1 - 2 / m) * log (1 - 2 / m)) := by ring
-      rw [e]
-      nlinarith [mul_le_mul_of_nonneg_left h2 hξ0, mul_le_mul_of_nonneg_left h1.le hξ0]
+    have hulog : ξ * log ξ - 3 * ξ ≤ u * log u :=
+      mul_log_count_cutoff_ge (by linarith only [hlam]) (by linarith only [hξ1]) hlogξ
     have hlog2m : log (2 * m) ≤ 1 + log m := by
-      rw [log_mul (by norm_num) hm0.ne']
-      linarith [log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 2)]
-    have hlogm : 0 ≤ log m := log_nonneg (by linarith)
-    have : u * log (2 * m) ≤ ξ * (1 + log m) := by
-      have h0 : 0 ≤ log (2 * m) := log_nonneg (by linarith)
-      calc u * log (2 * m) ≤ ξ * log (2 * m) := by gcongr
-        _ ≤ ξ * (1 + log m) := by gcongr
-    nlinarith
+      rw [log_mul two_pos.ne' hm0.ne']
+      linarith only [log_le_sub_one_of_pos two_pos]
+    have hweighted_log : u * log (2 * m) ≤ ξ * (1 + log m) := by
+      have h0 : 0 ≤ log (2 * m) := log_nonneg (by linarith only [hlam])
+      calc u * log (2 * m) ≤ ξ * log (2 * m) := mul_le_mul_of_nonneg_right huξ h0
+        _ ≤ ξ * (1 + log m) :=
+            mul_le_mul_of_nonneg_left hlog2m (by linarith only [hξ1])
+    linarith only [hulog, hweighted_log, huξ]
 
 /-! ### The comparison (4.9), (4.10) -/
 
