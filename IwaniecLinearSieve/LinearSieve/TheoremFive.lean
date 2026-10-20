@@ -39,81 +39,38 @@ def Bound (c₇ : ℝ) (r : ℕ) : Prop :=
     (#{d ∈ rosserSet lower y (y ^ (1 / s)) | #d.primeFactors ≤ r} : ℝ) ≤
       c₇ * ((r + 1) / (r + 2)) * delta s y * errMaj lower s * y / log y ^ 2
 
-/-! ### The inner level -/
+/-! ### The inner level
+
+Theorems 4 and 5 use the same inner-parameter estimates. These wrappers retain the
+Theorem 5 statements while sharing the proofs from `TheoremFour`.
+-/
 
 /-- For `p ∈ rosserPrimes lower y y^{1/s}`: `p < y`, and the inner parameter `t_p - 1` is in the
 domain of the opposite flag. -/
 theorem rosserPrimes_facts {lower : Bool} {y s : ℝ} {p : ℕ} (hy : 1 < y) (hs : sMin lower ≤ s)
     (hp : p ∈ rosserPrimes lower y (y ^ (1 / s))) :
     1 < p ∧ (p : ℝ) < y ∧ sMin (!lower) ≤ log y / log p - 1 := by
-  have hs1 := one_le_of_sMin_le hs
-  rw [mem_rosserPrimes, mem_primesLT] at hp
-  obtain ⟨⟨hpp, hpz⟩, hlow⟩ := hp
-  have hp1 : 1 < p := hpp.one_lt
-  have hp1' : (1 : ℝ) < p := by exact_mod_cast hp1
-  have hzy : y ^ (1 / s) ≤ y := by
-    conv_rhs => rw [← rpow_one y]
-    exact rpow_le_rpow_of_exponent_le hy.le (by rw [div_le_one (by linarith)]; exact hs1)
-  refine ⟨hp1, hpz.trans_le hzy, ?_⟩
-  have hlp : 0 < log (p : ℝ) := log_pos hp1'
-  cases lower
-  · -- upper sieve: `p³ < y`, so `t_p > 3`
-    have h3 : (p : ℝ) ^ 3 < y := by simpa using hlow
-    have := log_lt_log (by positivity) h3
-    rw [log_pow] at this
-    simp only [Bool.not_false, sMin]
-    rw [le_sub_iff_add_le, le_div_iff₀ hlp]
-    push_cast at this; linarith
-  · -- lower sieve: `s ≥ 2`, so `t_p ≥ s ≥ 2`
-    have h2 : (2 : ℝ) ≤ s := hs
-    have := le_div_log_of_le_rpow hy (by linarith) hp1 hpz.le
-    simp only [Bool.not_true, sMin]
-    linarith
+  exact ⟨(prime_of_mem_primesLT (rosserPrimes_subset hp)).one_lt,
+    TheoremFour.prime_lt_of_mem_rosserPrimes hy (one_le_of_sMin_le hs) hp,
+    TheoremFour.sMin_le_inner hy hs hp⟩
 
 /-- `t - 1 ≤ ξ(y/p)` for `t = t_p ≤ ξ(y)`, `1 < p < y`. -/
 theorem sub_one_le_xi_div {y : ℝ} {p : ℕ} (hy : 1 < y) (hp : 1 < p) (hpy : (p : ℝ) < y)
     (ht : log y / log p ≤ xi y) : log y / log p - 1 ≤ xi (y / p) := by
-  have hp' : (1 : ℝ) < p := by exact_mod_cast hp
-  have hp0 : (0 : ℝ) < p := by linarith
-  have hlp : 0 < log (p : ℝ) := log_pos hp'
-  have hyp : 1 < y / p := by rw [lt_div_iff₀ hp0]; linarith
-  have hL : log y = log p * (log y / log p) := by field_simp
-  set t := log y / log p with htdef
-  have ht1 : 1 < t := by
-    rw [htdef, lt_div_iff₀ hlp, one_mul]; exact log_lt_log hp0 hpy
-  have hlogyp := log_div_prime_eq (y := y) (by linarith) hp
-  rw [← htdef] at hlogyp
-  have hD := lam_pos hy
-  have hD' := lam_pos hyp
-  have hlam : lam (y / p) ≤ lam y := by
-    unfold lam
-    have h1 : 0 < log (3 * (y / p)) := log_pos (by nlinarith)
-    exact log_le_log h1 (log_le_log (by positivity) (by
-      rw [mul_div_assoc']; exact div_le_self (by positivity) hp'.le))
-  have hDD : lam (y / p) ^ (11 / 5 : ℝ) ≤ lam y ^ (11 / 5 : ℝ) :=
-    rpow_le_rpow hD'.le hlam (by norm_num)
-  have hD0 : 0 < lam (y / p) ^ (11 / 5 : ℝ) := rpow_pos_of_pos hD' _
-  have hD1 : 0 < lam y ^ (11 / 5 : ℝ) := rpow_pos_of_pos hD _
-  rw [xi_eq_lam] at ht ⊢
-  rw [hlogyp]
-  -- `ξ(y/p) ≥ log p (t - 1) / λ(y)^{11/5} = (t - 1) ξ(y) / t ≥ t - 1`
-  have h1 : log p * (t - 1) / lam y ^ (11 / 5 : ℝ) ≤ log p * (t - 1) / lam (y / p) ^ (11 / 5 : ℝ) :=
-    div_le_div_of_nonneg_left (by nlinarith) hD0 hDD
-  have h2 : t - 1 ≤ log p * (t - 1) / lam y ^ (11 / 5 : ℝ) := by
-    rw [le_div_iff₀ hD1]
-    rw [hL, le_div_iff₀ hD1] at ht
-    nlinarith
-  linarith
+  apply TheoremFour.inner_le_xi hy hp hpy
+  -- Convert the logarithmic hypothesis to the prime cutoff used in Theorem 4.
+  have hp0 : (0 : ℝ) < p := by positivity
+  have hlp : 0 < log (p : ℝ) := log_pos (by exact_mod_cast hp)
+  rw [← log_le_log_iff (rpow_pos_of_pos (zero_lt_one.trans hy) _) hp0,
+    log_rpow_one_div (zero_lt_one.trans hy), div_le_iff₀ (xi_pos hy)]
+  simpa only [mul_comm] using (div_le_iff₀ hlp).1 ht
 
+-- Preserve the existing `hy` parameter; `1 < p < y` already implies `0 < y`.
+set_option linter.unusedVariables false in
 /-- `(y/p)^{1/(t_p - 1)} = p`. -/
 theorem rpow_inv_sub_one_eq {y : ℝ} {p : ℕ} (hy : 0 < y) (hp : 1 < p) (hpy : (p : ℝ) < y) :
     (y / p) ^ (1 / (log y / log p - 1)) = p := by
-  have hp' : (1 : ℝ) < p := by exact_mod_cast hp
-  have hlp : 0 < log (p : ℝ) := log_pos hp'
-  have ht : 0 < log y / log p - 1 := by
-    rw [sub_pos, one_lt_div hlp]; exact log_lt_log (by linarith) hpy
-  rw [rpow_def_of_pos (div_pos hy (by linarith)), log_div_prime_eq hy hp, mul_one_div,
-    mul_div_assoc, div_self ht.ne', mul_one, exp_log (by linarith)]
+  exact TheoremFour.rpow_inner_eq hp hpy
 
 /-- The induction hypothesis at the inner level `(y/p, t_p - 1)`, for `t_p ≤ ξ(y)`. -/
 theorem inner_le {c₇ : ℝ} {r : ℕ} (ih : Bound c₇ r) {lower : Bool} {y s : ℝ} (hy : 1 < y)
@@ -178,11 +135,7 @@ theorem sum_inner_le {c₇ : ℝ} (hc₇ : 0 ≤ c₇) {r : ℕ} (ih : Bound c�
 
 theorem delta_max_le {s s₀ : ℝ} (hs : 1 ≤ s) (hs₀ : 1 ≤ s₀) (y : ℝ) :
     delta (max s s₀) y ≤ delta s y * delta s₀ y := by
-  rcases le_total s s₀ with h | h
-  · rw [max_eq_right h]
-    exact le_mul_of_one_le_left (delta_pos hs₀ y).le (one_le_delta hs y)
-  · rw [max_eq_left h]
-    exact le_mul_of_one_le_right (delta_pos hs y).le (one_le_delta hs₀ y)
+  simpa only [mul_comm] using TheoremFour.delta_max_le hs hs₀ y
 
 /-- The gain from depth `r` to `r + 1`: `(r+2)/(r+3) - (r+1)/(r+2) ≥ ℓ²/(4L²)` when
 `r + 3 ≤ 2L/ℓ`. -/
