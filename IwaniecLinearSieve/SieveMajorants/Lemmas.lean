@@ -358,51 +358,44 @@ theorem lemma9_phi_sub {s x : ℝ} (hs : 4 ≤ s) (hx : s - 1 ≤ x) (hxs : x �
   nlinarith [mul_le_mul_of_nonneg_left h2 hsx, mul_le_mul_of_nonneg_left h3 hsx,
     mul_le_mul_of_nonneg_left h4 hs0.le]
 
-/-- `lemma9Fun` is a subsolution of (3.12) for `s ≥ 4`. -/
-theorem lemma9Fun_le_integral {s : ℝ} (hs : 4 ≤ s) :
-    lemma9Fun s ≤ s / ((s - 1) ^ 2 - 1 / 2) *
-      ∫ x in (s - 1)..s, (1 - 1 / (2 * x ^ 2)) * lemma9Fun x := by
+/-- On `[s-1, s]`, convexity of the exponent gives an exponential lower bound for the
+weighted comparison function in (3.12). -/
+theorem lemma9Fun_weighted_exp_le {s x : ℝ} (hs : 4 ≤ s) (hx : s - 1 ≤ x) (hxs : x ≤ s) :
+    let l := log (s - 1) + log (log (s - 1)) + 3
+    (1 - 1 / (2 * (s - 1) ^ 2)) * (lemma9Fun s * exp l) *
+      exp (-(l * (x - (s - 1)))) ≤ (1 - 1 / (2 * x ^ 2)) * lemma9Fun x := by
+  dsimp only
+  set l := log (s - 1) + log (log (s - 1)) + 3
+  have hweight : 1 - 1 / (2 * (s - 1) ^ 2) ≤ 1 - 1 / (2 * x ^ 2) := by
+    have hrecip : 1 / (2 * x ^ 2) ≤ 1 / (2 * (s - 1) ^ 2) :=
+      one_div_le_one_div_of_le (by nlinarith only [hs]) (by nlinarith only [hs, hx])
+    linarith only [hrecip]
+  have hexp : lemma9Fun s * exp l * exp (-(l * (x - (s - 1)))) ≤ lemma9Fun x := by
+    unfold lemma9Fun
+    rw [← exp_add, ← exp_add, exp_le_exp]
+    have hconvex := lemma9_phi_sub hs hx hxs
+    dsimp only [l]
+    linarith only [hconvex]
+  rw [mul_assoc]
+  exact mul_le_mul hweight hexp (by unfold lemma9Fun; positivity)
+    (weight_mem (by linarith only [hs, hx])).1.le
+
+/-- The exponential lower bound, integrated and multiplied by the factor in (3.12),
+has coefficient at least one. The key estimate is `l (s-1)² ≤ s (exp l - 1)`. -/
+theorem lemma9_integral_factor_ge_one {s : ℝ} (hs : 4 ≤ s) :
+    let l := log (s - 1) + log (log (s - 1)) + 3
+    1 ≤ (1 - 1 / (2 * (s - 1) ^ 2)) * (exp l * ((1 - exp (-l)) / l)) *
+      (s / ((s - 1) ^ 2 - 1 / 2)) := by
+  dsimp only
   set L := log (s - 1) with hL
   set l := L + log L + 3 with hl
+  set w₀ := 1 - 1 / (2 * (s - 1) ^ 2) with hw₀
   have hL1 : 1 ≤ L := one_le_log_of_three_le (by linarith)
   have hlogL : log L ≤ L - 1 := log_le_sub_one_of_pos (by linarith)
   have hlogL0 : 0 ≤ log L := log_nonneg hL1
-  have hl0 : 0 < l := by linarith
-  have hs0 : 0 < s := by linarith
-  have hr : 0 < (s - 1) ^ 2 - 1 / 2 := by nlinarith
-  have hw := weight_mem (x := s - 1) (by linarith)
-  set w₀ := 1 - 1 / (2 * (s - 1) ^ 2) with hw₀
-  -- pointwise lower bound on `[s-1, s]`
-  have hpt : ∀ x ∈ Icc (s - 1) s, w₀ * (lemma9Fun s * exp l) * exp (-(l * (x - (s - 1)))) ≤
-      (1 - 1 / (2 * x ^ 2)) * lemma9Fun x := by
-    intro x hx
-    have hwx : w₀ ≤ 1 - 1 / (2 * x ^ 2) := by
-      have : 1 / (2 * x ^ 2) ≤ 1 / (2 * (s - 1) ^ 2) :=
-        one_div_le_one_div_of_le (by nlinarith) (by nlinarith [hx.1])
-      rw [hw₀]; linarith
-    have hhx : lemma9Fun s * exp l * exp (-(l * (x - (s - 1)))) ≤ lemma9Fun x := by
-      unfold lemma9Fun
-      rw [← exp_add, ← exp_add, exp_le_exp]
-      have := lemma9_phi_sub hs hx.1 hx.2
-      linarith
-    rw [mul_assoc]
-    exact mul_le_mul hwx hhx (mul_pos (mul_pos (exp_pos _) (exp_pos _)) (exp_pos _)).le
-      (weight_mem (by linarith [hx.1])).1.le
-  have hint : w₀ * (lemma9Fun s * exp l) * ((1 - exp (-l)) / l) ≤
-      ∫ x in (s - 1)..s, (1 - 1 / (2 * x ^ 2)) * lemma9Fun x := by
-    have := integral_exp_neg_mul_unit (s - 1) hl0.ne'
-    rw [sub_add_cancel] at this
-    rw [← this, ← intervalIntegral.integral_const_mul]
-    refine intervalIntegral.integral_mono_on (by linarith)
-      ((by fun_prop : Continuous fun x =>
-        w₀ * (lemma9Fun s * exp l) * exp (-(l * (x - (s - 1))))).intervalIntegrable _ _) ?_ hpt
-    refine ContinuousOn.intervalIntegrable_of_Icc (by linarith) ?_
-    refine ContinuousOn.mul (continuousOn_const.sub (continuousOn_const.div
-      (continuousOn_const.mul (continuousOn_id.pow 2)) fun x hx => ?_))
-      (continuousOn_lemma9Fun.mono fun x hx => by simp only [mem_Ici]; linarith [hx.1])
-    have : 0 < x := by linarith [hx.1]
-    positivity
-  -- the numerical inequality `l (s-1)² ≤ s (e^l - 1)`
+  have hl0 : 0 < l := by linarith only [hL1, hlogL0, hl]
+  have hr : 0 < (s - 1) ^ 2 - 1 / 2 := by nlinarith only [hs]
+  -- The numerical inequality `l (s-1)² ≤ s (exp l - 1)`.
   have hel : exp l = (s - 1) * L * exp 3 := by
     rw [hl, exp_add, exp_add, hL, exp_log (by linarith), exp_log (by linarith)]
   have he3 : 20 ≤ exp 3 := by
@@ -411,35 +404,65 @@ theorem lemma9Fun_le_integral {s : ℝ} (hs : 4 ≤ s) :
     have h := pow_le_pow_left₀ (by norm_num) exp_one_gt_d9.le 3
     norm_num at h
     linarith
-  have hnum : l * (s - 1) ^ 2 ≤ s * (exp l - 1) := by
+  have hexp_gain : l * (s - 1) ^ 2 ≤ s * (exp l - 1) := by
     rw [hel]
     have hy : 3 ≤ s - 1 := by linarith
     have h0 : 0 ≤ (s - 1) * L := by positivity
     have : 20 * ((s - 1) * L) ≤ (s - 1) * L * exp 3 := by
       nlinarith [mul_le_mul_of_nonneg_left he3 h0]
     nlinarith [mul_le_mul_of_nonneg_left hL1 (by nlinarith : (0 : ℝ) ≤ (s - 1) ^ 2)]
-  have hkey : w₀ * (exp l * ((1 - exp (-l)) / l)) * (s / ((s - 1) ^ 2 - 1 / 2)) ≥ 1 := by
-    have ea : exp l * (1 - exp (-l)) = exp l - 1 := by
-      rw [mul_sub, mul_one, ← exp_add]; simp
-    have eb : w₀ / ((s - 1) ^ 2 - 1 / 2) = 1 / (s - 1) ^ 2 := by
-      have : s - 1 ≠ 0 := by linarith
-      rw [hw₀, div_eq_div_iff hr.ne' (by positivity)]
-      field_simp
-    have e : w₀ * (exp l * ((1 - exp (-l)) / l)) * (s / ((s - 1) ^ 2 - 1 / 2)) =
-        s * (exp l - 1) / (l * (s - 1) ^ 2) := by
-      rw [← ea]
-      calc w₀ * (exp l * ((1 - exp (-l)) / l)) * (s / ((s - 1) ^ 2 - 1 / 2))
-          = w₀ / ((s - 1) ^ 2 - 1 / 2) * (s * (exp l * (1 - exp (-l))) / l) := by ring
-        _ = _ := by rw [eb]; field_simp
-    rw [e, ge_iff_le, le_div_iff₀ (mul_pos hl0 (by nlinarith))]
-    linarith
-  have hpos := (exp_pos (-(s * log s + s * log (log s) + 2 * s)))
-  have hF : 0 < lemma9Fun s := hpos
-  calc lemma9Fun s ≤ lemma9Fun s * (w₀ * (exp l * ((1 - exp (-l)) / l)) *
-        (s / ((s - 1) ^ 2 - 1 / 2))) := le_mul_of_one_le_right hF.le hkey
-    _ = s / ((s - 1) ^ 2 - 1 / 2) * (w₀ * (lemma9Fun s * exp l) * ((1 - exp (-l)) / l)) := by
-      ring
-    _ ≤ _ := mul_le_mul_of_nonneg_left hint (div_pos hs0 hr).le
+  have hexp_cancel : exp l * (1 - exp (-l)) = exp l - 1 := by
+    rw [mul_sub, mul_one, ← exp_add]; simp
+  have hweight_cancel : w₀ / ((s - 1) ^ 2 - 1 / 2) = 1 / (s - 1) ^ 2 := by
+    have : s - 1 ≠ 0 := by linarith
+    rw [hw₀, div_eq_div_iff hr.ne' (by positivity)]
+    field_simp
+  have hfactor : w₀ * (exp l * ((1 - exp (-l)) / l)) * (s / ((s - 1) ^ 2 - 1 / 2)) =
+      s * (exp l - 1) / (l * (s - 1) ^ 2) := by
+    rw [← hexp_cancel]
+    calc w₀ * (exp l * ((1 - exp (-l)) / l)) * (s / ((s - 1) ^ 2 - 1 / 2))
+        = w₀ / ((s - 1) ^ 2 - 1 / 2) * (s * (exp l * (1 - exp (-l))) / l) := by ring
+      _ = _ := by rw [hweight_cancel]; field_simp
+  rw [hfactor, le_div_iff₀ (mul_pos hl0 (by nlinarith)), one_mul]
+  exact hexp_gain
+
+/-- `lemma9Fun` is a subsolution of (3.12) for `s ≥ 4`. -/
+theorem lemma9Fun_le_integral {s : ℝ} (hs : 4 ≤ s) :
+    lemma9Fun s ≤ s / ((s - 1) ^ 2 - 1 / 2) *
+      ∫ x in (s - 1)..s, (1 - 1 / (2 * x ^ 2)) * lemma9Fun x := by
+  set l := log (s - 1) + log (log (s - 1)) + 3
+  set w₀ := 1 - 1 / (2 * (s - 1) ^ 2)
+  have hL1 : 1 ≤ log (s - 1) := one_le_log_of_three_le (by linarith only [hs])
+  have hl0 : 0 < l := by
+    dsimp only [l]
+    linarith only [hL1, log_nonneg hL1]
+  have hr : 0 < (s - 1) ^ 2 - 1 / 2 := by nlinarith only [hs]
+  -- Integrate the pointwise exponential lower bound over `[s-1, s]`.
+  have hint : w₀ * (lemma9Fun s * exp l) * ((1 - exp (-l)) / l) ≤
+      ∫ x in (s - 1)..s, (1 - 1 / (2 * x ^ 2)) * lemma9Fun x := by
+    have hexp := integral_exp_neg_mul_unit (s - 1) hl0.ne'
+    rw [sub_add_cancel] at hexp
+    rw [← hexp, ← intervalIntegral.integral_const_mul]
+    refine intervalIntegral.integral_mono_on (by linarith only)
+      ((by fun_prop : Continuous fun x =>
+        w₀ * (lemma9Fun s * exp l) * exp (-(l * (x - (s - 1))))).intervalIntegrable _ _)
+      ?_ (fun x hx => lemma9Fun_weighted_exp_le hs hx.1 hx.2)
+    refine ContinuousOn.intervalIntegrable_of_Icc (by linarith only) ?_
+    refine ContinuousOn.mul (continuousOn_const.sub (continuousOn_const.div
+      (continuousOn_const.mul (continuousOn_id.pow 2)) fun x hx => ?_))
+      (continuousOn_lemma9Fun.mono fun x hx => by
+        simp only [mem_Ici]; linarith only [hs, hx.1])
+    have : 0 < x := by linarith only [hs, hx.1]
+    positivity
+  -- The integrated exponential has a large enough coefficient to recover `lemma9Fun s`.
+  have hF : 0 < lemma9Fun s := exp_pos _
+  calc
+    lemma9Fun s ≤ lemma9Fun s * (w₀ * (exp l * ((1 - exp (-l)) / l)) *
+        (s / ((s - 1) ^ 2 - 1 / 2))) :=
+      le_mul_of_one_le_right hF.le (lemma9_integral_factor_ge_one hs)
+    _ = s / ((s - 1) ^ 2 - 1 / 2) *
+        (w₀ * (lemma9Fun s * exp l) * ((1 - exp (-l)) / l)) := by ring
+    _ ≤ _ := mul_le_mul_of_nonneg_left hint (div_nonneg (by linarith only [hs]) hr.le)
 
 /-- Comparison of `𝔐` with the subsolution `lemma9Fun`: `𝔐(s) > (𝔐(4)/2) lemma9Fun(s)` for
 `s ≥ 3`. -/
