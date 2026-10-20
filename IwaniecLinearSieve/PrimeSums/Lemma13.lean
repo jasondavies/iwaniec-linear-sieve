@@ -345,7 +345,6 @@ theorem lemma13_anti_of_subset : ∃ C, 0 ≤ C ∧ ∀ (b : ℝ → ℝ) (A B :
     exact integral_congr fun x _ ↦ by ring
   rw [hsum, hint]
   have h5 : 0 ≤ C * b A * pntE B := mul_nonneg (mul_nonneg hC0 hbA) (pntE_pos B).le
-  have h6 : C * (c - b A) * pntE B = C * c * pntE B - C * b A * pntE B := by ring
   rw [abs_le] at e1 e2 ⊢
   constructor <;> linarith
 

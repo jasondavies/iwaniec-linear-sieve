@@ -188,7 +188,6 @@ theorem exists_slack (C : ℝ) (hC : 0 ≤ C) : ∃ y₀ : ℝ, ∀ y ≥ y₀,
   have hM4 := le_max_right C (25 / pntκ ^ 2)
   have hM5 := le_max_right (16 * (K + 1) + 2) (max C (25 / pntκ ^ 2))
   -- `ℓ` is large and `ℓ ≤ L`
-  have hℓK : 16 * (K + 1) + 1 ≤ ℓ := by linarith
   have hℓ1' : 1 ≤ ℓ := by linarith
   have hℓL : ℓ ≤ L := by linarith [log_le_sub_one_of_pos hL0]
   have hℓsq : 16 * (K + 1) ≤ ℓ ^ 2 := by nlinarith

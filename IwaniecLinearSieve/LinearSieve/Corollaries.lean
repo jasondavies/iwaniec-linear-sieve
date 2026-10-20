@@ -171,7 +171,6 @@ theorem cor1 : ∃ C, 0 ≤ C ∧ ∀ (M : ℝ → ℝ) (y α β : ℝ), 1 < y �
     have hp1 := hp.1.1.one_lt
     have hlp : 0 < log (p : ℝ) := log_pos (by exact_mod_cast hp1)
     have ht := le_div_log_of_le_rpow hy (by linarith) hp1 hp.1.2.le
-    have ht1 : 0 < log y / log p - 1 := by linarith
     rw [log_div_prime_eq hy0 hp1]
     simp only [F]
     have : (p : ℝ) ≠ 0 := by positivity
@@ -342,8 +341,6 @@ theorem cor3_large : ∃ C, 0 ≤ C ∧ ∀ (lower : Bool) (y s b : ℝ) (S : Fi
     have h1 := growth_le_delta (y := y) (by linarith : (1 : ℝ) ≤ s) le_rfl
     have h2 := errMaj_shift_sq_le lower (!lower) (by linarith : (2 : ℝ) ≤ s)
     rw [hG', hGs] at h2
-    have h0 : 0 ≤ (1 + s ^ 2 * log s ^ 5 / log y ^ 2) ^ (5 * (s - 1)) :=
-      (rpow_pos_of_pos (by linarith [lsx_nonneg (log y) (by linarith : (1 : ℝ) ≤ s)]) _).le
     have h3 : 0 ≤ majG r (s - 1) * (s ^ 2 / (s - 1) ^ 2) := by
       have := majG_pos r (s - 1); positivity
     show (1 + s ^ 2 * log s ^ 5 / log y ^ 2) ^ (5 * (s - 1)) * majG r (s - 1) *

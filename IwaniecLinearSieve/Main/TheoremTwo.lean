@@ -125,7 +125,6 @@ theorem theorem2 : ∃ C : ℝ, ∀ r : ℕ, 2 ≤ r → ∀ (x : ℤ) (m : ℕ)
     have hsℓ : s * ℓ = L := by rw [hs]; field_simp
     have hs2 : 2 + c / ℓ ≤ s := by
       rw [hs, le_div_iff₀ hℓ, add_mul, div_mul_cancel₀ _ hℓ.ne']; linarith
-    have hcℓ : c / ℓ ≤ 1 / 2 := by rw [div_le_iff₀ hℓ]; linarith
     have hcℓ0 : 0 ≤ c / ℓ := by positivity
     have hs4 : s ≤ 4 := by
       rw [hs, div_le_iff₀ hℓ]; linarith [log_two_lt_d9]

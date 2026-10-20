@@ -255,7 +255,6 @@ theorem exists_le_factorial : ∃ y₀ : ℝ, ∀ y ≥ y₀, ∀ r : ℕ,
     nlinarith
   have hratio : 4 ≤ L / ℓ := by rw [le_div_iff₀ hℓ0]; linarith
   have h2Lℓ : 2 * L / ℓ = 2 * (L / ℓ) := by ring
-  have hr7 : (6 : ℝ) < r := by linarith
   refine ⟨by exact_mod_cast (by linarith : (2 : ℝ) ≤ r), ?_⟩
   -- `log ℓ ≤ (ℓ - 3) / 3`
   have hlogℓ : 3 * log ℓ + 3 ≤ ℓ := by

@@ -208,7 +208,6 @@ theorem card_rosserSet_rpow_le (hy : 1 < y) (hw : 2 ≤ y ^ (1 / (xi y - 1)))
       have h2 : log (1 / 2) = -log 2 := by rw [one_div, log_inv]
       have : log 2 ≤ 1 := by linarith [log_le_sub_one_of_pos (by norm_num : (0 : ℝ) < 2)]
       linarith
-    have hlogv0 : log (1 - 2 / m) ≤ 0 := log_nonpos (by linarith) hv1
     have hulog : ξ * log ξ - 3 * ξ ≤ u * log u := by
       rw [hu, log_mul (by linarith) (by linarith)]
       have h1 : (1 - 2 / m) * log (1 - 2 / m) ≥ -1 := by nlinarith
@@ -314,7 +313,6 @@ theorem exp_le_delta_errMaj {cG : ℝ} (hcG : 0 ≤ cG)
       refine le_trans (exp_le_exp.2 ?_) (hGl s hs3)
       nlinarith [hll s hs3 hsξ]
     set c₁ := cG + 5 * log 128 with hc₁
-    have hqξ : 0 ≤ log ξ - 2 * a + c₁ := by linarith
     have hsq : s * (log s - 2 * a + c₁) ≤ ξ * (log ξ - 2 * a + c₁) := by
       rcases le_or_gt (log s - 2 * a + c₁) 0 with hq | hq
       · nlinarith

@@ -148,7 +148,6 @@ theorem mainMaj_sub_one_le (lower lower' : Bool) {s : ℝ} (hs : 1 ≤ s) :
     have hB : bigM 3 ≤ bigM s := bigM_antitone h3
     have := bigM_three_gt
     have hs2 : 1 ≤ s ^ 2 := by nlinarith
-    have hG' : 1 / 2 ≤ errMaj lower' s := by linarith
     have : 24 ≤ 48 * s ^ 2 * errMaj lower' s := by nlinarith
     linarith
 

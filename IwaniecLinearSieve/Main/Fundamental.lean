@@ -173,10 +173,6 @@ theorem fundamental_lemma : ∃ C Y : ℝ, 0 ≤ C ∧ 1 < Y ∧ ∀ (k : ℕ) (
   have hc2 := hcard true
   have hRR : y * R z / log y ≤ y * Rk k z / log y := by gcongr
   have e : y * Rk k z * (1 / log y) = y * Rk k z / log y := by ring
-  have e1 : y * Rk k z * (1 + fail false r D z / R z) =
-      y * Rk k z + y * Rk k z * (fail false r D z / R z) := by ring
-  have e2 : y * Rk k z * (1 - fail true r D z / R z) =
-      y * Rk k z - y * Rk k z * (fail true r D z / R z) := by ring
   have e3 : 2 * y * Rk k z / log y = 2 * (y * Rk k z / log y) := by ring
   rw [abs_le, e3]
   constructor <;> linarith

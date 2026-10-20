@@ -220,7 +220,6 @@ theorem lemma16 {cR CR : ℝ} (hcR : 0 < cR) (hR : ∀ z ≥ 2, |R z * log z - c
       _ ≤ g 2 s / L + K * E := by linarith
   -- large `y`
   have hL64 : 6 * log 2 ≤ L := hlog64 ▸ log_le_log (by norm_num) hy64
-  have hL4 : 4 ≤ L := by linarith
   rw [d2_eq_sum hy s]
   set B := y ^ (1 / (4 : ℝ))
   set z := y ^ (1 / s)

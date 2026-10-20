@@ -220,7 +220,6 @@ theorem asymPsi_one_facts {t : ℝ} (ht : 8 ≤ t) :
     rw [hlam]; unfold asymPsi; rw [← hldef]; field_simp; ring
   have h1 : 0 ≤ ((l + 2) * L - l) / L ^ 2 := by
     apply div_nonneg _ (by positivity); nlinarith
-  have hlamL : L ≤ lam := by linarith
   refine ⟨by linarith, ?_⟩
   have hlam0 : 0 < lam := by linarith
   -- `log λ ≤ λ - L`

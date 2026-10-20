@@ -223,7 +223,6 @@ theorem crude_alg {c C' ℓ L ξ : ℝ} (hc : 0 ≤ c) (hC' : 1 ≤ C') (hℓ : 
   have hlogξ2 : ℓ / 2 ≤ log (ξ / 2) := by
     calc ℓ / 2 = log (exp (ℓ / 2)) := (log_exp _).symm
       _ ≤ log (ξ / 2) := log_le_log hE0 (by linarith)
-  have hξ8 : 8 * ℓ ≤ ξ := by linarith
   -- `X`
   have hX1 : 1 ≤ X := by
     have := mul_nonneg (by norm_num : (0 : ℝ) ≤ 11 / 5) hlℓ.le; linarith
