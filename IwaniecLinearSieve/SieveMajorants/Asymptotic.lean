@@ -238,6 +238,39 @@ theorem asymPsi_one_facts {t : ℝ} (ht : 8 ≤ t) :
         rw [exp_add, exp_log hlam0, hLdef, exp_log ht0]
     _ ≤ exp lam := exp_le_exp.2 (by linarith)
 
+/-- The correction term in `ψ₋₅` satisfies `|D| ≤ 1` and
+`D (L + ℓ + D - 1) ≤ ℓ - 1` when `L ≥ 20`, `1 ≤ ℓ ≤ L - 1` and `ℓ² ≤ L`. -/
+theorem asymPsi_neg_five_error_bounds {L l D : ℝ} (hL : 20 ≤ L) (hl : 1 ≤ l)
+    (hl1 : l ≤ L - 1) (hlsq : l ^ 2 ≤ L)
+    (hDdef : D = (l - 4) / L - (l - 6) / L ^ 2) :
+    -1 ≤ D ∧ D ≤ 1 ∧ D * (L + l + D - 1) ≤ l - 1 := by
+  have hL0 : 0 < L := by linarith only [hL]
+  set u := 1 / L with hu
+  have huL : u * L = 1 := by rw [hu]; field_simp
+  have hu0 : 0 < u := by positivity
+  have hu20 : u ≤ 1 / 20 := by rw [hu]; exact one_div_le_one_div_of_le (by norm_num) hL
+  have hD : D = (l - 4) * u - (l - 6) * u ^ 2 := by
+    simp only [hDdef, u, div_eq_mul_inv, one_mul, inv_pow]
+  -- `|D| ≤ 1`
+  have hlu : l * u ≤ 1 - u := by nlinarith only [hl1, huL, hu0]
+  have hD1 : D ≤ 1 := by rw [hD]; nlinarith only [hlu, hu0, hu20, hl]
+  have hD2 : -1 ≤ D := by rw [hD]; nlinarith only [hlu, hu0, hu20, hl]
+  -- Bound the three terms in `D (L + ℓ + D - 1) = DL + D(ℓ - 1) + D²`.
+  have k1 : D * L = l - 4 - (l - 6) * u := by
+    rw [hD]; linear_combination (l - 4 - (l - 6) * u) * huL
+  have k2 : D * (l - 1) ≤ 1 + 7 * u := by
+    have a1 : (l - 4) * (l - 1) * u ≤ 1 := by
+      have : (l - 4) * (l - 1) ≤ L := by nlinarith only [hl, hlsq]
+      nlinarith only [this, huL, hu0]
+    have a2 : -((l - 6) * (l - 1)) * u ^ 2 ≤ 7 * u := by
+      have : -((l - 6) * (l - 1)) ≤ 7 * L := by nlinarith only [hl, hl1]
+      nlinarith only [this, huL, hu0, sq_nonneg u]
+    rw [hD]
+    nlinarith only [a1, a2]
+  have k3 : D * D ≤ 1 := by nlinarith only [hD1, hD2]
+  refine ⟨hD2, hD1, ?_⟩
+  nlinarith only [k1, k2, k3, hl, hu0, hu20]
+
 /-- Supersolution inequality: for `s ≥ e²⁰`, `μ = ψ₋₅(log s)` satisfies `0 < μ` and
 `e^μ ≤ μ (s - 2)`. -/
 theorem asymPsi_neg_five_facts {s : ℝ} (hs : exp 20 ≤ s) :
@@ -251,70 +284,39 @@ theorem asymPsi_neg_five_facts {s : ℝ} (hs : exp 20 ≤ s) :
   have hl : 1 ≤ l := by
     rw [hldef, le_log_iff_exp_le hL0]; linarith [exp_one_lt_d9]
   have hlsq : l ^ 2 ≤ L := log_sq_le (by linarith)
-  set u := 1 / L with hu
-  have huL : u * L = 1 := by rw [hu]; field_simp
-  have hu0 : 0 < u := by positivity
-  have hu20 : u ≤ 1 / 20 := by rw [hu]; exact one_div_le_one_div_of_le (by norm_num) hL
-  set D := (l - 4) * u - (l - 6) * u ^ 2 with hD
+  set D := (l - 4) / L - (l - 6) / L ^ 2 with hD
   set mu := asymPsi (-5) L with hmu
   have emu : mu = L + l + D := by
-    rw [hmu, hD, hu]; unfold asymPsi; rw [← hldef]; field_simp; ring
-  -- `|D| ≤ 1`
-  have hlu : l * u ≤ 1 - u := by nlinarith
-  have hD1 : D ≤ 1 := by rw [hD]; nlinarith
-  have hD2 : -1 ≤ D := by rw [hD]; nlinarith
-  have hmu0 : 0 < mu := by rw [emu]; linarith
-  -- the key inequality `D (μ - 1) ≤ l - 1`
-  have k1 : D * L = l - 4 - (l - 6) * u := by
-    rw [hD]; linear_combination (l - 4 - (l - 6) * u) * huL
-  have k2 : D * (l - 1) ≤ 1 + 7 * u := by
-    have a1 : (l - 4) * (l - 1) * u ≤ 1 := by
-      have : (l - 4) * (l - 1) ≤ L := by nlinarith
-      nlinarith
-    have a2 : -((l - 6) * (l - 1)) * u ^ 2 ≤ 7 * u := by
-      have : -((l - 6) * (l - 1)) ≤ 7 * L := by nlinarith
-      have hu2 : 0 ≤ u ^ 2 := by positivity
-      nlinarith
-    have : D * (l - 1) = (l - 4) * (l - 1) * u + -((l - 6) * (l - 1)) * u ^ 2 := by
-      rw [hD]; ring
-    linarith
-  have k3 : D * D ≤ 1 := by nlinarith
-  have key : D * (mu - 1) ≤ l - 1 := by
-    have : D * (mu - 1) = D * L + D * (l - 1) + D * D := by rw [emu]; ring
-    nlinarith
+    simp only [hmu, asymPsi, hD, hldef]
+    ring
+  obtain ⟨hD2, hD1, hkey⟩ := asymPsi_neg_five_error_bounds hL hl hl1 hlsq hD
+  have hmu0 : 0 < mu := by rw [emu]; linarith only [hL, hl, hD2]
   -- `2 μ ≤ s - 2`
   have hs2 : 2 * mu ≤ s - 2 := by
     have := quadratic_le_exp_of_nonneg hL0.le
     rw [hLdef, exp_log hs0] at this
-    rw [emu]; nlinarith
+    rw [emu]; nlinarith only [this, hL, hl1, hD1]
   refine ⟨hmu0, ?_⟩
-  have hs2' : 0 < s - 2 := by linarith
+  have hs2' : 0 < s - 2 := by linarith only [hs2, hmu0]
   -- lower bounds for `log μ` and `log (s - 2)`
   have hlogmu : l + (1 - L / mu) ≤ log mu := by
-    have e : log mu = l + log (mu / L) := by
-      rw [hldef, ← log_mul hL0.ne' (by positivity)]; congr 1; field_simp
-    rw [e]
-    have := one_sub_inv_le_log_of_pos (show 0 < mu / L by positivity)
-    rw [inv_div] at this
-    linarith
+    have h := one_sub_inv_le_log_of_pos (div_pos hmu0 hL0)
+    rw [inv_div, log_div hmu0.ne' hL0.ne'] at h
+    linarith only [h]
   have hlogs : L + (1 - s / (s - 2)) ≤ log (s - 2) := by
-    have e : log (s - 2) = L + log ((s - 2) / s) := by
-      rw [hLdef, ← log_mul hs0.ne' (by positivity)]; congr 1; field_simp
-    rw [e]
-    have := one_sub_inv_le_log_of_pos (show 0 < (s - 2) / s by positivity)
-    rw [inv_div] at this
-    linarith
+    have h := one_sub_inv_le_log_of_pos (div_pos hs2' hs0)
+    rw [inv_div, log_div hs2'.ne' hs0.ne'] at h
+    linarith only [h]
   have hb : s / (s - 2) ≤ 1 + 1 / mu := by
     have e : s / (s - 2) = 1 + 2 / (s - 2) := by field_simp; ring
     rw [e, add_le_add_iff_left, div_le_div_iff₀ hs2' hmu0]
-    linarith
+    linarith only [hs2]
   have hfin : (L + 1) / mu ≤ L + l + 1 - mu := by
-    rw [div_le_iff₀ hmu0]
-    have : mu * mu - (L + l + 1) * mu + (L + 1) = D * (mu - 1) - (l - 1) := by
-      rw [emu]; ring
-    nlinarith
+    rw [div_le_iff₀ hmu0, emu]
+    nlinarith only [hkey]
   have hsplit : (L + 1) / mu = L / mu + 1 / mu := by ring
-  calc exp mu ≤ exp (log mu + log (s - 2)) := exp_le_exp.2 (by linarith)
+  calc exp mu ≤ exp (log mu + log (s - 2)) :=
+        exp_le_exp.2 (by linarith only [hlogmu, hlogs, hb, hfin, hsplit])
     _ = mu * (s - 2) := by rw [exp_add, exp_log hmu0, exp_log hs2']
 
 /-! ### Sub- and supersolutions of (3.12) -/
