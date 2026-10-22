@@ -38,7 +38,7 @@ vendored prime number theorem against that allowlist (CI runs both).
   ([doi:10.1090/coll/057](https://doi.org/10.1090/coll/057)), §12.4–12.6, for the modern form of
   the same argument.
 
-[I71] is formalized in full: §2 (Lemmas 1, 2 for general `k` and finite sequences `M`, as
+[I71] is formalised in full: §2 (Lemmas 1, 2 for general `k` and finite sequences `M`, as
 multisets, so repeated terms count with multiplicity), §3 (the functions
 `f`, `F`, `𝔐`, `𝔚`, Lemmas 3–10, including Lemma 5 with `F(3) = 2e^γ - 3` and the asymptotics of
 `𝔐`), §4 (Lemmas 11–17, Theorem 4: main term with error `O(1/log y)`; Theorem 5: support of size
@@ -48,7 +48,7 @@ multisets, so repeated terms count with multiplicity), §3 (the functions
 Theorem 1 at level `y = C₀ z²` (`linearSieveEstimate`), so `iwaniecBound` does not depend on §5 or
 on the results involving `γ`.
 
-[I78] is formalized in full: Lemma 1 for arbitrary sequences, multiplicative functions `f`, `g`
+[I78] is formalised in full: Lemma 1 for arbitrary sequences, multiplicative functions `f`, `g`
 and weights, with both the lower bound (4) and the upper bound (3) (`shiftedSieve_lower`,
 `shiftedSieve_upper`); Lemma 2 (`lemma2_sum_abs_le`, `lemma2_sum_sigma_ge`); the Theorem, that
 every interval of length `c ∏ (1 - 1/q_i)⁻¹ r² log r` contains at least `r²` integers coprime to
@@ -59,6 +59,14 @@ every interval of length `c ∏ (1 - 1/q_i)⁻¹ r² log r` contains at least `r
 
 `BLUEPRINT.md` maps each lemma to its Lean statement and records every deviation; the most
 notable are listed below.
+
+## Palomar registration
+
+This formalisation is registered in the [Palomar registry](https://palomar-registry.org/)
+as [`PALOMAR-2026-10-22-000021`, version 1](https://palomar-registry.org/entry?id=PALOMAR-2026-10-22-000021&version=1),
+for commit [`c8d0154`](https://github.com/jasondavies/iwaniec-linear-sieve/commit/c8d01549d2ae640b36ec198c1f0f6495f1b036cf).
+To cite it, give the identifier and the version. Later commits are not covered
+by the registration until they are registered as a new version.
 
 ## Palomar statement surface
 
